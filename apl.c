@@ -1,4 +1,5 @@
-/* toy interpreter - tokenization */
+/* toy interpreter - unicode */
+#include <utf.h>
 #include <fmt.h>
 #include <bio.h>
 #include <stdarg.h>
@@ -17,72 +18,112 @@ void err(char *fmt, ...);
 void die(char *fmt, ...);
 
 int parse(void);
+int lex(int fd);
 
-int isfun(char c);
-int isnum(char *b, char *e);
-int n(char *ne, char *nb);
+int isfun(Rune r);
+int isdelim(Rune r);
+int isop(Rune r);
+
+char delims[] = "(){}[]";
+char fns[] = "⊃⊂,+-×÷⍴⌈⌊←→⍳♦⍝";
+char ops[] = "¨/\\";
 
 Biobuf *input;
 Biobuf *parsein;
 
-/* Numbers:
-	¯?[0-9]+(.[0-9]+)?
-   Functions:
-   	[*+-/]
-   Symbols:
-   	[a-zA-Z][a-zA-Z0-9]*
-*/
+int lex(int fd) {
+	Rune r;
+	int state;
+
+	state = IDLE;
+	while((r=Bgetrune(input))>0) {
+		if (r=='\n') {parse();print("\n");}
+		if (isfun(r)) switch(state) {
+		case A_NUM: case A_SYM:
+			state = IDLE;
+			fprint(fd, "\n");
+		case IDLE:
+			fprint(fd, "FUN %C\n", r);
+		}
+		else if (isop(r)) switch(state) {
+		case A_NUM: case A_SYM:
+			state = IDLE;
+			fprint(fd, "\n");
+		case IDLE:
+			fprint(fd, "OP %C\n", r);
+		}
+		else if (isdelim(r)) switch(state) {
+		case A_NUM: case A_SYM:
+			state = IDLE;
+			fprint(fd, "\n");
+		case IDLE:
+			fprint(fd, "DELIM %C\n", r);
+		}
+		else if (isdigit(r)) switch(state) {
+		case IDLE:
+			state = A_NUM;
+			fprint(fd, "NUM ");
+		case A_NUM: case A_SYM:
+			fprint(fd, "%C", r);
+			break;
+		}
+		else if (utfrune("¯",r)) switch(state) {
+		case IDLE:
+			state = A_NUM;
+			fprint(fd, "NUM -");
+			break;
+		case A_SYM: case A_NUM:
+			err("Lexing error\n");
+		}
+		else if (r == '.') switch(state) {
+		case IDLE:
+			if (!isdigit(Bgetrune(input))) {
+				err("Symbol no begin with '.'\n");
+			} else {
+				state = A_NUM;
+				fprint(fd, "NUM 0.");
+			}
+			Bungetrune(input);
+			break;
+		case A_NUM:
+			if (!isdigit(Bgetrune(input))) 
+				err("Numbers no end with decimal!\n");
+			Bungetrune(input);
+		case A_SYM:
+			fprint(fd, "%C", r);
+		}
+		else if (isspace(r)) switch(state) {
+		case A_SYM: case A_NUM:
+			state = IDLE;
+			fprint(fd, "\n");
+		case IDLE: break;
+		}
+		else switch(state) {
+		case IDLE:
+			state = A_SYM;
+			fprint(fd, "SYM ");
+		case A_SYM:
+			fprint(fd, "%C", r);
+			break;
+		case A_NUM:
+			err("Lexing error\n");
+		}
+	}
+}
+
 int main(void) {
-	int c;
+	Rune r;
 	int chan[2];
-	enum lex_state state;
 
 	if(pipe2(chan, O_NONBLOCK))
 		die("Pipe error\n");
 	input = Bfdopen(0, O_RDONLY);
 	parsein = Bfdopen(chan[0], O_RDONLY);
 
-	state = IDLE;
-	while((c=Bgetc(input))>0) {
-		if (c=='\n') {parse();print("\n");}
-		if (isfun(c)) switch(state) {
-		case A_NUM:
-		case A_SYM:
-			state = IDLE;
-			fprint(chan[1], "\n");
-		case IDLE:
-			fprint(chan[1], "FUN %c\n", c);
-		}
-		else if (isdigit(c)) switch(state) {
-		case IDLE:
-			state = A_NUM;
-			fprint(chan[1], "NUM ");
-		case A_NUM:
-		case A_SYM:
-			fprint(chan[1], "%c", c);
-			break;
-		}
-		else if (isalpha(c)) switch(state) {
-		case IDLE:
-			state = A_SYM;
-			fprint(chan[1], "SYM ");
-		case A_SYM:
-			fprint(chan[1], "%c", c);
-			break;
-		case A_NUM:
-			err("Lexing error\n");
-		}
-		else if (isspace(c)) switch(state) {
-		case A_SYM:
-		case A_NUM:
-			state = IDLE;
-			fprint(chan[1], "\n");
-		case IDLE: break;
-		}
-		else err("Invalid character %c\n", c);
-	}
+	lex(chan[1]);
 Cleanup:
 	Bterm(input);
+	Bterm(parsein);
 	return 0;
 }
 
@@ -94,6 +135,10 @@ int parse(void) {
 	}
 	return 0;
 }
+
+int isfun(Rune r) { return !!utfrune(fns, r); }
+int isop(Rune r) { return !!utfrune(ops, r); }
+int isdelim(Rune r) { return !!utfrune(delims, r); }
 
 void err(char *fmt, ...) {
 	va_list ap;
@@ -110,27 +155,4 @@ void die(char *fmt, ...) {
 	vfprint(2, fmt, ap);
 	va_end(ap);
 	exit(1);
-}
-
-short fns[] = { '+', '-', '/', '*' };
-int isfun(char c) {
-	int i;for (i=0; i<NELEM(fns); i++)
-		if(c==fns[i]) return 1;
-	return 0;
-}
-
-/* [ 	]+[0-9]+[ 	]+ */
-int isnum(char *b, char *e) {
-	int x, p;
-	for(x = 0, p = 0;b < e; b++) {
-		if (!isdigit(*b) && !isspace(*b)) return 0;
-		if (p && isdigit(*b)) x++;
-		p=isspace(*b);
-		
-	}
-	return x <= 2;
-}
-
-int n(char *ne, char *nb) {
-	return strtol(ne, &nb, 0);
 }
