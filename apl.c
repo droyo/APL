@@ -1,4 +1,4 @@
-/* toy interpreter */
+/* toy interpreter - whitespace allowed */
 #include <fmt.h>
 #include <bio.h>
 #include <stdarg.h>
@@ -41,6 +41,7 @@ int eval(char *b, char *e) {
 		return n(b, e);
 	
 	for(m = b; m < e; m++) {
+		if (isspace(*m)) continue;
 		if (isfun(*m) && (m == b || m == e))
 			die("Missing argument to '%c'\n",*m);
 		if (isfun(*m))
@@ -85,9 +86,16 @@ int isfun(char c) {
 	return 0;
 }
 
+/* [ 	]+[0-9]+[ 	]+ */
 int isnum(char *b, char *e) {
-	for(;b<e;b++) if(!isdigit(*b)) return 0;
-	return 1;
+	int x, p;
+	for(x = 0, p = 0;b < e; b++) {
+		if (!isdigit(*b) && !isspace(*b)) return 0;
+		if (p && isdigit(*b)) x++;
+		p=isspace(*b);
+		
+	}
+	return x <= 2;
 }
 
 int n(char *ne, char *nb) {
