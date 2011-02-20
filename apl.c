@@ -1,64 +1,97 @@
-/* toy interpreter - whitespace allowed */
+/* toy interpreter - tokenization */
 #include <fmt.h>
 #include <bio.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <unistd.h>
 
-#define OK 1
-#define ERR -1
 #define NELEM(a) (sizeof(a)/sizeof(*a))
+
+enum {
+	IDLE,
+	A_NUM,
+	A_SYM
+} lex_state;
 
 void err(char *fmt, ...);
 void die(char *fmt, ...);
 
-int eval(char *b, char *e);
-int apply(short fn, char *ab, char *ae, char *ob, char *oe);
+int parse(void);
 
 int isfun(char c);
 int isnum(char *b, char *e);
 int n(char *ne, char *nb);
 
-int apply(short fn, char *ab, char *ae, char *ob, char *oe) {
-	int alpha, omega;
+Biobuf *input;
+Biobuf *parsein;
 
-	omega = eval(ob, oe);
-	alpha = eval(ab, ae);
-	
-	switch(fn) {
-		case '+' : return alpha + omega;
-		case '-' : return alpha - omega;
-		case '*' : return alpha * omega;
-		case '/' : return alpha / omega;
-		default: die("Invalid function %c\n", fn);
-	}
-}
-
-int eval(char *b, char *e) {
-	short f;
-	char *m;
-	
-	if (isnum(b,e))
-		return n(b, e);
-	
-	for(m = b; m < e; m++) {
-		if (isspace(*m)) continue;
-		if (isfun(*m) && (m == b || m == e))
-			die("Missing argument to '%c'\n",*m);
-		if (isfun(*m))
-			return apply(*m, b, m-1, m+1, e);
-	}
-}
-
+/* Numbers:
+	¯?[0-9]+(.[0-9]+)?
+   Functions:
+   	[*+-/]
+   Symbols:
+   	[a-zA-Z][a-zA-Z0-9]*
+*/
 int main(void) {
-	char *line;
-	Biobuf *input;
-	
+	int c;
+	int chan[2];
+	enum lex_state state;
+
+	if(pipe2(chan, O_NONBLOCK))
+		die("Pipe error\n");
 	input = Bfdopen(0, O_RDONLY);
-	
-	while(*(line = Brdline(input, '\n'))) {
-		print("\t%d\n", eval(line, line + Blinelen(input)-1));
+	parsein = Bfdopen(chan[0], O_RDONLY);
+
+	state = IDLE;
+	while((c=Bgetc(input))>0) {
+		if (c=='\n') {parse();print("\n");}
+		if (isfun(c)) switch(state) {
+		case A_NUM:
+		case A_SYM:
+			state = IDLE;
+			fprint(chan[1], "\n");
+		case IDLE:
+			fprint(chan[1], "FUN %c\n", c);
+		}
+		else if (isdigit(c)) switch(state) {
+		case IDLE:
+			state = A_NUM;
+			fprint(chan[1], "NUM ");
+		case A_NUM:
+		case A_SYM:
+			fprint(chan[1], "%c", c);
+			break;
+		}
+		else if (isalpha(c)) switch(state) {
+		case IDLE:
+			state = A_SYM;
+			fprint(chan[1], "SYM ");
+		case A_SYM:
+			fprint(chan[1], "%c", c);
+			break;
+		case A_NUM:
+			err("Lexing error\n");
+		}
+		else if (isspace(c)) switch(state) {
+		case A_SYM:
+		case A_NUM:
+			state = IDLE;
+			fprint(chan[1], "\n");
+		case IDLE: break;
+		}
+		else err("Invalid character %c\n", c);
 	}
-	
+Cleanup:
+	Bterm(input);
+	return 0;
+}
+
+int parse(void) {
+	char *s;
+	while((s = Brdstr(parsein, '\n', 0))) {
+		print(s);
+		free(s);
+	}
 	return 0;
 }
 
