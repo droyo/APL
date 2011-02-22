@@ -1,28 +1,39 @@
 enum FSM {
 	SCANNING,
 	FINISHED,
+	P_NUM,
 	A_NUMBER,
 	A_SYMBOL,
 	A_LITERAL,
 	ERROR
 };
 
-char quotemarks[] = "\"'`";
-char delimiters[] = "(){}[]";
-char primitives[] = "¨¯<≤=≥>≠∨^×÷"
-	"⌶⍫⍒⍋⌽⍉⊖⍟⍱⍲!⌹"
-	"?⍵∊⍴~↑↓⍳○*←→"
-	"⍥⍷⍬⍐⍗⍸⌷⍇⍈,+-"
-	"⍺⌈⌊_∇∆∘'⎕⍎⍕⋄"
-	"⍙⌷≡≢⍞/\\⊢⍪⍤"
-	"⊣⊂⊃∩∪⊥⊤|⍝⍀⌿";
+#define TSEP 31
+enum token_fields {
+	TCLASS = 128,
+	TVALTYPE = 96,
+	TPRITYPE = 64
+};
+enum token_types {
+	TPRIMITIVE = 128,
+	TDELIMITER = 64,
+	TFUNCTION = 0,
+	TDATA = 63,
+	TVALUE = 0,
+	TNUMBER = 0,
+	TSTRING = 32,
+	TQEXEC = 64,
+	TNAME = 96
+};
+enum delim_types {
+	DOPENBRACE,
+	DOPENPAREN,
+	DOPENBRACK,
+	DCLOSEBRACE,
+	DCLOSEPAREN,
+	DCLOSEBRACK
+};
 
 int scan(Biobuf *in, int out);
-int eval(Biobuf *in);
+int eval(int in);
 int disp(void);
-
-int scanliteral(enum FSM*, int, Rune, Rune*);
-int scannumeral(enum FSM*, int, Rune);
-int scandelimiter(enum FSM*, int, Rune);
-int scanprimitive(enum FSM*, int, Rune);
-int scanwhitespace(enum FSM*, int, Rune);
