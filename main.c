@@ -3,6 +3,7 @@
 #include <bio.h>
 #include <unistd.h>
 #include "apl.h"
+#include "scan.h"
 
 int main(void) {
 	Rune r;

@@ -1,8 +1,6 @@
 #include <utf.h>
 #include <fmt.h>
-#include <bio.h>
-#include <string.h>
-#include <errno.h>
+#include <unistd.h>
 #include "apl.h"
 
 int slurp(int fd, char *buf, int n, int sep) {
@@ -67,8 +65,4 @@ int eval(int in) {
 		}
 		print("\n");
 	}
-	if (errno == EAGAIN)
-		return 0;
-	else
-		return 1;
 }

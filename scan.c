@@ -2,11 +2,10 @@
 #include <utf.h>
 #include <fmt.h>
 #include <bio.h>
-#include <unistd.h>
+#include <stdlib.h>
 #include <string.h>
 #include "apl.h"
-
-enum { max_digits = 32 };
+#include "scan.h"
 
 char quotemarks[] = "\"'`";
 char delimiters[] = "(){}[]";
@@ -18,11 +17,7 @@ char primitives[] = "¨¯<≤=≥>≠∨^×÷"
 	"⍙⌷≡≢⍞/\\⊢⍪⍤"
 	"⊣⊂⊃∩∪⊥⊤|⍝⍀⌿";
 
-int scanliteral(enum FSM*, int, Rune, Rune*);
-int scannumeral(enum FSM*, int, Rune, char *);
-int scandelimiter(enum FSM*, int, Rune);
-int scanprimitive(enum FSM*, int, Rune);
-int scanwhitespace(enum FSM*, int, Rune);
+enum { max_digits = 32 };
 
 int scan(Biobuf *in, int out) {
 	int i;

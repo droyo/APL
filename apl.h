@@ -1,13 +1,3 @@
-enum FSM {
-	SCANNING,
-	FINISHED,
-	P_NUM,
-	A_NUMBER,
-	A_SYMBOL,
-	A_LITERAL,
-	ERROR
-};
-
 #define TSEP 31
 enum token_fields {
 	TCLASS = 128,
@@ -34,6 +24,5 @@ enum delim_types {
 	DCLOSEBRACK
 };
 
-int scan(Biobuf *in, int out);
 int eval(int in);
 int disp(void);
