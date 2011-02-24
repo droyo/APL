@@ -8,7 +8,7 @@
 #include "scan.h"
 
 char quotemarks[] = "\"'`";
-char delimiters[] = "(){}[]";
+char delimiters[] = "(){}[]⋄:";
 char primitives[] = "¨¯<≤=≥>≠∨^×÷"
 	"⌶⍫⍒⍋⌽⍉⊖⍟⍱⍲!⌹"
 	"?⍵∊⍴~↑↓⍳○*←→"

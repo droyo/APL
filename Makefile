@@ -1,6 +1,6 @@
 BIN := apl
 SRC := main.c eval.c scan.c
-INC := apl.h
+INC := apl.h scan.h
 OBJ := $(SRC:.c=.o)
 
 LDFLAGS = -lbio -lfmt -lutf
@@ -13,7 +13,9 @@ $(BIN): $(OBJ)
 .c.o:
 	tcc -c $<
 
-$(OBJ) : $(INC)
+scan.o : scan.h apl.h
+eval.o : apl.h
+main.o : $(INC)
 
 clean:
 	rm -f $(OBJ) $(BIN)
