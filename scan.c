@@ -3,11 +3,15 @@
 #include <bio.h>
 #include "apl.h"
 
+const char TSEP = 0xfe;
 int scan_num(Biobuf *i, int o);
 int scan_literal(Biobuf *i, int o);
 int scan_special(Biobuf *i, int o);
 int scan_id(Biobuf *i, int o);
-int info(int fd,char c){return write(fd,&c,sizeof c);}
+
+int info(int fd,const char c){
+	return write(fd,&c,sizeof c);
+}
 
 enum { single_quote = 39 };
 enum { max_digits = 32 };

@@ -3,7 +3,6 @@
 #include <bio.h>
 #include <unistd.h>
 #include "apl.h"
-#include "scan.h"
 
 int main(void) {
 	Rune r;
@@ -17,9 +16,9 @@ int main(void) {
 	}
 	input = Bfdopen(0, O_RDONLY);
 
-	while(!scan(input, chan[1])) {
+	while(!scan(input, chan[1]))
 		eval(chan[0]);
-	}
+
 Cleanup:
 	Bterm(input);
 	return 0;

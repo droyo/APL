@@ -1,4 +1,4 @@
-#define TSEP 31
+extern const char TSEP;
 enum token_fields {
 	TCLASS = 128,
 	TVALTYPE = 96,
@@ -24,5 +24,6 @@ enum delim_types {
 	DCLOSEBRACK
 };
 
-int eval(int in);
+int scan(Biobuf *in, int out);
+int eval(int fd);
 int disp(void);
