@@ -1,29 +1,12 @@
-extern const char TSEP;
-enum token_fields {
-	TCLASS = 128,
-	TVALTYPE = 96,
-	TPRITYPE = 64
-};
-enum token_types {
-	TPRIMITIVE = 128,
-	TDELIMITER = 64,
-	TFUNCTION = 0,
-	TDATA = 63,
-	TVALUE = 0,
-	TNUMBER = 0,
-	TSTRING = 32,
-	TQEXEC = 64,
-	TNAME = 96
-};
-enum delim_types {
-	DOPENBRACE,
-	DOPENPAREN,
-	DOPENBRACK,
-	DCLOSEBRACE,
-	DCLOSEPAREN,
-	DCLOSEBRACK
+enum Tag {
+	TSEP = 0xFE,
+	TCLS = 0xC0,
+	TVAR = 0x00,
+	TSTR = 0x40,
+	TNUM = 0x80,
+	TCMD = 0xC0
 };
 
 int scan(Biobuf *in, int out);
-int eval(int fd);
-int disp(void);
+int parse(int fd);
+int disp(void *obj);

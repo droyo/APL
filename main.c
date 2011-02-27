@@ -17,7 +17,7 @@ int main(void) {
 	input = Bfdopen(0, O_RDONLY);
 
 	while(!scan(input, chan[1]))
-		eval(chan[0]);
+		parse(chan[0]);
 
 Cleanup:
 	Bterm(input);

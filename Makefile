@@ -1,5 +1,5 @@
 BIN := apl
-SRC := main.c eval.c scan.c
+SRC := main.c parse.c scan.c
 INC := apl.h
 OBJ := $(SRC:.c=.o)
 
