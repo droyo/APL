@@ -7,12 +7,14 @@ int scan_number(Biobuf *i, int o);
 int scan_literal(Biobuf *i, int o);
 int scan_special(Biobuf *i, int o);
 int scan_symbol(Biobuf *i, int o);
+int scan_delims(Biobuf *i, int o);
 
 int tag(int fd, const char c) {
 	return write(fd, &c, sizeof c);
 }
 
 char quotes[] = "\"'`";
+char delims[] = "(){}[]♦:;";
 char special[] = "(){}[]⋄:;×+-¨"
 	"⍫⍒⍋⌽⍉⊖⍟⍱⍲!⌹?⍵∊⍴~↑↓⍳○*←→"
 	"⍥⍷⍬⍐⍗⍸⌷⍇⍈,+-⍺⌈⌊_∇∆∘'⍎⍕⋄"
@@ -27,6 +29,7 @@ int scan(Biobuf *i, int o) {
 		
 		if(isdigit(r)||utfrune("¯", r)) scan_number(i, o);
 		else if(utfrune(quotes, r)) scan_literal(i, o);
+		else if(utfrune(delims, r)) scan_delims(i, o);
 		else if(utfrune(special, r)) scan_special(i, o);
 		else scan_symbol(i, o);
 	}
@@ -53,7 +56,7 @@ int scan_literal(Biobuf *i, int o) {
 	r = 0;
 	q = Bgetrune(i);
 
-	tag(o, ('`'==q)?TCMD:TSTR);
+	tag(o, TSTR|((q=='`') * TCMD));
 	for(r = Bgetrune(i); q != r; r=Bgetrune(i))
 		fprint(o, "%C", r);
 	tag(o, TSEP);
@@ -63,6 +66,13 @@ int scan_literal(Biobuf *i, int o) {
 
 int scan_special(Biobuf *i, int o) {
 	tag(o, TVAR);
+	fprint(o, "%C", Bgetrune(i));
+	tag(o, TSEP);
+	return 0;
+}
+
+int scan_delims(Biobuf *i, int o) {
+	tag(o, TDLM);
 	fprint(o, "%C", Bgetrune(i));
 	tag(o, TSEP);
 	return 0;

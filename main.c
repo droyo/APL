@@ -14,12 +14,20 @@ int main(void) {
 		fprint(2, "Pipe error\n");
 		exit(1);
 	}
+	if(init_parser()) {
+		fprint(2, "Could not init parser\n");
+		return 1;
+	}
 	input = Bfdopen(0, O_RDONLY);
 
-	while(!scan(input, chan[1]))
+	print("\t");
+	while(!scan(input, chan[1])) {
 		parse(chan[0]);
+		print("\t");
+	}
 
 Cleanup:
+	cleanup_parser();
 	Bterm(input);
 	return 0;
 }
