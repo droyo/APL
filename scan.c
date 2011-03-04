@@ -95,7 +95,7 @@ int scan_special(Biobuf *i) {
 		mem_dbg();
 		return 1;
 	}
-	tok.tag = identifier;
+	tok.tag = function;
 	tok.str = mem.top;
 	mem_add(r); mem_end();
 	return 0;

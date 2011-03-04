@@ -1,12 +1,12 @@
-CC := gcc
-LD := gcc
+CC := tcc
+LD := tcc
 BIN := apl
 SRC := main.c parse.c scan.c
 INC := apl.h
 OBJ := $(SRC:.c=.o)
 
-CFLAGS = -Wall
-LDFLAGS = -lbio -lfmt -lutf
+CFLAGS = -Wall -I/usr/local/include
+LDFLAGS = -lbio -lfmt -lutf -L/usr/local/lib 
 
 all: $(BIN)
 

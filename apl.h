@@ -1,7 +1,7 @@
-enum tag { number, identifier, semicolon, 
+enum tag { number, identifier, function,
 	colon, diamond, lparen, rparen, lbracket, 
 	rbracket, lbrace, rbrace, assign,
-	string, subcmd
+	string, subcmd, empty,  semicolon
 };
 
 struct token {
@@ -15,7 +15,6 @@ struct token {
 
 int scan(Biobuf *in, int out);
 int parse(int fd);
-int disp(void *obj);
 
 int init_scanner(void);
 void cleanup_scanner(void);
