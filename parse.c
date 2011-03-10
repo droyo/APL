@@ -1,44 +1,31 @@
 #include <utf.h>
 #include <fmt.h>
 #include <bio.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include "apl.h"
-/* Strategy - Change the stream of tokens into an
-	execution stack ⍬ */
 
-#define NELEM(x) ((sizeof (x)) / (sizeof (*x)))
-struct token tok;
-int next(int fd);
-
-int parse(int fd) {
-	while(next(fd)) switch(tok.tag) {
+int parse(int end) {
+	for(;end >= 0; end--) switch(tok[end].t) {
 		case number: 
-			print("num %g\n", tok.num);
+			print("\tnum %g\n", tok[end].v.d);
 			break;
 		case string:
-			print("str %s\n", tok.str);
+			print("\tstr %s\n", tok[end].v.s);
 			break;
 		case subcmd:
-			print("cmd %s\n", tok.str);
+			print("\tcmd %s\n", tok[end].v.s);
 			break;
 		case identifier:
-			print("sym %s\n", tok.str);
+			print("\tsym %s\n", tok[end].v.s);
 			break;
 		case assign:
-			print("set (%C)\n", tok.sym);
+			print("\tset (%C)\n", tok[end].v.p);
 			break;
 		case function:
-			print("fn %s\n", tok.str);
+			print("\tfn %s\n", tok[end].v.s);
 			break;
 		default:
-			print("del %C\n", tok.sym);
+			print("\tdel %C\n", tok[end].v.s);
 			break;
 	}
 	return 1;
-}
-
-int next(int fd) {
-	return read(fd, &tok, sizeof tok)>0;
 }

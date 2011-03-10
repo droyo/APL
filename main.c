@@ -17,19 +17,15 @@ int main(void) {
 		fcntl(chan[0], F_SETFL, O_NONBLOCK);
 		fcntl(chan[1], F_SETFL, O_NONBLOCK);
 	}
-	if(init_scanner()) {
+	if(init_scan()) {
 		fprint(2, "Could not init scanner\n");
 		return 1;
 	}
 	input = Bfdopen(0, O_RDONLY);
 
-	print("\t");
-	while(!scan(input, chan[1])) {
-		parse(chan[0]);
-		print("\t");
-	}
+	while(parse(scan(input)));
 
-	cleanup_scanner();
+	cleanup_scan();
 	Bterm(input);
 	return 0;
 }

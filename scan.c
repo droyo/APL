@@ -6,6 +6,9 @@
 #include <unistd.h>
 #include "apl.h"
 
+int top;
+struct obj tok[128];
+
 int scan_number(Biobuf *i);
 int scan_literal(Biobuf *i);
 int scan_special(Biobuf *i);
@@ -24,8 +27,6 @@ static struct {
 	char *pool;
 } mem;
 
-static struct token tok;
-
 char quotes[] = "\"'`";
 char delims[] = "(){}[]♦:;";
 char digits[] = "¯0123456789";
@@ -34,12 +35,14 @@ char special[] = "×+-¨÷≠"
 	"⍥⍷⍬⍐⍗⍸⌷⍇⍈,+-⍺⌈⌊_∇∆∘'⍎⍕⋄"
 	"⍙⌷≡≢⍞/\\⊢⍪⍤⊣⊂⊃∩∪⊥⊤|⍝⍀⌿.";
 
-int scan(Biobuf *i, int o) {
+int scan(Biobuf *i) {
 	int e;
 	Rune r;
+	top = 0;
 	while((r=Bgetrune(i))>0) {
 		if(r == '\n') break;
 		if(isspace(r)) continue;
+		if(top>=NELEM(tok)) return -1;
 		Bungetrune(i);
 		
 		if(utfrune(digits, r)) 
@@ -53,12 +56,10 @@ int scan(Biobuf *i, int o) {
 		else 
 			e = scan_symbol(i);
 		
-		if(!e)
-			write(o, &tok, sizeof tok);
-		else if (e < 0)
-			print("Err %r\n");
+		if (e < 0) return -1;
+		top++;
 	}
-	return 0;
+	return top-1;
 }
 
 int scan_number(Biobuf *i) {
@@ -67,9 +68,9 @@ int scan_number(Biobuf *i) {
 	sign = utfrune("¯", Bgetrune(i)) ? -1 : 1;
 	if (sign > 0) Bungetrune(i);
 	
-	Bgetd(i, &tok.num); 
-	tok.num *= sign;
-	tok.tag = number;
+	Bgetd(i, &tok[top].v.d); 
+	tok[top].v.d *= sign;
+	tok[top].t = number;
 	
 	return 0;
 }
@@ -78,8 +79,8 @@ int scan_literal(Biobuf *i) {
 	Rune q;
 	
 	q = Bgetrune(i);
-	tok.str = mem_str(i, q);
-	tok.tag = (q == '`') ? subcmd : string;
+	tok[top].v.s = mem_str(i, q);
+	tok[top].t = (q == '`') ? subcmd : string;
 
 	return 0;
 }
@@ -88,41 +89,42 @@ int scan_special(Biobuf *i) {
 	Rune r;
 	r = Bgetrune(i);
 	if (utfrune("←", r)) {
-		tok.tag = assign;
-		tok.sym = r;
+		tok[top].t = assign;
+		tok[top].v.p = r;
 		return 0;
 	}
 	if (r == '?') {
 		mem_dbg();
 		return 1;
 	}
-	tok.tag = function;
-	tok.str = mem.top;
+	tok[top].t = function;
+	tok[top].v.s = mem.top;
 	mem_add(r); mem_end();
 	return 0;
 }
 
 int scan_delims(Biobuf *i) {
 	Rune r;
+	enum tag *t = &tok[top].t;
 	switch(r = Bgetrune(i)) {
-		case '(': tok.tag = lparen;
-		case ')': tok.tag = rparen;
-		case '[': tok.tag = lbracket;
-		case ']': tok.tag = rbracket;
-		case '{': tok.tag = lbrace;
-		case '}': tok.tag = rbrace;
-		case ';': tok.tag = semicolon;
-		case ':': tok.tag = colon;
-		case 0x2666: tok.tag = diamond;
+		case '(': *t = lparen;
+		case ')': *t = rparen;
+		case '[': *t = lbracket;
+		case ']': *t = rbracket;
+		case '{': *t = lbrace;
+		case '}': *t = rbrace;
+		case ';': *t = semicolon;
+		case ':': *t = colon;
+		case 0x2666: *t = diamond;
 	}
-	tok.sym = r;
+	tok[top].v.p = r;
 	return 0;
 }
 
 int scan_symbol(Biobuf *i) {
 	Rune r;
-	tok.tag = identifier;
-	tok.str = mem.top;
+	tok[top].t = identifier;
+	tok[top].v.s = mem.top;
 	while((r = Bgetrune(i))>0) {
 		if (isspace(r)) break;
 		if (utfrune(quotes, r)) break;
@@ -175,7 +177,7 @@ void mem_dbg(void) {
 	}
 	print("\n");
 }
-int init_scanner(void) {
+int init_scan(void) {
 	mem.max = 512;
 	if(!(mem.pool = malloc(mem.max))) {
 		fprint(2, "Error: %r\n");
@@ -184,6 +186,6 @@ int init_scanner(void) {
 	mem.top = mem.pool;
 	return 0;
 }
-void cleanup_scanner(void) {
+void cleanup_scan(void) {
 	free(mem.pool);
 }
