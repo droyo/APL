@@ -28,6 +28,7 @@ static struct token tok;
 
 char quotes[] = "\"'`";
 char delims[] = "(){}[]♦:;";
+char digits[] = "¯0123456789";
 char special[] = "×+-¨÷≠"
 	"⍫⍒⍋⌽⍉⊖⍟⍱⍲!⌹?⍵∊⍴~↑↓⍳○*←→"
 	"⍥⍷⍬⍐⍗⍸⌷⍇⍈,+-⍺⌈⌊_∇∆∘'⍎⍕⋄"
@@ -41,7 +42,7 @@ int scan(Biobuf *i, int o) {
 		if(isspace(r)) continue;
 		Bungetrune(i);
 		
-		if(isdigit(r)||utfrune("¯", r)) 
+		if(utfrune(digits, r)) 
 			e = scan_number(i);
 		else if(utfrune(quotes, r)) 
 			e = scan_literal(i);
