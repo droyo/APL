@@ -4,27 +4,30 @@
 #include "apl.h"
 
 int parse(int end) {
+	int i;
 	for(;end >= 0; end--) switch(tok[end].t) {
 		case number: 
-			print("\tnum %g\n", tok[end].v.d);
+			print("\tnum ");
+			for(i = 0; i < tok[end].n; i++)
+				print("%g ", *((double*)tok[end].m + i));
 			break;
 		case string:
-			print("\tstr %s\n", tok[end].v.s);
+			print("\tstr %s\n", tok[end].m);
 			break;
 		case subcmd:
-			print("\tcmd %s\n", tok[end].v.s);
+			print("\tcmd %s\n", tok[end].m);
 			break;
 		case identifier:
-			print("\tsym %s\n", tok[end].v.s);
+			print("\tsym %s\n", tok[end].m);
 			break;
 		case assign:
-			print("\tset (%C)\n", tok[end].v.p);
+			print("\tset (%C)\n", *tok[end].m);
 			break;
 		case function:
-			print("\tfn %s\n", tok[end].v.s);
+			print("\tfn %C\n", *tok[end].m);
 			break;
 		default:
-			print("\tdel %C\n", tok[end].v.s);
+			print("\tdel %C\n", *tok[end].m);
 			break;
 	}
 	return 1;
