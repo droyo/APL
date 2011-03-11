@@ -5,29 +5,41 @@
 
 int parse(int end) {
 	int i;
+	char *s;
+	Rune *r;
+	double *d;
+
 	for(;end >= 0; end--) switch(tok[end].t) {
 		case number: 
 			print("\tnum ");
+			d = tok[end].m;
 			for(i = 0; i < tok[end].n; i++)
-				print("%g ", *((double*)tok[end].m + i));
+				print("%g ", d[i]);
+			print("\n");
 			break;
 		case string:
-			print("\tstr %s\n", tok[end].m);
+			s = tok[end].m;
+			print("\tstr %s\n", s);
 			break;
 		case subcmd:
-			print("\tcmd %s\n", tok[end].m);
+			s = tok[end].m;
+			print("\tcmd %s\n", s);
 			break;
 		case identifier:
-			print("\tsym %s\n", tok[end].m);
+			s = tok[end].m;
+			print("\tsym %s\n", s);
 			break;
 		case assign:
-			print("\tset (%C)\n", *tok[end].m);
+			r = tok[end].m;
+			print("\tset (%C)\n", *r);
 			break;
 		case function:
-			print("\tfn %C\n", *tok[end].m);
+			r = tok[end].m;
+			print("\tfn %C\n", *r);
 			break;
 		default:
-			print("\tdel %C\n", *tok[end].m);
+			r = tok[end].m;
+			print("\tdel %C\n", *r);
 			break;
 	}
 	return 1;

@@ -7,7 +7,7 @@
 #include "apl.h"
 
 int top;
-array tok[128];
+array tok[256];
 
 int scan_numeral(Biobuf *i);
 int scan_literal(Biobuf *i);
@@ -19,11 +19,10 @@ static int mem_ok(int x);
 static int mem_add(Rune r);
 static void mem_end(void);
 static char *mem_str(Biobuf *b, Rune d);
-static void mem_dbg(void);
 
 static struct {
 	long max;
-	char  *top;
+	char *top;
 	char *pool;
 } mem;
 
@@ -39,6 +38,7 @@ int scan(Biobuf *i) {
 	int e;
 	Rune r;
 	top = 0;
+	mem.top = mem.pool;
 	while((r=Bgetrune(i))>0) {
 		if(r == '\n') break;
 		if(isspace(r)) continue;
@@ -69,18 +69,21 @@ int scan_numeral(Biobuf *i) {
 	
 	tok[top].n = 0;
 	tok[top].t = number;
-	tok[top].m = d = mem.top;
+	tok[top].m = mem.top;
+	d = (double *)mem.top;
 
 	while(mem_ok(sizeof(double))) {
 		r = Bgetrune(i);
-		if(isspace(r)) continue;
+		if(isblank(r)) continue;
 		if(!utfrune(digits, r)) break;
 		sign = utfrune("¯",r)?-1:1;
-		if(r > 0) Bungetrune(i);
+		if(sign > 0) Bungetrune(i);
 		Bgetd(i, d); *d *= sign;
-		d = mem.top += sizeof (double);
+		mem.top += sizeof (double);
+		d = (double *)mem.top;
 		tok[top].n++;
 	}
+	Bungetrune(i);
 	tok[top].r = tok[top].n > 1 ? 1 : 0;
 	return 0;
 }
@@ -98,12 +101,15 @@ int scan_literal(Biobuf *i) {
 
 int scan_special(Biobuf *i) {
 	Rune *r;
-	tok[top].t = utfrune("←", r) ? assign : function;
-	tok[top].m = r = mem.top;
+	tok[top].m = mem.top;
+	r = (Rune *)mem.top;
 	if (mem_ok(sizeof (Rune))) {
 		*r = Bgetrune(i);
 		mem.top += sizeof (Rune);
 	} else return -1;
+	tok[top].t = utfrune("←", *r) ? assign : function;
+	tok[top].n = 1;
+	tok[top].r = 0;
 	return 0;
 }
 
@@ -112,7 +118,8 @@ int scan_delims(Biobuf *i) {
 	enum tag *t = &tok[top].t;
 	tok[top].n = 1;
 	tok[top].r = 0;
-	tok[top].m = r = mem.top;
+	tok[top].m = mem.top;
+	r = (Rune*)mem.top;
 	if (mem_ok(sizeof (Rune))) {
 		*r = Bgetrune(i);
 		mem.top += sizeof (Rune);
@@ -151,7 +158,7 @@ int scan_symbol(Biobuf *i) {
 }
 
 static int mem_add(Rune r) {
-	int n;
+	int n = 0;
 	if(!mem_ok(runelen(r))) return -1;
 	n += runetochar(mem.top, &r);
 	mem.top += n;

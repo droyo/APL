@@ -13,10 +13,9 @@ enum tag {
 	rbrace		= 0x0200,
 	lbrace		= 0x0400,
 	assign		= 0x0800,
-	string		= 0x1000,
-	subcmd		= 0x2000,
-	semicolon	= 0x4000,
-	diamond		= 0x8000
+	subcmd		= 0x1000,
+	semicolon	= 0x2000,
+	diamond		= 0x4000
 };
 
 typedef struct {
@@ -25,7 +24,7 @@ typedef struct {
 	void *m;
 } array;
 
-extern array tok[128];
+extern array tok[256];
 int scan(Biobuf *in);
 int parse(int end);
 
