@@ -23,8 +23,8 @@ int main(void) {
 	}
 	input = Bfdopen(0, O_RDONLY);
 
-	while(parse(scan(input)));
-
+	do{print("\t");}while(parse(scan(input)));
+	print("\nBye\n");
 	cleanup_scan();
 	Bterm(input);
 	return 0;

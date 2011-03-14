@@ -6,7 +6,6 @@
 #include <unistd.h>
 #include "apl.h"
 
-int top;
 array tok[256];
 
 int scan_numeral(Biobuf *i);
@@ -15,6 +14,7 @@ int scan_special(Biobuf *i);
 int scan_symbol(Biobuf *i);
 int scan_delims(Biobuf *i);
 
+static int top;
 static int mem_ok(int x);
 static int mem_add(Rune r);
 static void mem_end(void);
@@ -39,8 +39,9 @@ int scan(Biobuf *i) {
 	Rune r;
 	top = 0;
 	mem.top = mem.pool;
+	tok[top++].t = diamond;
 	while((r=Bgetrune(i))>0) {
-		if(r == '\n') break;
+		if(r == Beof || r == '\n') break;
 		if(isspace(r)) continue;
 		if(top>=NELEM(tok)) return -1;
 		Bungetrune(i);
@@ -142,7 +143,7 @@ int scan_symbol(Biobuf *i) {
 	Rune r;
 	tok[top].n = 0;
 	tok[top].r = 1;
-	tok[top].t = identifier;
+	tok[top].t = symbol;
 	tok[top].m = mem.top;
 	while((r = Bgetrune(i))>0) {
 		if (isspace(r)) break;
@@ -174,7 +175,10 @@ static char *mem_str(Biobuf *b, Rune d) {
 	char *s = Brdline(b, d);
 	int n = Blinelen(b);
 	s[n-1] = '\0';
-	if(!mem_ok(n)) return NULL;
+	if(!mem_ok(n)) {
+		fprint(2, "%r\n");
+		return NULL;
+	}
 	for(i=0;i<n;i++) *mem.top++ = s[i];
 	return t;
 }
