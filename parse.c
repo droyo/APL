@@ -1,6 +1,5 @@
 #include <utf.h>
 #include <fmt.h>
-#include <bio.h>
 #include "apl.h"
 
 struct stack {
@@ -17,27 +16,23 @@ static void push(struct stack *, array*);
 static int count(struct stack *);
 static struct stack mkstack(array *);
 
-int parse(int end) {
-	if(!end) return 0;
-	if(end < 0) return -1;
-	int e = end;
-	struct stack s = mkstack(tok+e);
+int parse(array *end) {
+	if(!end) return -1;
+	array *e = end;
+	struct stack s = mkstack(e);
 	
-	for(;e>=0;e--) {
+	for(;e->t != marker;e--) {
 		if (top(&s)->t == assign)
-			push(&s, tok+e);
-		else push(&s, eval(tok+e));
+			push(&s, e);
+		else push(&s, eval(e));
 		if (count(&s) == 4) 
 			exec(&s);
 	}
-	exec (&s);
 	return 1;
 }
 
 array *eval(array *a) {
-	const int literal = number+string+diamond;
-	if(a->t & literal) return a;
-	else return a;
+	return a;
 }
 
 int exec(struct stack *s) {

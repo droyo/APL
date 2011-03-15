@@ -1,6 +1,5 @@
 #define NELEM(x)(sizeof(x)/sizeof(*x))
 enum tag {
-	empty		= 0x0000,
 	number		= 0x0001,
 	string		= 0x0002,
 	symbol		= 0x0004,
@@ -22,11 +21,8 @@ enum tag {
 typedef struct {
 	enum tag t;
 	int r, c, n;
-	void *m;
+	char *m;
 } array;
-
-/* temp storage for input line */
-extern array tok[256];
 
 /* Hash table for var bindings */
 void*  shadow(void *, int);
@@ -39,8 +35,8 @@ int copy(array *, array *);
 void *val(array *);
 
 /* Core interpreter */
-int scan(void *v);
-int parse(int end);
+array* scan(void *v);
+int parse(array *end);
 
 void *init_env(void);
 int init_scan(void);
