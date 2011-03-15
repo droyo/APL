@@ -1,7 +1,7 @@
 CC := tcc
 LD := tcc
 BIN := apl
-SRC := main.c parse.c scan.c
+SRC := main.c parse.c scan.c array.c
 INC := apl.h
 OBJ := $(SRC:.c=.o)
 

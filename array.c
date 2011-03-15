@@ -20,3 +20,6 @@ int copy(array *dst, array *src) {
 	if(!(dst->m = malloc(s))) return 0;
 	return !!memcpy(dst->m,src->m,s);
 }
+void *val(array *a) {
+	return a->m + (sizeof (int) * a->r);
+}

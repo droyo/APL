@@ -58,36 +58,23 @@ void disp(array *a) {
 	Rune *r;
 	double *d;
 	switch(a->t) {
-	case diamond:
-		print("♦");
-		break;
 	case number: 
 		print("num ");
-		d = a->m;
+		d = val(a);
 		for(i = 0; i < a->n; i++)
 			print("%s%g",i?" ":"", d[i]);
 		break;
 	case string:
-		print("str %s", (char*)a->m);
+		print("str %s", (char*)val(a));
 		break;
 	case subcmd:
-		print("cmd %s", (char*)a->m);
+		print("cmd %s", (char*)val(a));
 		break;
 	case symbol:
-		print("sym %s", (char*)a->m);
-		break;
-	case assign:
-		r = a->m;
-		print("%C", *r);
-		break;
-	case function:
-		r = a->m;
-		print("fn %C", *r);
+		print("sym %s", (char*)val(a));
 		break;
 	default:
-		r = a->m;
-		print("del %C", *r);
-		break;
+		print("%s", (char*)val(a));
 	}
 }
 
@@ -96,7 +83,7 @@ static struct stack mkstack(array *beg) {
 	s.bot = s.top = beg; return s;
 }
 static array *pop(struct stack *s) {
-	return (s->top<=s->bot)?0:--s->top;
+	return (s->top<=s->bot)?NULL:--s->top;
 }
 static array *top(struct stack *s) { 
 	return s->top; 

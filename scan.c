@@ -3,6 +3,7 @@
 #include <bio.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include "apl.h"
 
@@ -34,12 +35,29 @@ char special[] = "×+-¨÷≠"
 	"⍥⍷⍬⍐⍗⍸⌷⍇⍈,+-⍺⌈⌊_∇∆∘'⍎⍕⋄"
 	"⍙⌷≡≢⍞/\\⊢⍪⍤⊣⊂⊃∩∪⊥⊤|⍝⍀⌿.";
 
-int scan(Biobuf *i) {
+int fill(void) {
+	int *shp;
+	Rune r; chartorune(&r,"♦");
+	tok[top].m = mem.top;
+	if(mem_ok(sizeof *shp)) {
+		shp = (int*)mem.top;
+		mem.top += sizeof *shp;
+	} else return 0;
+	*shp = 1;
+	tok[top].t = diamond;
+	tok[top].n = mem_add(r); mem_end();
+	tok[top].r = 1;
+	top++;
+}
+
+int scan(void *v) {
 	int e;
 	Rune r;
+	Biobuf *i = v;
 	top = 0;
 	mem.top = mem.pool;
-	tok[top++].t = diamond;
+	if (!fill()) return 0;
+		
 	while((r=Bgetrune(i))>0) {
 		if(r == Beof || r == '\n') break;
 		if(isspace(r)) continue;
@@ -66,14 +84,20 @@ int scan(Biobuf *i) {
 int scan_numeral(Biobuf *i) {
 	Rune r;
 	int sign;
+	int *shp;
 	double *d;
 	
 	tok[top].n = 0;
 	tok[top].t = number;
 	tok[top].m = mem.top;
-	d = (double *)mem.top;
-
-	while(mem_ok(sizeof(double))) {
+	tok[top].r = 1;
+	if(mem_ok(sizeof *shp)) {
+		shp = (int*)mem.top;
+		mem.top += sizeof *shp;
+	} else return -1;
+	d = (double*)mem.top;
+	
+	while(mem_ok(sizeof *d)) {
 		r = Bgetrune(i);
 		if(isblank(r)) continue;
 		if(!utfrune(digits, r)) break;
@@ -85,47 +109,52 @@ int scan_numeral(Biobuf *i) {
 		tok[top].n++;
 	}
 	Bungetrune(i);
+	*shp = tok[top].n;
 	tok[top].r = tok[top].n > 1 ? 1 : 0;
+	if(!tok[top].r) 
+		memmove(tok[top].m, tok[top].m+sizeof *shp, sizeof *d * tok[top].n);
 	return 0;
 }
 
 int scan_literal(Biobuf *i) {
 	Rune q;
-	
+	char *s;
+	int *shp;
+
 	q = Bgetrune(i);
+	tok[top].m = mem.top;
 	tok[top].r = 1;
-	tok[top].m = mem_str(i, q);
+	if(mem_ok(sizeof *shp)) {
+		shp = (int*)mem.top;
+		mem.top += sizeof *shp;
+	} else return -1;
+	
+	s = mem_str(i, q);
+	tok[top].n = strlen(s);
+	*shp = utflen((char*)tok[top].m);
 	tok[top].t = (q == '`') ? subcmd : string;
 
 	return 0;
 }
 
 int scan_special(Biobuf *i) {
-	Rune *r;
+	Rune r = Bgetrune(i);
 	tok[top].m = mem.top;
-	r = (Rune *)mem.top;
-	if (mem_ok(sizeof (Rune))) {
-		*r = Bgetrune(i);
-		mem.top += sizeof (Rune);
-	} else return -1;
-	tok[top].t = utfrune("←", *r) ? assign : function;
-	tok[top].n = 1;
+	if (mem_add(r)<0) return -1; else mem_end();
+	tok[top].t = utfrune("←", r) ? assign : function;
+	tok[top].n = strlen(tok[top].m);
 	tok[top].r = 0;
 	return 0;
 }
 
 int scan_delims(Biobuf *i) {
-	Rune *r;
+	Rune r = Bgetrune(i);
 	enum tag *t = &tok[top].t;
-	tok[top].n = 1;
 	tok[top].r = 0;
 	tok[top].m = mem.top;
-	r = (Rune*)mem.top;
-	if (mem_ok(sizeof (Rune))) {
-		*r = Bgetrune(i);
-		mem.top += sizeof (Rune);
-	} else return -1;
-	switch(*r) {
+	if (mem_add(r)<0) return -1; else mem_end();
+	tok[top].n = strlen(tok[top].m);
+	switch(r) {
 		case '(': *t = lparen;
 		case ')': *t = rparen;
 		case '[': *t = lbracket;
@@ -141,10 +170,17 @@ int scan_delims(Biobuf *i) {
 
 int scan_symbol(Biobuf *i) {
 	Rune r;
+	int *shp;
 	tok[top].n = 0;
 	tok[top].r = 1;
 	tok[top].t = symbol;
 	tok[top].m = mem.top;
+	
+	if(mem_ok(sizeof *shp)) {
+		shp = (int*)mem.top;
+		mem.top += sizeof *shp;
+	} else return -1;
+	
 	while((r = Bgetrune(i))>0) {
 		if (isspace(r)) break;
 		if (utfrune(quotes, r)) break;
@@ -155,6 +191,7 @@ int scan_symbol(Biobuf *i) {
 	}
 	Bungetrune(i);
 	mem_end();
+	*shp = utflen(tok[top].m);
 	return 0;
 }
 

@@ -5,15 +5,15 @@ enum tag {
 	string		= 0x0002,
 	symbol		= 0x0004,
 	function	= 0x0008,
-	colon		= 0x0010,
+	subcmd		= 0x0010,
 	lparen		= 0x0020,
 	rparen		= 0x0040,
 	lbracket	= 0x0080,
 	rbracket	= 0x0100,
-	rbrace		= 0x0200,
-	lbrace		= 0x0400,
+	lbrace		= 0x0200,
+	rbrace		= 0x0400,
 	assign		= 0x0800,
-	subcmd		= 0x1000,
+	colon		= 0x1000,
 	semicolon	= 0x2000,
 	diamond		= 0x4000,
 	marker		= 0x8000
@@ -34,8 +34,12 @@ array* put(void *, char*);
 array* get(void *, char*);
 void   del(void *, char*);
 
+/* Array operations */
 int copy(array *, array *);
-int scan(Biobuf *in);
+void *val(array *);
+
+/* Core interpreter */
+int scan(void *v);
 int parse(int end);
 
 void *init_env(void);
