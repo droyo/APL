@@ -5,15 +5,15 @@ typedef struct {
 
 typedef struct {
 	long c[4];
-	array (*f)(void*,array*,array*);
+	array (*f)(void*,array**,int,int);
 	long b, e;
 } rule;
 
-array monad(void *env, array*, array*);
-array dyad(void *env, array*, array*);
-array oper(void *env, array*, array*);
-array set(void *env, array*, array*);
-array punc(void *env, array*, array*);
+array monad(void *env, array**, int,int);
+array dyad(void *env, array**, int,int);
+array oper(void *env, array**, int,int);
+array set(void *env, array**, int,int);
+array punc(void *env, array**, int,int);
 
 array *eval(array *);
 int exec(stack *);

@@ -4,13 +4,13 @@
 #include "apl.h"
 #include "parse.h"
 
-#define FUNC (primitive + function)
-#define NAME (symbol + string)
+#define FUNC (primitive|function)
+#define NAME (symbol|string)
 #define OPER (operator)
-#define ATOM (string + number)
-#define EDGE (lparen + lbracket + assign + empty)
-#define FNOA (FUNC + NAME + OPER + ATOM)
-#define FOA (FUNC + OPER + ATOM)
+#define ATOM (string|number)
+#define EDGE (lparen|lbracket|assign|empty)
+#define FNOA (FUNC|NAME|OPER|ATOM)
+#define FOA (FUNC|OPER|ATOM)
 #define ANY (~0)
 
 rule cases[] = {
@@ -20,20 +20,26 @@ rule cases[] = {
 {{EDGE+FOA,		ATOM+FUNC,	OPER,		ANY},	oper,	1,2},
 {{NAME,			assign,		FNOA,		ANY},	set,	0,2},
 {{lparen,		FNOA,		rparen,		ANY},	punc,	0,2},
-{{0,0,0,0},NULL,0,0}};
+{{0,0,0,0},NULL,0,0}
+};
 
 array empty_array = { empty, 0, 0, 0, NULL };
 
 int parse(array *end) {
 	if(!end) return -1;
+	int i;
 	array *e = end;
 	stack s = mkstack(e);
-	do {
+	for(push(&s,e--); top(&s)->t!=empty;e--) {
+		while(exec(&s));
 		if (top(&s)->t == assign)
 			push(&s, e);
 		else push(&s, eval(e));
-		exec(&s);
-	} while((e->t != empty&&e--) || exec(&s));
+	}
+	while(exec(&s));
+	print("Result(%d): ",count(&s));
+	for(i=0;i<count(&s);i++){print(i?",":"");disp(nth(&s,i));}
+	print("\n");
 	return 1;
 }
 
@@ -44,8 +50,8 @@ int exec(stack *s) {
 	int i, j, a, p;
 	for(i = 0; i < NELEM(cases); i++) {
 		for(j=0;j<NELEM(cases[0].c);j++) {
-			p = cases[i].c[j];
 			a = nth(s,j)->t;
+			p = cases[i].c[j];
 			if(!(a&p)) break;
 		}
 		if(j==4) {
@@ -63,36 +69,37 @@ int apply(rule *r, stack *s) {
 	array *a[4];
 	
 	print("(");
+	for(i=0;i<4;i++)disp(nth(s,i));
 	for(i = 0; i <= r->e; i++) {
 		a[i] = pop(s);
-		disp(a[i]);
-	}print(") ");
-	x = (*r->f)(NULL, a[r->b], a[r->e]);
+	}print(")[%d,%d] ",r->b,r->e);
+	x = (*r->f)(NULL, a, r->b, r->e);
 	push(s, &x);
 	for(i=r->b-1;i>=0;i--) push(s,a[i]);
 	return 0;
 }
-array monad(void *env, array *b, array *e) {
+array monad(void *env, array **a, int b, int e) {
 	print("monad "); 
-	disp(b);print(" ");disp(e);
-	return *e;
+	disp(a[b]);print(" ");disp(a[e]);
+	return *(a[e]);
 }
-array dyad(void *env, array *b, array *e) {
+array dyad(void *env, array **a, int b, int e)  {
 	print("dyad ");
-	disp(b+1);print(" ");
-	disp(b);print(",");disp(e);
-	return *e;
+	disp(a[b+1]);print(" ");
+	disp(a[b]);print(",");disp(a[e]);
+	return *(a[e]);
 }
-array oper(void *env, array *b, array *e) {
+array oper(void *env, array **a, int b, int e) {
 	print("oper ");
 	return empty_array;
 }
-array set(void *env, array *b, array *e) {
-	print("set ");
-	return empty_array;
+array set(void *env, array **a, int b, int e) {
+	print("set "); disp(a[b]); 
+	print (" := "); disp(a[e]);
+	return *(a[e]);
 }
-array punc(void *env, array *b, array *e) {
-	return empty_array;
+array punc(void *env, array **a, int b, int e) {
+	return *(a[b+1]);
 }
 
 static stack mkstack(array *beg) {
