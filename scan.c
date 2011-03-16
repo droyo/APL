@@ -141,15 +141,15 @@ int scan_delims(Biobuf *i) {
 	if (mem_add(r)<0) return -1; else mem_end();
 	top->n = strlen(top->m);
 	switch(r) {
-		case '(': top->t = lparen;
-		case ')': top->t = rparen;
-		case '[': top->t = lbracket;
-		case ']': top->t = rbracket;
-		case '{': top->t = lbrace;
-		case '}': top->t = rbrace;
-		case ';': top->t = semicolon;
-		case ':': top->t = colon;
-		case 0x2666: top->t = diamond;
+		case '(': top->t = lparen;		break;
+		case ')': top->t = rparen;		break;
+		case '[': top->t = lbracket;	break;
+		case ']': top->t = rbracket;	break;
+		case '{': top->t = lbrace;		break;
+		case '}': top->t = rbrace;		break;
+		case ';': top->t = semicolon;	break;
+		case ':': top->t = colon;		break;
+		case 0x2666: top->t = diamond;	break;
 	}
 	return 0;
 }

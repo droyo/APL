@@ -5,7 +5,7 @@
 #include "parse.h"
 
 #define FUNC (primitive + function)
-#define NAME (symbol + string)
+#define NAME (symbol)
 #define OPER (operator)
 #define ATOM (string + number)
 #define EDGE (lparen + lbracket + assign + empty)
@@ -44,8 +44,8 @@ int exec(stack *s) {
 	int i, j, a, p;
 	for(i = 0; i < NELEM(cases); i++) {
 		for(j=0;j<NELEM(cases[0].c);j++) {
-			p = cases[i].c[j];
 			a = nth(s,j)->t;
+			p = cases[i].c[j];
 			if(!(a&p)) break;
 		}
 		if(j==4) {
@@ -66,33 +66,34 @@ int apply(rule *r, stack *s) {
 	for(i = 0; i <= r->e; i++) {
 		a[i] = pop(s);
 		disp(a[i]);
-	}print(") ");
-	x = (*r->f)(NULL, a[r->b], a[r->e]);
+	}print(")[%d,%d] ",r->b,r->e);
+	x = (*r->f)(NULL, a, r->b, r->e);
 	push(s, &x);
 	for(i=r->b-1;i>=0;i--) push(s,a[i]);
 	return 0;
 }
-array monad(void *env, array *b, array *e) {
+array monad(void *env, array **a, int b, int e) {
 	print("monad "); 
-	disp(b);print(" ");disp(e);
-	return *e;
+	disp(a[b]);print(" ");disp(a[e]);
+	return *(a[e]);
 }
-array dyad(void *env, array *b, array *e) {
+array dyad(void *env, array **a, int b, int e)  {
 	print("dyad ");
-	disp(b+1);print(" ");
-	disp(b);print(",");disp(e);
-	return *e;
+	disp(a[b+1]);print(" ");
+	disp(a[b]);print(",");disp(a[e]);
+	return *(a[e]);
 }
-array oper(void *env, array *b, array *e) {
+array oper(void *env, array **a, int b, int e) {
 	print("oper ");
 	return empty_array;
 }
-array set(void *env, array *b, array *e) {
-	print("set ");
-	return empty_array;
+array set(void *env, array **a, int b, int e) {
+	print("set "); disp(a[b]); 
+	print (" := "); disp(a[e]);
+	return *(a[b]);
 }
-array punc(void *env, array *b, array *e) {
-	return empty_array;
+array punc(void *env, array **a, int b, int e) {
+	return *(a[b+1]);
 }
 
 static stack mkstack(array *beg) {
