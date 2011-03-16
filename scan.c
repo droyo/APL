@@ -41,7 +41,7 @@ array* scan(void *v) {
 	Biobuf *i = v;
 	mem.top = mem.pool;
 	top = tok;
-	top++->t = marker;
+	top++->t = empty;
 		
 	while((r=Bgetrune(i))>0) {
 		if(r == Beof || r == '\n') break;

@@ -1,11 +1,11 @@
-CC := tcc
-LD := tcc
+CC := gcc
+LD := gcc
 BIN := apl
-SRC := main.c parse.c scan.c array.c
+SRC := main.c parse.c scan.c array.c disp.c
 INC := apl.h
 OBJ := $(SRC:.c=.o)
 
-CFLAGS = -Wall -I/usr/local/include
+CFLAGS = -Wall -I/usr/local/include -g
 LDFLAGS = -lbio -lfmt -lutf -L/usr/local/lib 
 
 all: $(BIN)
@@ -16,7 +16,8 @@ $(BIN): $(OBJ)
 .c.o:
 	$(CC) $(CFLAGS) -c $<
 
-$(OBJ) : $(INC)
+$(OBJ) : apl.h
+parse.o : parse.h
 
 clean:
 	rm -f $(OBJ) $(BIN)

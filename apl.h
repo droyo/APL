@@ -1,21 +1,23 @@
 #define NELEM(x)(sizeof(x)/sizeof(*x))
 enum tag {
-	number		= 0x0001,
-	string		= 0x0002,
-	symbol		= 0x0004,
-	function	= 0x0008,
-	subcmd		= 0x0010,
-	lparen		= 0x0020,
-	rparen		= 0x0040,
-	lbracket	= 0x0080,
-	rbracket	= 0x0100,
-	lbrace		= 0x0200,
-	rbrace		= 0x0400,
-	assign		= 0x0800,
-	colon		= 0x1000,
-	semicolon	= 0x2000,
-	diamond		= 0x4000,
-	marker		= 0x8000
+	number		= 0x00001,
+	string		= 0x00002,
+	symbol		= 0x00004,
+	function	= 0x00008,
+	subcmd		= 0x00010,
+	operator	= 0x00020,
+	lparen		= 0x00040,
+	rparen		= 0x00080,
+	lbracket	= 0x00100,
+	rbracket	= 0x00200,
+	lbrace		= 0x00400,
+	rbrace		= 0x00800,
+	primitive	= 0x01000,
+	colon		= 0x02000,
+	semicolon	= 0x04000,
+	diamond		= 0x08000,
+	assign		= 0x10000,
+	empty		= 0x20000
 };
 
 typedef struct {
@@ -35,8 +37,9 @@ int copy(array *, array *);
 void *val(array *);
 
 /* Core interpreter */
-array* scan(void *v);
-int parse(array *end);
+array* scan(void *);
+int parse(array *);
+void disp(array *);
 
 void *init_env(void);
 int init_scan(void);
