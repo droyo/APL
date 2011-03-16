@@ -11,7 +11,8 @@ typedef struct {
 
 array monad(void *env, array**, int,int);
 array dyad(void *env, array**, int,int);
-array oper(void *env, array**, int,int);
+array moper(void *env, array**, int,int);
+array doper(void *env, array**, int,int);
 array set(void *env, array**, int,int);
 array punc(void *env, array**, int,int);
 

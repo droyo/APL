@@ -33,8 +33,9 @@ char digits[] = "¯0123456789";
 char special[] = 
 	"~!@#$%^&*_-=+¨<≤=≥>≠∨^×÷"
 	"⍞⌶⍫⍒⍋⌽⍉⊖⍟⍱⍲⌹?⍵∊⍴↑↓⍳○*←→⊢"
-	"⍷⍐⍗⍸⌷⍇⍈⊣⍺⌈⌊∇∆∘⎕⍎⍕⌷⊃⊂∩∪⊥⊤|⍀⌿"
+	"⍷⍐⍗⍸⌷⍇⍈⊣⍺⌈⌊∇∆∘⎕⍎⍕⌷⊃⊂∩∪⊥⊤|\\⍀/⌿"
 	"∪⍂⌻⍪⍤";
+char operators[] = "\\⍀/⌿¨";
 array* scan(void *v) {
 	int e;
 	Rune r;
@@ -129,7 +130,11 @@ int scan_special(Biobuf *i) {
 	top->m = mem.top;
 	if (mem_add(r)<0) return -1; else mem_end();
 	top->r = 0;
-	top->t = utfrune("←", r) ? assign : function;
+	if(utfrune("←", r))
+		top->t = assign;
+	else if(utfrune(operators,r))
+		top->t = moperator;
+	else top->t = primitive;
 	top->n = strlen(top->m);
 	return 0;
 }

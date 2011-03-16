@@ -4,22 +4,22 @@
 #include "apl.h"
 #include "parse.h"
 
-#define FUNC (primitive|function)
-#define NAME (symbol|string)
-#define OPER (operator)
-#define ATOM (string|number)
-#define EDGE (lparen|lbracket|assign|empty)
-#define FNOA (FUNC|NAME|OPER|ATOM)
-#define FOA (FUNC|OPER|ATOM)
-#define ANY (~0)
+#define L (lparen|lbracket|assign|empty)
+#define F (primitive|function)
+#define N (symbol|string)
+#define V (string|number)
+#define D (doperator)
+#define M (moperator)
+#define R (~0)
 
 rule cases[] = {
-{{EDGE,			FUNC,		ATOM,		ANY},	monad,	1,2},
-{{EDGE+FOA,		FUNC,		FUNC,		ATOM},	monad,	2,3},
-{{EDGE+FOA,		ATOM,		FUNC,		ATOM},	dyad,	1,3},
-{{EDGE+FOA,		ATOM+FUNC,	OPER,		ANY},	oper,	1,2},
-{{NAME,			assign,		FNOA,		ANY},	set,	0,2},
-{{lparen,		FNOA,		rparen,		ANY},	punc,	0,2},
+{{V|M|F|L,	V|F,	D,			V|F},	doper,	1,3},
+{{V|M|F|L,	V,		F,			V},		dyad,	1,3},
+{{V|M|F|L,	V|F,	M,			R},		moper,	1,2},
+{{M|F|L,	F,		V,			R},		monad,	1,2},
+{{D,		V,		F,			V},		monad,  2,3},
+{{N,		assign,	V|M|D|F,	R},		set,	0,2},
+{{lparen,	V|M|D|F,rparen,		R},		punc,	0,2},
 {{0,0,0,0},NULL,0,0}
 };
 
@@ -89,9 +89,15 @@ array dyad(void *env, array **a, int b, int e)  {
 	disp(a[b]);print(",");disp(a[e]);
 	return *(a[e]);
 }
-array oper(void *env, array **a, int b, int e) {
-	print("oper ");
-	return empty_array;
+array moper(void *env, array **a, int b, int e) {
+	print("monad oper (");
+	disp(a[b]);disp(a[e]);print(")");
+	return *(a[b]);
+}
+array doper(void *env, array **a, int b, int e) {
+	print("dyad oper (");
+	disp(a[b]);disp(a[b+1]);disp(a[e]);print(")");
+	return *(a[e]);
 }
 array set(void *env, array **a, int b, int e) {
 	print("set "); disp(a[b]); 

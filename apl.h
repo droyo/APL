@@ -5,19 +5,20 @@ enum tag {
 	symbol		= 0x00004,
 	function	= 0x00008,
 	subcmd		= 0x00010,
-	operator	= 0x00020,
-	lparen		= 0x00040,
-	rparen		= 0x00080,
-	lbracket	= 0x00100,
-	rbracket	= 0x00200,
-	lbrace		= 0x00400,
-	rbrace		= 0x00800,
-	primitive	= 0x01000,
-	colon		= 0x02000,
-	semicolon	= 0x04000,
-	diamond		= 0x08000,
-	assign		= 0x10000,
-	empty		= 0x20000
+	doperator	= 0x00020,
+	moperator	= 0x00040,
+	lparen		= 0x00080,
+	rparen		= 0x00100,
+	lbracket	= 0x00200,
+	rbracket	= 0x00400,
+	lbrace		= 0x00800,
+	rbrace		= 0x01000,
+	primitive	= 0x02000,
+	colon		= 0x04000,
+	semicolon	= 0x08000,
+	diamond		= 0x10000,
+	assign		= 0x20000,
+	empty		= 0x40000
 };
 
 typedef struct {
