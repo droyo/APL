@@ -15,6 +15,7 @@ int scan_literal(Biobuf *i);
 int scan_special(Biobuf *i);
 int scan_symbol(Biobuf *i);
 int scan_delims(Biobuf *i);
+int scan_operator(Biobuf *i);
 
 static int mem_ok(int x);
 static int mem_add(Rune r);
@@ -30,12 +31,11 @@ static struct {
 char quotes[] = "\"'`";
 char delims[] = "(){}[]♦:;";
 char digits[] = "¯0123456789";
+char operators[] = "\\⍀/⌿¨∘.";
 char special[] = 
-	"~!@#$%^&*_-=+¨<≤=≥>≠∨^×÷"
+	"~!@#$%^&*_-=+<≤=≥>≠∨^×÷"
 	"⍞⌶⍫⍒⍋⌽⍉⊖⍟⍱⍲⌹?⍵∊⍴↑↓⍳○*←→⊢"
-	"⍷⍐⍗⍸⌷⍇⍈⊣⍺⌈⌊∇∆∘⎕⍎⍕⌷⊃⊂∩∪⊥⊤|\\⍀/⌿"
-	"∪⍂⌻⍪⍤";
-char operators[] = "\\⍀/⌿¨";
+	"⍷⍐⍗⍸⌷⍇⍈⊣⍺⌈⌊∇∆⎕⍎⍕⌷⊃⊂∩∪⊥⊤|⍂⌻⍪";
 array* scan(void *v) {
 	int e;
 	Rune r;
@@ -58,6 +58,8 @@ array* scan(void *v) {
 			e = scan_delims(i);
 		else if(utfrune(special, r)) 
 			e = scan_special(i);
+		else if(utfrune(operators, r))
+			e = scan_operator(i);
 		else 
 			e = scan_symbol(i);
 		
@@ -132,9 +134,23 @@ int scan_special(Biobuf *i) {
 	top->r = 0;
 	if(utfrune("←", r))
 		top->t = assign;
-	else if(utfrune(operators,r))
-		top->t = moperator;
 	else top->t = primitive;
+	top->n = strlen(top->m);
+	return 0;
+}
+int scan_operator(Biobuf *i) {
+	Rune r = Bgetrune(i);
+	top->m = mem.top;
+	if (mem_add(r)<0) return -1; else mem_end();
+	if(r=='.'){
+		print("Inner product\n");
+		top->t = doperator;
+	} else if(utfrune("∘",r)) {
+		if(utfrune(".",Bgetrune(i)))
+			top->t = function;
+		else top->t = doperator;
+		Bungetrune(i);
+	} else top->t = moperator;
 	top->n = strlen(top->m);
 	return 0;
 }
