@@ -29,7 +29,8 @@ int scan_operator(Biobuf *i);
 char quotes[] = "`'";
 char delims[] = "():";
 char digits[] = "¯0123456789";
-char operators[] = "\\⍀/⌿¨∘.⍤";
+char operators[] =	"¨.⍤⍥\\⍀/⌿";
+char dyad_ops[] =	"¨.⍤⍥";
 char special[] = 
 	"~!@#$%^&*_-=+<≤=≥>≠∨^×÷{}"
 	"⍞⌶⍫⍒⍋⌽⍉⊖⍟⍱⍲⌹?⍵∊⍴↑↓⍳○*←→⊢"
@@ -160,19 +161,22 @@ int scan_special(Biobuf *i) {
 }
 
 int scan_operator(Biobuf *i) {
-	int end = '\0';
+	int end = '\0',c;
 	Rune r = Bgetrune(i);
+	/* Make sure it's '.' the operator, and
+	   not the start of a decimal number */
+	if (r == '.') {
+		Bungetrune(i);
+		Bgetc(i); c = Bgetc(i);
+		if(isdigit(c)) {
+			Bungetc(i); Bungetc(i);
+			return scan_numeral(i);
+		} else Bungetc(i);
+	}
+	top->t = utfrune(dyad_ops,r)?doperator:moperator;
 	top->m = alloc(runelen(r));
-	runetochar(top->m, &r); push(&end,1);
-	if(r=='.' || utfrune("⍤",r))
-		top->t = doperator;
-	else if(utfrune("∘",r)) {
-		if(Bgetc(i) == '.')
-			top->t = function;
-		else top->t = doperator;
-		Bungetc(i);
-	} else top->t = moperator;
-	top->n = strlen(top->m);
+	top->n = runetochar(top->m, &r);
+	push(&end,1);
 	return 0;
 }
 

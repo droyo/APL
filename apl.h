@@ -32,6 +32,7 @@ void   del(void *, char*);
 
 /* Array operations */
 int copy(array *, array *);
+array *clone(array*);
 void *val(array *);
 
 /* Core interpreter */

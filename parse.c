@@ -41,6 +41,7 @@ void top4(stack *s) {
 		print(",");
 	}print("\n");
 }
+
 array *parse(array **t) {
 	stack l = mkstack(t[0],+1); l.top = t[1];
 	stack r = mkstack(t[1],-1);
@@ -62,8 +63,7 @@ array *process(stack *l, stack *r, int lvl) {
 		}else if (top(r)->t == assign)
 			push(r,a);
 		else push(r, eval(a));
-		while(exec(r));
-		showdbg(l,r);
+		showdbg(l,r);while(exec(r));
 	} while(a->t != empty);
 	while(exec(r));
 	if (count(r) > 2) {
