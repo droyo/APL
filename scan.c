@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <math.h>
 #include "apl.h"
 
 static array *top;
@@ -98,10 +99,12 @@ int scan_numeral(Biobuf *i) {
 		default:
 			if (j>0) {
 				digits[j] = '\0';
-				print("DBG (%s)\n", digits);
-				if(!strcmp(digits, "-")) d = 1.0/0;
-				else if(!strcmp(digits, "--")) d = -1.0/0;
-				else d = strtod(digits, 0);
+				if(!strcmp(digits, "-")) 
+					d = INFINITY;
+				else if(!strcmp(digits, "--"))
+					d = -INFINITY;
+				else 
+					d = strtod(digits, 0);
 				push(&d, sizeof d);
 				*shape = ++top->n;
 			}

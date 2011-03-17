@@ -1,5 +1,6 @@
 #include <utf.h>
 #include <fmt.h>
+#include <math.h>
 #include "apl.h"
 
 void disp(array *a) {
@@ -8,8 +9,14 @@ void disp(array *a) {
 	switch(a->t) {
 	case number: 
 		d = val(a);
-		for(i = 0; i < a->n; i++)
-			print("%s%g",i?" ":"", d[i]);
+		for(i = 0; i < a->n; i++) {
+			print(i?" ":"");
+			if(d[i] == INFINITY)
+				print("∞");
+			else if(d[i] == -INFINITY)
+				print("-∞");
+			else print("%g",d[i]);
+		}
 		break;
 	case string:
 		print("`%s'", (char*)val(a));
