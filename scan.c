@@ -26,9 +26,9 @@ int scan_delims(Biobuf *i);
 int scan_operator(Biobuf *i);
 
 char quotes[] = "`'";
-char delims[] = "(){}[]♦:;";
+char delims[] = "(){}[]♦:;⍝";
 char digits[] = "¯0123456789";
-char operators[] = "\\⍀/⌿¨∘.";
+char operators[] = "\\⍀/⌿¨∘.⍤";
 char special[] = 
 	"~!@#$%^&*_-=+<≤=≥>≠∨^×÷"
 	"⍞⌶⍫⍒⍋⌽⍉⊖⍟⍱⍲⌹?⍵∊⍴↑↓⍳○*←→⊢"
@@ -48,9 +48,12 @@ array* scan(void *v) {
 		if(top-tok>NELEM(tok)) return NULL;
 		Bungetrune(i);
 		
-		if(utfrune("←", r))
+		if(r == 0x2190)
 			top->t = assign;
-		else if(utfrune(digits, r))
+		else if (r == 0x235D) {
+			Brdline(i,'\n');
+			break;
+		}else if(utfrune(digits, r))
 			e = scan_numeral(i);
 		else if(utfrune(quotes, r)) 
 			e = scan_literal(i);
@@ -95,7 +98,6 @@ int scan_numeral(Biobuf *i) {
 		case '5':case '6':case '7':case '8': case '9':
 			digits[j] = r;
 			break;
-		case '\n':case ' ':case '\t':
 		default:
 			if (j>0) {
 				digits[j] = '\0';
@@ -108,10 +110,10 @@ int scan_numeral(Biobuf *i) {
 				push(&d, sizeof d);
 				*shape = ++top->n;
 			}
-			if (!isblank(r)) goto End;
-			j = -1; e = dot = 0;
-			break;
-			goto End;
+			if (r == '\t' || r == ' ') {
+				j = -1; e = dot = 0;
+				break;
+			} else goto End;
 	}
 End: Bungetrune(i);
 	top->r = top->n > 1 ? 1 : 0;
@@ -159,7 +161,7 @@ int scan_operator(Biobuf *i) {
 	Rune r = Bgetrune(i);
 	top->m = alloc(runelen(r));
 	runetochar(top->m, &r); push(&end,1);
-	if(r=='.')
+	if(r=='.' || utfrune("⍤",r))
 		top->t = doperator;
 	else if(utfrune("∘",r)) {
 		if(Bgetc(i) == '.')
@@ -181,8 +183,6 @@ int scan_delims(Biobuf *i) {
 	switch(r) {
 		case '(': top->t = lparen;		break;
 		case ')': top->t = rparen;		break;
-		case '[': top->t = lbracket;	break;
-		case ']': top->t = rbracket;	break;
 		case '{': top->t = lbrace;		break;
 		case '}': top->t = rbrace;		break;
 		case ';': top->t = semicolon;	break;

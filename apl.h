@@ -10,16 +10,15 @@ enum tag {
 	niladic		= 0x00080,
 	lparen		= 0x00100,
 	rparen		= 0x00200,
-	lbracket	= 0x00400,
-	rbracket	= 0x00800,
+	boxed		= 0x00400,
+	assign		= 0x00800,
 	lbrace		= 0x01000,
 	rbrace		= 0x02000,
 	location	= 0x04000,
 	colon		= 0x08000,
 	semicolon	= 0x10000,
 	diamond		= 0x20000,
-	assign		= 0x40000,
-	empty		= 0x80000
+	empty		= 0x40000,
 };
 
 typedef struct {

@@ -4,7 +4,7 @@
 #include "apl.h"
 #include "parse.h"
 
-#define L (lparen|lbracket|assign|empty)
+#define L (lparen|assign|empty)
 #define F (function)
 #define N (symbol|string|location)
 #define V (string|number)
