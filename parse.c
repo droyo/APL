@@ -43,6 +43,7 @@ void top4(stack *s) {
 }
 
 array *parse(array **t) {
+	if (!t) return NULL;
 	stack l = mkstack(t[0],+1); l.top = t[1];
 	stack r = mkstack(t[1],-1);
 	return process(&l, &r, 0);

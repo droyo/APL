@@ -7,6 +7,9 @@ void disp(array *a) {
 	int i;
 	double *d;
 	switch(a->t) {
+	case assign:
+		print("←");
+		break;
 	case number: 
 		d = val(a);
 		for(i = 0; i < a->n; i++) {

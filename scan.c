@@ -33,7 +33,7 @@ char operators[] =	"¨.⍤⍥\\⍀/⌿";
 char dyad_ops[] =	"¨.⍤⍥";
 char special[] = 
 	"~!@#$%^&*_-=+<≤=≥>≠∨^×÷{}"
-	"⍞⌶⍫⍒⍋⌽⍉⊖⍟⍱⍲⌹?⍵∊⍴↑↓⍳○*←→⊢"
+	"⍞⌶⍫⍒⍋⌽⍉⊖⍟⍱⍲⌹?⍵∊⍴↑↓⍳○*→⊢←"
 	"⍷⍐⍗⍸⌷⍇⍈⊣⍺⌈⌊∇∆⎕⍎⍕⌷⊃⊂∩∪⊥⊤|⍂⌻⍪";
 
 array** scan(void *v) {
@@ -47,12 +47,14 @@ array** scan(void *v) {
 	while((r=Bgetrune(i))>0) {
 		if(r == Beof || r == '\n') break;
 		if(isspace(r)) continue;
-		if(top-tok>NELEM(tok)) return NULL;
+		if(top-tok>NELEM(tok)) {
+			print("Full!\n");
+			return NULL;
+		}
 		Bungetrune(i);
+		e = 0;
 		
-		if(r == 0x2190)
-			top->t = assign;
-		else if (r == 0x235D) {
+		if (r == 0x235D) {
 			Brdline(i,'\n');
 			break;
 		}else if(utfrune(digits, r))
@@ -153,7 +155,9 @@ int scan_special(Biobuf *i) {
 	int end = '\0';
 	Rune r = Bgetrune(i);
 	top->r = 0;
-	top->t = function;
+	if(r == 0x2190) {
+		top->t = assign;
+	} else top->t = function;
 	top->m = alloc(runelen(r));
 	runetochar(top->m, &r); push(&end,1);
 	top->n = strlen(top->m);
