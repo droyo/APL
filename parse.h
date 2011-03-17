@@ -24,5 +24,7 @@ static array *pop(stack *);
 static array *top(stack *);
 static array *nth(stack *, int);
 static void push(stack *, array*);
+static void step(stack *);
 static int count(stack *);
 static stack mkstack(array *);
+static int close(array *, array *);

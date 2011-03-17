@@ -23,22 +23,42 @@ rule cases[] = {
 {{0,0,0,0},NULL,0,0}
 };
 
-int parse(array *end) {
-	if(!end) return -1;
-	int i;
+stack *toplevel = NULL;
+void show(stack *s) {
+	array *b,*a = s->bot;
+	for(b=a=s->bot;a->t!=empty;a--);
+	for(;a <= b;a++) {
+		disp(a);
+		if(a == s->top) print("♦");
+	}
+	print("\n");
+}
+
+array *parse(array *end) {
+	if(!end) return NULL;
 	array *e = end;
 	stack s = mkstack(e);
-	for(push(&s,e--); top(&s)->t!=empty;e--) {
+	if(!toplevel) toplevel = &s;
+	for(push(&s,e--); !close(top(&s),end);e--) {
+		show(toplevel);
+		if(end->t == rparen && e->t == empty)
+			return NULL;
+		if(e->t == rparen) { 
+			if(!(e = parse(e)))
+				return NULL;
+			else step(&s);
+		}
 		while(exec(&s));
 		if (top(&s)->t == assign)
 			push(&s, e);
 		else push(&s, eval(e));
 	}
 	while(exec(&s));
-	print("Result(%d): ",count(&s));
-	for(i=0;i<count(&s);i++){print(i?",":"");disp(nth(&s,i));}
-	print("\n");
-	return 1;
+	if (count(&s) > 2) {
+		print("Parsing error\n");
+		return NULL;
+	}
+	return e;
 }
 
 array *eval(array *a) {
@@ -53,7 +73,7 @@ int exec(stack *s) {
 			if(!(a&p)) break;
 		}
 		if(j==4) {
-			print("Rule %d: ", i);
+			print("\t");
 			apply(&cases[i], s);
 			print("\n");
 			break;
@@ -103,7 +123,11 @@ array set(void *env, array **a, int b, int e) {
 	return *(a[e]);
 }
 array punc(void *env, array **a, int b, int e) {
+	print("punc ");
 	return *(a[b+1]);
+}
+static int close(array *b, array *e) {
+	return e->t==rparen ? b->t==lparen : b->t==empty;
 }
 
 static stack mkstack(array *beg) {
@@ -111,17 +135,20 @@ static stack mkstack(array *beg) {
 	s.bot = s.top = beg; return s;
 }
 static array *pop(stack *s) {
-	return (s->top<=s->bot)?&zilde:--s->top;
+	return (s->top>=s->bot)?&zilde:++s->top;
 }
 static array *nth(stack *s, int n) {
-	return (s->top-(n+1)<s->bot)?&zilde:s->top-(n+1);
+	return s->top+n+1>s->bot?&zilde:s->top+n+1;
 }
 static array *top(stack *s) { 
 	return nth(s,0);
 }
 static void push(stack *s, array *a) {
-	*s->top++ = *a;
+	*s->top-- = *a;
+}
+static void step(stack *s) {
+	s->top--;
 }
 static int count(stack *s) {
-	return s->top - s->bot;
+	return s->bot - s->top;
 }

@@ -5,10 +5,11 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "apl.h"
-
+int quit;
 int main(void) {
 	int chan[2];
 	Biobuf *input;
+	quit = 0;
 	
 	if(pipe(chan)) {
 		fprint(2, "Pipe error\n");
@@ -19,7 +20,10 @@ int main(void) {
 	}
 	input = Bfdopen(0, O_RDONLY);
 
-	do{print("\t");}while(parse(scan(input)));
+	while(!quit) {
+		print("\t");
+		parse(scan(input));
+	}
 	print("\nBye\n");
 	Bterm(input);
 	return 0;

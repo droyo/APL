@@ -26,6 +26,7 @@ typedef struct {
 	char *m;
 } array;
 extern array zilde;
+extern int quit;
 
 /* Hash table for var bindings */
 void*  shadow(void *, int);
@@ -39,7 +40,7 @@ void *val(array *);
 
 /* Core interpreter */
 array* scan(void *);
-int parse(array *);
+array* parse(array *);
 void disp(array *);
 
 void *init_env(void);
