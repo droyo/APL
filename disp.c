@@ -25,7 +25,7 @@ void disp(array *a) {
 		print("$(%s)", (char*)val(a));
 		break;
 	case empty:
-		print("§"); 
+		print("⍝"); 
 		break;
 	default:
 		print("%s", (char*)val(a));

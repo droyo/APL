@@ -9,6 +9,7 @@
 #include "apl.h"
 
 static array *top;
+static array *ret[2];
 static array tok[128];
 static struct {
 	char pool[512];
@@ -26,15 +27,15 @@ int scan_delims(Biobuf *i);
 int scan_operator(Biobuf *i);
 
 char quotes[] = "`'";
-char delims[] = "(){}[]♦:;⍝";
+char delims[] = "():";
 char digits[] = "¯0123456789";
 char operators[] = "\\⍀/⌿¨∘.⍤";
 char special[] = 
-	"~!@#$%^&*_-=+<≤=≥>≠∨^×÷"
+	"~!@#$%^&*_-=+<≤=≥>≠∨^×÷{}"
 	"⍞⌶⍫⍒⍋⌽⍉⊖⍟⍱⍲⌹?⍵∊⍴↑↓⍳○*←→⊢"
 	"⍷⍐⍗⍸⌷⍇⍈⊣⍺⌈⌊∇∆⎕⍎⍕⌷⊃⊂∩∪⊥⊤|⍂⌻⍪";
 
-array* scan(void *v) {
+array** scan(void *v) {
 	int e;
 	Rune r;
 	Biobuf *i = v;
@@ -69,7 +70,9 @@ array* scan(void *v) {
 			return NULL;
 		top++;
 	}
-	return top-1;
+	ret[0] = tok;
+	ret[1] = top-1;
+	return ret;
 }
 
 int scan_numeral(Biobuf *i) {
@@ -183,9 +186,6 @@ int scan_delims(Biobuf *i) {
 	switch(r) {
 		case '(': top->t = lparen;		break;
 		case ')': top->t = rparen;		break;
-		case '{': top->t = lbrace;		break;
-		case '}': top->t = rbrace;		break;
-		case ';': top->t = semicolon;	break;
 		case ':': top->t = colon;		break;
 	}
 	return 0;

@@ -6,7 +6,7 @@
 
 #define L (lparen|assign|empty)
 #define F (function)
-#define N (symbol|string|location)
+#define N (symbol|string)
 #define V (string|number)
 #define D (doperator)
 #define M (moperator)
@@ -23,42 +23,54 @@ rule cases[] = {
 {{0,0,0,0},NULL,0,0}
 };
 
-stack *toplevel = NULL;
-void show(stack *s) {
-	array *b,*a = s->bot;
-	for(b=a=s->bot;a->t!=empty;a--);
-	for(;a <= b;a++) {
-		disp(a);
-		if(a == s->top) print("♦");
-	}
-	print("\n");
-}
-
-array *parse(array *end) {
-	if(!end) return NULL;
-	array *e = end;
-	stack s = mkstack(e);
-	if(!toplevel) toplevel = &s;
-	for(push(&s,e--); !close(top(&s),end);e--) {
-		show(toplevel);
-		if(end->t == rparen && e->t == empty)
-			return NULL;
-		if(e->t == rparen) { 
-			if(!(e = parse(e)))
-				return NULL;
-			else step(&s);
+void showdbg(stack *l, stack *r) {
+	array *a;
+	print("[");
+	for(a=l->bot;a <= r->bot;a++) {
+		if(a > l->top && a < r->top) {
+			print(" ");
+			continue;
 		}
-		while(exec(&s));
-		if (top(&s)->t == assign)
-			push(&s, e);
-		else push(&s, eval(e));
-	}
-	while(exec(&s));
-	if (count(&s) > 2) {
+		if(a == r->top) print("♦");
+		disp(a);
+	} print("]\n");
+}
+void top4(stack *s) {
+	int i; for (i=0;i<4;i++) {
+		disp(nth(s,i));
+		print(",");
+	}print("\n");
+}
+array *parse(array **t) {
+	stack l = mkstack(t[0],+1); l.top = t[1];
+	stack r = mkstack(t[1],-1);
+	return process(&l, &r, 0);
+}
+array *process(stack *l, stack *r, int lvl) {
+	stack n;
+	array *a, *e;
+	do {
+		a = pop(l);
+		if(a->t == rparen) {
+			n = mkstack(a,-1); push(&n,a);
+			if(!(e = process(l,&n,lvl+1)))
+				return NULL; 
+			else push(r,e);
+		}else if(a->t == lparen) {
+			if (!lvl) return NULL;
+			push(r,a); break;
+		}else if (top(r)->t == assign)
+			push(r,a);
+		else push(r, eval(a));
+		while(exec(r));
+		showdbg(l,r);
+	} while(a->t != empty);
+	while(exec(r));
+	if (count(r) > 2) {
 		print("Parsing error\n");
 		return NULL;
 	}
-	return e;
+	return nth(r,lvl?0:1);
 }
 
 array *eval(array *a) {
@@ -86,11 +98,11 @@ int apply(rule *r, stack *s) {
 	array x;
 	array *a[4];
 	
-	print("(");
+	print("|");
 	for(i=0;i<4;i++)disp(nth(s,i));
 	for(i = 0; i <= r->e; i++) {
 		a[i] = pop(s);
-	}print(")[%d,%d] ",r->b,r->e);
+	}print("| ",r->b,r->e);
 	x = (*r->f)(NULL, a, r->b, r->e);
 	push(s, &x);
 	for(i=r->b-1;i>=0;i--) push(s,a[i]);
@@ -126,29 +138,30 @@ array punc(void *env, array **a, int b, int e) {
 	print("punc ");
 	return *(a[b+1]);
 }
-static int close(array *b, array *e) {
-	return e->t==rparen ? b->t==lparen : b->t==empty;
-}
 
-static stack mkstack(array *beg) {
-	stack s;
-	s.bot = s.top = beg; return s;
+static stack mkstack(array *beg, char d) {
+	stack s; s.dir = d;
+	s.bot = beg; s.top = beg - d; 
+	return s;
 }
 static array *pop(stack *s) {
-	return (s->top>=s->bot)?&zilde:++s->top;
+	array *a = s->top;
+	if (!count(s)) return &zilde;
+	s->top -= s->dir;
+	return a;
 }
 static array *nth(stack *s, int n) {
-	return s->top+n+1>s->bot?&zilde:s->top+n+1;
+	if (count(s) <= n) return &zilde;
+	return s->top-(s->dir*n);
 }
 static array *top(stack *s) { 
 	return nth(s,0);
 }
 static void push(stack *s, array *a) {
-	*s->top-- = *a;
-}
-static void step(stack *s) {
-	s->top--;
+	*(s->top+=s->dir) = *a;
 }
 static int count(stack *s) {
-	return s->bot - s->top;
+	array *hi = s->dir>0?s->top:s->bot;
+	array *lo = s->dir>0?s->bot:s->top;
+	return hi - lo + 1;
 }

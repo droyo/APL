@@ -1,4 +1,5 @@
 typedef struct {
+	char dir;
 	array *top;
 	array *bot;
 } stack;
@@ -17,6 +18,7 @@ array set(void *env, array**, int,int);
 array punc(void *env, array**, int,int);
 
 array *eval(array *);
+array *process(stack*,stack*,int);
 int exec(stack *);
 int apply(rule *, stack *);
 
@@ -24,7 +26,5 @@ static array *pop(stack *);
 static array *top(stack *);
 static array *nth(stack *, int);
 static void push(stack *, array*);
-static void step(stack *);
 static int count(stack *);
-static stack mkstack(array *);
-static int close(array *, array *);
+static stack mkstack(array *, char dir);
