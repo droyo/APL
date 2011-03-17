@@ -81,7 +81,7 @@ int scan_numeral(Biobuf *i) {
 
 	for(j=0; j<NELEM(digits);j++) switch(r = Bgetrune(i)) {
 		case 0xAF:
-			if (j == 0 || digits[j-1] == 'e')
+			if (j < 2 || digits[j-1] == 'e')
 				digits[j] = '-';
 			break;
 		case '.':
@@ -98,7 +98,10 @@ int scan_numeral(Biobuf *i) {
 		default:
 			if (j>0) {
 				digits[j] = '\0';
-				d = strtod(digits, 0);
+				print("DBG (%s)\n", digits);
+				if(!strcmp(digits, "-")) d = 1.0/0;
+				else if(!strcmp(digits, "--")) d = -1.0/0;
+				else d = strtod(digits, 0);
 				push(&d, sizeof d);
 				*shape = ++top->n;
 			}
