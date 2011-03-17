@@ -70,23 +70,44 @@ array* scan(void *v) {
 
 int scan_numeral(Biobuf *i) {
 	Rune r;
-	int sign, *shape;
+	int *shape, j, e=0, dot=0;
+	char digits[64];
 	double d;
-	
 	top->n = 0;
 	top->t = number;
 	top->r = 1;
 	top->m = mem.top;
 	shape = alloc(sizeof *shape);
 
-	for(r = Bgetrune(i); isblank(r) || utfrune(digits, r); r = Bgetrune(i)) {
-		if(isblank(r)) continue;
-		sign = utfrune("¯", r) ? -1 : Bungetrune(i);
-		Bgetd(i, &d);
-		push(&d, sizeof d);
-		*shape = ++top->n;
+	for(j=0; j<NELEM(digits);j++) switch(r = Bgetrune(i)) {
+		case 0xAF:
+			if (j == 0 || digits[j-1] == 'e')
+				digits[j] = '-';
+			break;
+		case '.':
+			if (!dot) dot = digits[j] = '.';
+			break;
+		case 'e':
+			if (!e) e = digits[j] = 'e';
+			break;
+		case '0':case '1':case '2':case '3':case '4':
+		case '5':case '6':case '7':case '8': case '9':
+			digits[j] = r;
+			break;
+		case '\n':case ' ':case '\t':
+		default:
+			if (j>0) {
+				digits[j] = '\0';
+				d = strtod(digits, 0);
+				push(&d, sizeof d);
+				*shape = ++top->n;
+			}
+			if (!isblank(r)) goto End;
+			j = -1; e = dot = 0;
+			break;
+			goto End;
 	}
-	Bungetrune(i);
+End: Bungetrune(i);
 	top->r = top->n > 1 ? 1 : 0;
 	if(!top->r) {
 		pop(sizeof d + sizeof *shape);
