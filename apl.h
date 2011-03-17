@@ -14,7 +14,7 @@ enum tag {
 	rbracket	= 0x00800,
 	lbrace		= 0x01000,
 	rbrace		= 0x02000,
-	primitive	= 0x04000,
+	location	= 0x04000,
 	colon		= 0x08000,
 	semicolon	= 0x10000,
 	diamond		= 0x20000,
@@ -27,6 +27,7 @@ typedef struct {
 	int r, c, n;
 	char *m;
 } array;
+extern array zilde;
 
 /* Hash table for var bindings */
 void*  shadow(void *, int);
@@ -44,6 +45,4 @@ int parse(array *);
 void disp(array *);
 
 void *init_env(void);
-int init_scan(void);
 void env_free(void);
-void cleanup_scan(void);

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "apl.h"
 
+array zilde = {empty, 0, 0, 0, NULL};
 int type_sizes[] = {
 	sizeof (double),	/* number */
 	sizeof (char),		/* string */

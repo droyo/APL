@@ -5,25 +5,23 @@
 #include "parse.h"
 
 #define L (lparen|lbracket|assign|empty)
-#define F (primitive|function)
-#define N (symbol|string)
+#define F (function)
+#define N (symbol|string|location)
 #define V (string|number)
 #define D (doperator)
 #define M (moperator)
 #define R (~0)
 
 rule cases[] = {
-{{V|M|F|L,	V|F,	D,			V|F},	doper,	1,3},
-{{V|M|F|L,	V,		F,			V},		dyad,	1,3},
-{{V|M|F|L,	V|F,	M,			R},		moper,	1,2},
-{{M|F|L,	F,		V,			R},		monad,	1,2},
-{{D,		V,		F,			V},		monad,  2,3},
-{{N,		assign,	V|M|D|F,	R},		set,	0,2},
-{{lparen,	V|M|D|F,rparen,		R},		punc,	0,2},
+{{V|M|F|L, V|F,     D,       V|F},doper, 1,3},
+{{V|M|F|L, V,       F,       V},  dyad,  1,3},
+{{V|M|F|L, V|F,     M,       R},  moper, 1,2},
+{{M|F|L,   F,       V,       R},  monad, 1,2},
+{{D,       V,       F,       V},  monad, 2,3},
+{{N,       assign,  V|M|D|F, R},  set,   0,2},
+{{lparen,  V|M|D|F, rparen,  R},  punc,  0,2},
 {{0,0,0,0},NULL,0,0}
 };
-
-array empty_array = { empty, 0, 0, 0, NULL };
 
 int parse(array *end) {
 	if(!end) return -1;
@@ -113,10 +111,10 @@ static stack mkstack(array *beg) {
 	s.bot = s.top = beg; return s;
 }
 static array *pop(stack *s) {
-	return (s->top<=s->bot)?&empty_array:--s->top;
+	return (s->top<=s->bot)?&zilde:--s->top;
 }
 static array *nth(stack *s, int n) {
-	return (s->top-(n+1)<s->bot)?&empty_array:s->top-(n+1);
+	return (s->top-(n+1)<s->bot)?&zilde:s->top-(n+1);
 }
 static array *top(stack *s) { 
 	return nth(s,0);
