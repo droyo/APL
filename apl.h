@@ -17,7 +17,6 @@ enum tag {
 	location	= 0x04000,
 	colon		= 0x08000,
 	semicolon	= 0x10000,
-	diamond		= 0x20000,
 	empty		= 0x40000,
 };
 

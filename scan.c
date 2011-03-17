@@ -187,7 +187,6 @@ int scan_delims(Biobuf *i) {
 		case '}': top->t = rbrace;		break;
 		case ';': top->t = semicolon;	break;
 		case ':': top->t = colon;		break;
-		case 0x2666: top->t = diamond;	break;
 	}
 	return 0;
 }
