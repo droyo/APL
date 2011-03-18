@@ -53,6 +53,7 @@ array** scan(void *v) {
 		}
 		Bungetrune(i);
 		e = 0;
+		top->c = 0;
 		
 		if (r == 0x235D) {
 			Brdline(i,'\n');

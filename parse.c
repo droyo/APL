@@ -145,6 +145,7 @@ array set(void *E, array **a, int b, int e) {
 		disp(a[b]);print("\n");
 		return zilde;
 	}
+	s->c++;
 	return *s;
 }
 array punc(void *E, array **a, int b, int e) {

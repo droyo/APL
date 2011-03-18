@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "apl.h"
 
-typedef struct _p{struct _p *nxt;char k[64];array a;}pair;
+typedef struct _p{struct _p *nxt;char k[64];array *a;}pair;
 typedef struct _e{struct _e *up;long sz,n;pair *p;}env;
 static unsigned long hash(char *d); 
 static pair *slot(void *v, char *key, pair **u); 
@@ -31,26 +31,28 @@ static pair *slot(void *v, char *key, pair **u) {
 }
 array *put(void *v, char *k, array *a) {
 	pair *u, *p=slot((env*)v,k,&u);
-	if(u && !p && !(p = u->nxt = malloc(sizeof *p)))
+	if(u && !p && !(p = u->nxt = malloc(sizeof *p))) 
 		goto err_pa;
-	if(!strncmp(p->k,k,sizeof p->k)) free(p->a.m);
-	else memcpy(p->k,k,sizeof p->k);
-	if(!acopy(&p->a,a)) goto err_cp;
-	return &p->a;
-	err_cp: if(u) free(p);
+	if(!strncmp(p->k,k,sizeof p->k)) p->a->c--;
+	if(!(p->a = malloc(sizeof(array)))) goto err_aa;
+	memcpy(p->k,k,sizeof p->k);
+	if(!acopy(p->a,a)) goto err_ca;
+	return p->a;
+	err_ca: free(p->a);
+	err_aa: if(u) free(p);
 	err_pa: return NULL;
 }
 array *get(void *v, char *key) {
 	env *e = v; pair *p;
 	do{ p = slot(e, key, NULL);
 		if (!p && e->up) e = e->up;
-		else if(p) return &p->a;
+		else if(p) return p->a;
 	} while(e->up); return NULL;
 }
 void del(void *v, char *key) {
-	pair *u,*n,*p=slot((env*)v, key,&u); if(!p) return;
-	free(p->a.m); n=p->nxt; 
-	if(u){u->nxt=n;free(p);}else memset(p,0,sizeof *p);
+	pair *u,*p=slot((env*)v, key,&u); if(!p) return;
+	free(p->a->m); free(p->a); *p->k = '\0';
+	if(u){u->nxt=p->nxt;free(p);}else memset(p,0,sizeof *p);
 }
 static unsigned long hash(char *s) {
 	unsigned long c, h = 5381;
