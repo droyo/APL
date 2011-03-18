@@ -10,6 +10,7 @@ void *global_env;
 
 int main(void) {
 	Biobuf *input;
+	array *result;
 	quit = 0;
 	
 	if(!(input = Bfdopen(1, O_RDONLY))) {
@@ -22,7 +23,8 @@ int main(void) {
 	}
 	while(!quit) {
 		print("\t");
-		parse(global_env,scan(input));
+		result = eval(global_env,scan(input));
+		if(result) disp(result);
 	}
 	print("\nBye\n");
 	env_free(global_env);

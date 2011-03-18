@@ -2,7 +2,7 @@
 #include <utf.h>
 #include <fmt.h>
 #include "apl.h"
-#include "parse.h"
+#include "eval.h"
 
 #define L (lparen|assign|empty)
 #define F (function|primitive)
@@ -23,39 +23,20 @@ rule cases[] = {
 {{0,0,0,0},NULL,0,0}
 };
 
-void showdbg(stack *l, stack *r) {
-	array *a;
-	print("[");
-	for(a=l->bot;a <= r->bot;a++) {
-		if(a > l->top && a < r->top) {
-			print(" ");
-			continue;
-		}
-		if(a == r->top) print("♦");
-		disp(a);
-	} print("]\n");
-}
-void top4(stack *s) {
-	int i; for (i=0;i<4;i++) {
-		disp(nth(s,i));
-		print(",");
-	}print("\n");
-}
-
-array *parse(void *E, array **t) {
+array *eval(void *E, array **t) {
 	if (!t) return NULL;
 	stack l = mkstack(t[0],+1); l.top = t[1];
 	stack r = mkstack(t[1],-1);
-	return process(E, &l, &r, 0);
+	return parse(E, &l, &r, 0);
 }
-array *process(void *E, stack *l, stack *r, int lvl) {
+array *parse(void *E, stack *l, stack *r, int lvl) {
 	stack n;
 	array *a, *e;
 	do {
 		a = pop(l);
 		if(a->t == rparen) {
 			n = mkstack(a,-1); push(&n,a);
-			if(!(e = process(E,l,&n,lvl+1)))
+			if(!(e = parse(E,l,&n,lvl+1)))
 				return NULL; 
 			else push(r,e);
 		}else if(a->t == lparen) {
@@ -63,8 +44,8 @@ array *process(void *E, stack *l, stack *r, int lvl) {
 			push(r,a); break;
 		}else if (top(r)->t == assign)
 			push(r,a);
-		else push(r, eval(E,a));
-		showdbg(l,r);while(exec(E, r));
+		else push(r, lookup(E,a));
+		while(exec(E, r));
 	} while(a->t != empty);
 	while(exec(E, r));
 	if (count(r) > 2) {
@@ -74,7 +55,7 @@ array *process(void *E, stack *l, stack *r, int lvl) {
 	return nth(r,lvl?0:1);
 }
 
-array *eval(void *E,array *a) {
+array *lookup(void *E,array *a) {
 	array *r;
 	switch(a->t) {
 	case symbol: 

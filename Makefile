@@ -1,8 +1,8 @@
 CC := gcc
 LD := gcc
 BIN := apl
-SRC := main.c parse.c scan.c array.c disp.c env.c
-INC := apl.h parse.h
+SRC := main.c eval.c scan.c array.c disp.c env.c
+INC := apl.h eval.h
 OBJ := $(SRC:.c=.o)
 
 CFLAGS = -Wall -I/usr/local/include -g
@@ -17,7 +17,7 @@ $(BIN): $(OBJ)
 	$(CC) $(CFLAGS) -c $<
 
 $(OBJ) : apl.h
-parse.o : parse.h
+eval.o : eval.h
 
 clean:
 	rm -f $(OBJ) $(BIN)

@@ -17,8 +17,8 @@ array doper(void *env, array**, int,int);
 array set(void *env, array**, int,int);
 array punc(void *env, array**, int,int);
 
-array *eval(void*,array *);
-array *process(void*,stack*,stack*,int);
+array *lookup(void*,array *);
+array *parse(void*,stack*,stack*,int);
 int exec(void*,stack *);
 int apply(void*,rule *, stack *);
 

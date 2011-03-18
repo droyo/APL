@@ -39,7 +39,7 @@ void *aval(array *);
 
 /* Core interpreter */
 array** scan(void *);
-array* parse(void*,array **);
+array* eval(void*,array **);
 void disp(array *);
 
 void *init_env(void);
