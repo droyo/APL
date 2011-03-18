@@ -10,6 +10,11 @@ typedef struct {
 	long b, e;
 } rule;
 
+struct {
+	array *ref[4096];
+	array **top, **new;
+} tmp;
+
 array monad(void *env, array**, int,int);
 array dyad(void *env, array**, int,int);
 array moper(void *env, array**, int,int);

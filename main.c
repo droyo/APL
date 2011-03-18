@@ -17,14 +17,18 @@ int main(void) {
 		fprint(2, "Cannot open input file\n");
 		exit(1);
 	}
-	if(!(global_env = init_env())) {
+	if(!(global_env = env_init())) {
 		fprint(2, "Cannot init environment\n");
 		exit(1);
 	}
+	eval_init();
 	while(!quit) {
 		print("\t");
 		result = eval(global_env,scan(input));
-		if(result) disp(result);
+		if(result) {
+			disp(result);
+			print("\n");
+		}
 	}
 	print("\nBye\n");
 	env_free(global_env);

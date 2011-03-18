@@ -20,9 +20,12 @@ rule cases[] = {
 {{D,       V,       F,       V},  monad, 2,3},
 {{N,       assign,  V|M|D|F, R},  set,   0,2},
 {{lparen,  V|M|D|F, rparen,  R},  punc,  0,2},
-{{0,0,0,0},NULL,0,0}
+{{0,       0,       0,       0},  NULL,  0,0}
 };
 
+void eval_init(void) {
+	tmp.top = tmp.new = tmp.ref;
+}
 array *eval(void *E, array **t) {
 	if (!t) return NULL;
 	stack l = mkstack(t[0],+1); l.top = t[1];

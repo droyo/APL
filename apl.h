@@ -8,9 +8,9 @@ enum tag {
 	doperator	= 0x0020,
 	moperator	= 0x0040,
 	niladic		= 0x0080,
-	lparen		= 0x0100,
-	rparen		= 0x0200,
-	boxed		= 0x0400,
+	boxed		= 0x0100,
+	lparen		= 0x0200,
+	rparen		= 0x0400,
 	assign		= 0x0800,
 	colon		= 0x1000,
 	primitive	= 0x2000,
@@ -36,11 +36,13 @@ void   del(void *, char*);
 int acopy(array *, array *);
 array *aclone(array*);
 void *aval(array *);
+void afree(array *);
 
 /* Core interpreter */
 array** scan(void *);
 array* eval(void*,array **);
 void disp(array *);
 
-void *init_env(void);
+void eval_init(void);
+void *env_init(void);
 void env_free(void*);

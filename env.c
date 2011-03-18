@@ -19,7 +19,7 @@ void *shadow(void *up, int hint) {
 	err_dat: free(e);
 	err_env: return NULL;
 }
-void *init_env(void) { return shadow(NULL, 0); }
+void *env_init(void) { return shadow(NULL, 0); }
 void env_free(void *p) { env *e=p; free(e->p); free(e); }
 static pair *slot(void *v, char *key, pair **u) {
 	int a; pair *p; env *e=v; if(u) *u=NULL;
