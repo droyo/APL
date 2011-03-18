@@ -157,7 +157,7 @@ int scan_special(Biobuf *i) {
 	top->r = 0;
 	if(r == 0x2190) {
 		top->t = assign;
-	} else top->t = function;
+	} else top->t = primitive;
 	top->m = alloc(runelen(r));
 	runetochar(top->m, &r); push(&end,1);
 	top->n = strlen(top->m);

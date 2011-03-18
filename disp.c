@@ -11,7 +11,7 @@ void disp(array *a) {
 		print("←");
 		break;
 	case number: 
-		d = val(a);
+		d = aval(a);
 		for(i = 0; i < a->n; i++) {
 			print(i?" ":"");
 			if(d[i] == INFINITY)
@@ -22,16 +22,16 @@ void disp(array *a) {
 		}
 		break;
 	case string:
-		print("`%s'", (char*)val(a));
+		print("`%s'", (char*)aval(a));
 		break;
 	case subcmd:
-		print("$(%s)", (char*)val(a));
+		print("$(%s)", (char*)aval(a));
 		break;
 	case empty:
 		print("⍝"); 
 		break;
 	default:
-		print("%s", (char*)val(a));
+		print("%s", (char*)aval(a));
 	}
 }
 

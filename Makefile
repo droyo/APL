@@ -1,7 +1,7 @@
 CC := gcc
 LD := gcc
 BIN := apl
-SRC := main.c parse.c scan.c array.c disp.c 
+SRC := main.c parse.c scan.c array.c disp.c env.c
 INC := apl.h parse.h
 OBJ := $(SRC:.c=.o)
 

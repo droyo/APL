@@ -5,7 +5,7 @@
 #include "parse.h"
 
 #define L (lparen|assign|empty)
-#define F (function)
+#define F (function|primitive)
 #define N (symbol|string)
 #define V (string|number)
 #define D (doperator)
@@ -42,20 +42,20 @@ void top4(stack *s) {
 	}print("\n");
 }
 
-array *parse(array **t) {
+array *parse(void *E, array **t) {
 	if (!t) return NULL;
 	stack l = mkstack(t[0],+1); l.top = t[1];
 	stack r = mkstack(t[1],-1);
-	return process(&l, &r, 0);
+	return process(E, &l, &r, 0);
 }
-array *process(stack *l, stack *r, int lvl) {
+array *process(void *E, stack *l, stack *r, int lvl) {
 	stack n;
 	array *a, *e;
 	do {
 		a = pop(l);
 		if(a->t == rparen) {
 			n = mkstack(a,-1); push(&n,a);
-			if(!(e = process(l,&n,lvl+1)))
+			if(!(e = process(E,l,&n,lvl+1)))
 				return NULL; 
 			else push(r,e);
 		}else if(a->t == lparen) {
@@ -63,10 +63,10 @@ array *process(stack *l, stack *r, int lvl) {
 			push(r,a); break;
 		}else if (top(r)->t == assign)
 			push(r,a);
-		else push(r, eval(a));
-		showdbg(l,r);while(exec(r));
+		else push(r, eval(E,a));
+		showdbg(l,r);while(exec(E, r));
 	} while(a->t != empty);
-	while(exec(r));
+	while(exec(E, r));
 	if (count(r) > 2) {
 		print("Parsing error\n");
 		return NULL;
@@ -74,10 +74,15 @@ array *process(stack *l, stack *r, int lvl) {
 	return nth(r,lvl?0:1);
 }
 
-array *eval(array *a) {
-	return a;
+array *eval(void *E,array *a) {
+	array *r;
+	switch(a->t) {
+	case symbol: 
+		return (r=get(E,aval(a)))?r:&zilde;
+	default: return a;
+	}
 }
-int exec(stack *s) {
+int exec(void *E, stack *s) {
 	int i, j, a, p;
 	for(i = 0; i < NELEM(cases); i++) {
 		for(j=0;j<NELEM(cases[0].c);j++) {
@@ -87,14 +92,14 @@ int exec(stack *s) {
 		}
 		if(j==4) {
 			print("\t");
-			apply(&cases[i], s);
+			apply(E, &cases[i], s);
 			print("\n");
 			break;
 		}
 	}
 	return j == 4;
 }
-int apply(rule *r, stack *s) {
+int apply(void *E, rule *r, stack *s) {
 	int i;
 	array x;
 	array *a[4];
@@ -104,38 +109,45 @@ int apply(rule *r, stack *s) {
 	for(i = 0; i <= r->e; i++) {
 		a[i] = pop(s);
 	}print("| ",r->b,r->e);
-	x = (*r->f)(NULL, a, r->b, r->e);
+	x = (*r->f)(E, a, r->b, r->e);
 	push(s, &x);
 	for(i=r->b-1;i>=0;i--) push(s,a[i]);
 	return 0;
 }
-array monad(void *env, array **a, int b, int e) {
+array monad(void *E, array **a, int b, int e) {
 	print("monad "); 
 	disp(a[b]);print(" ");disp(a[e]);
 	return *(a[e]);
 }
-array dyad(void *env, array **a, int b, int e)  {
+array dyad(void *E, array **a, int b, int e)  {
 	print("dyad ");
 	disp(a[b+1]);print(" ");
 	disp(a[b]);print(",");disp(a[e]);
 	return *(a[e]);
 }
-array moper(void *env, array **a, int b, int e) {
+array moper(void *E, array **a, int b, int e) {
 	print("monad oper (");
 	disp(a[b]);disp(a[e]);print(")");
 	return *(a[b]);
 }
-array doper(void *env, array **a, int b, int e) {
+array doper(void *E, array **a, int b, int e) {
 	print("dyad oper (");
 	disp(a[b]);disp(a[b+1]);disp(a[e]);print(")");
 	return *(a[e]);
 }
-array set(void *env, array **a, int b, int e) {
+array set(void *E, array **a, int b, int e) {
 	print("set "); disp(a[b]); 
-	print (" := "); disp(a[e]);
-	return *(a[e]);
+	print(" := "); disp(a[e]);
+	array *s = put(E, aval(a[b]), a[e]);
+	if(!s) {
+		fprint(2,"Could not store ");
+		disp(a[e]);print(" in ");
+		disp(a[b]);print("\n");
+		return zilde;
+	}
+	return *s;
 }
-array punc(void *env, array **a, int b, int e) {
+array punc(void *E, array **a, int b, int e) {
 	print("punc ");
 	return *(a[b+1]);
 }

@@ -17,10 +17,10 @@ array doper(void *env, array**, int,int);
 array set(void *env, array**, int,int);
 array punc(void *env, array**, int,int);
 
-array *eval(array *);
-array *process(stack*,stack*,int);
-int exec(stack *);
-int apply(rule *, stack *);
+array *eval(void*,array *);
+array *process(void*,stack*,stack*,int);
+int exec(void*,stack *);
+int apply(void*,rule *, stack *);
 
 static array *pop(stack *);
 static array *top(stack *);

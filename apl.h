@@ -13,7 +13,8 @@ enum tag {
 	boxed		= 0x0400,
 	assign		= 0x0800,
 	colon		= 0x1000,
-	empty		= 0x2000,
+	primitive	= 0x2000,
+	empty		= 0x4000,
 };
 
 typedef struct {
@@ -23,22 +24,23 @@ typedef struct {
 } array;
 extern array zilde;
 extern int quit;
+extern void *global_env;
 
 /* Hash table for var bindings */
 void*  shadow(void *, int);
-array* put(void *, char*);
+array* put(void *, char*, array*);
 array* get(void *, char*);
 void   del(void *, char*);
 
 /* Array operations */
-int copy(array *, array *);
-array *clone(array*);
-void *val(array *);
+int acopy(array *, array *);
+array *aclone(array*);
+void *aval(array *);
 
 /* Core interpreter */
 array** scan(void *);
-array* parse(array **);
+array* parse(void*,array **);
 void disp(array *);
 
 void *init_env(void);
-void env_free(void);
+void env_free(void*);
