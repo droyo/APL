@@ -21,7 +21,6 @@ int main(void) {
 		fprint(2, "Cannot init environment\n");
 		exit(1);
 	}
-	eval_init();
 	while(!quit) {
 		print("\t");
 		result = eval(global_env,scan(input));

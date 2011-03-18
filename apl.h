@@ -43,6 +43,5 @@ array** scan(void *);
 array* eval(void*,array **);
 void disp(array *);
 
-void eval_init(void);
 void *env_init(void);
 void env_free(void*);

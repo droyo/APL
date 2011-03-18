@@ -18,14 +18,11 @@ rule cases[] = {
 {{V|M|F|L, V|F,     M,       R},  moper, 1,2},
 {{M|F|L,   F,       V,       R},  monad, 1,2},
 {{D,       V,       F,       V},  monad, 2,3},
-{{N,       assign,  V|M|D|F, R},  set,   0,2},
+{{N,       assign,  V|M|D|F, R},  bind,  0,2},
 {{lparen,  V|M|D|F, rparen,  R},  punc,  0,2},
 {{0,       0,       0,       0},  NULL,  0,0}
 };
 
-void eval_init(void) {
-	tmp.top = tmp.new = tmp.ref;
-}
 array *eval(void *E, array **t) {
 	if (!t) return NULL;
 	stack l = mkstack(t[0],+1); l.top = t[1];
@@ -119,8 +116,8 @@ array doper(void *E, array **a, int b, int e) {
 	disp(a[b]);disp(a[b+1]);disp(a[e]);print(")");
 	return *(a[e]);
 }
-array set(void *E, array **a, int b, int e) {
-	print("set "); disp(a[b]); 
+array bind(void *E, array **a, int b, int e) {
+	print("bind "); disp(a[b]); 
 	print(" := "); disp(a[e]);
 	array *s = put(E, aval(a[b]), a[e]);
 	if(!s) {
@@ -136,7 +133,6 @@ array punc(void *E, array **a, int b, int e) {
 	print("punc ");
 	return *(a[b+1]);
 }
-
 static stack mkstack(array *beg, char d) {
 	stack s; s.dir = d;
 	s.bot = beg; s.top = beg - d; 
