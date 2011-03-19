@@ -17,8 +17,13 @@ enum tag {
 	empty		= 0x4000,
 };
 
+enum flag {
+	tmpmem		= 0x01,
+};
+
 typedef struct {
 	enum tag t;
+	enum flag f;
 	int r, c, n;
 	char *m;
 } array;

@@ -34,9 +34,11 @@ array *put(void *v, char *k, array *a) {
 	if(u && !p && !(p = u->nxt = malloc(sizeof *p))) 
 		goto err_pa;
 	if(!strncmp(p->k,k,sizeof p->k)) p->a->c--;
+	else{strncpy(p->k,k,sizeof p->k-1); a->c++;}
+	if(!(a->f&tmpmem)){p->a = a; return a;}
 	if(!(p->a = malloc(sizeof(array)))) goto err_aa;
-	memcpy(p->k,k,sizeof p->k);
 	if(!acopy(p->a,a)) goto err_ca;
+	p->a->f &= ~tmpmem;
 	return p->a;
 	err_ca: free(p->a);
 	err_aa: if(u) free(p);

@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "apl.h"
 
-array zilde = {empty, 0, 0, 0, NULL};
+array zilde = {empty, 0, 0, 0, 0, NULL};
 /* Make sure if you modify the tag order
  * in apl.h that you also modify this table
  * accordingly */
