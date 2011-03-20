@@ -13,6 +13,14 @@ int main(void) {
 	array *result;
 	quit = 0;
 	
+	if(mem_init()) {
+		fprint(2, "Cannot init memory manager.\n");
+		exit(1);
+	}
+	if(const_init()) {
+		fprint(2, "Cannot init constants\n");
+		exit(1);
+	}
 	if(!(input = Bfdopen(1, O_RDONLY))) {
 		fprint(2, "Cannot open input file\n");
 		exit(1);
@@ -25,12 +33,14 @@ int main(void) {
 		print("\t");
 		result = eval(global_env,scan(input));
 		if(result) {
-			disp(result);
-			print("\n");
+			disp(result); print("\n");
+			mem_coll();
 		}
 	}
 	print("\nBye\n");
-	env_free(global_env);
 	Bterm(input);
+	env_free(global_env);
+	const_free();
+	mem_free();
 	return 0;
 }

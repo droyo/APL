@@ -4,171 +4,142 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <math.h>
 #include "apl.h"
 
-static array *top;
-static array *ret[2];
-static array tok[128];
+static array *tok[128];
+static array **ret[2];
+
 static struct {
-	char pool[512];
+	char bot[1024];
 	char *top;
-} mem;
+} pool;
+static void *mem(long n);
+static array *parray(enum tag, unsigned, unsigned);
 static void *push(void *p, long n);
-static void *alloc(long n);
 static void *pop(long n);
+static void reset_mem(void);
 
-int scan_numeral(Biobuf *i);
-int scan_literal(Biobuf *i);
-int scan_special(Biobuf *i);
-int scan_symbol(Biobuf *i);
-int scan_delims(Biobuf *i);
-int scan_operator(Biobuf *i);
+static array* scan_numeral(Biobuf *i);
+static array* scan_literal(Biobuf *i);
+static array* scan_special(Biobuf *i);
+static array* scan_symbol(Biobuf *i);
+static array* scan_delims(Biobuf *i);
+static array* scan_operator(Biobuf *i);
 
-char quotes[] = "`'";
+enum special_characters {
+	squote = '\'',
+	macron = 0xAF,
+	lamp = 0x235D
+};
 char delims[] = "():";
-char digits[] = "¯0123456789";
-char operators[] =	"¨.⍤⍥\\⍀/⌿";
-char dyad_ops[] =	"¨.⍤⍥";
+char ops[] = "¨.⍤⍥\\⍀/⌿";
+char dop[] = "¨.⍤⍥";
 char special[] = 
 	"~!@#$%^&*_-=+<≤=≥>≠∨^×÷{}"
-	"⍞⌶⍫⍒⍋⌽⍉⊖⍟⍱⍲⌹?⍵∊⍴↑↓⍳○*→⊢←"
+	"⍞⌶⍫⍒⍋⌽⍉⊖⍟⍱⍲⌹?⍵∊⍴↑↓⍳○*→⊢←⊣"
 	"⍷⍐⍗⍸⌷⍇⍈⊣⍺⌈⌊∇∆⎕⍎⍕⌷⊃⊂∩∪⊥⊤|⍂⌻⍪";
 
-array** scan(void *v) {
-	int e;
+array*** scan(void *v) {
 	Rune r;
+	int top = 0;
 	Biobuf *i = v;
-	top = tok;
-	top++->t = empty;
-	mem.top = mem.pool;
-		
+	tok[top++] = marker;
+	reset_mem();
+
 	while((r=Bgetrune(i))>0) {
 		if(r == Beof || r == '\n') break;
 		if(isspace(r)) continue;
-		if(top-tok>NELEM(tok)) {
-			print("Full!\n");
-			return NULL;
-		}
+		if(top>NELEM(tok)) return NULL;
 		Bungetrune(i);
-		e = 0;
-		top->c = 0;
-		top->f = tmpmem;
 		
-		if (r == 0x235D) {
+		if (r == lamp) {
 			Brdline(i,'\n');
 			break;
-		}else if(utfrune(digits, r))
-			e = scan_numeral(i);
-		else if(utfrune(quotes, r)) 
-			e = scan_literal(i);
+		}else if(isdigit(r)||r==macron)
+			tok[top] = scan_numeral(i);
+		else if(r == squote)
+			tok[top] = scan_literal(i);
 		else if(utfrune(delims, r)) 
-			e = scan_delims(i);
+			tok[top] = scan_delims(i);
 		else if(utfrune(special, r)) 
-			e = scan_special(i);
-		else if(utfrune(operators, r))
-			e = scan_operator(i);
+			tok[top] = scan_special(i);
+		else if(utfrune(ops, r))
+			tok[top] = scan_operator(i);
 		else 
-			e = scan_symbol(i);
-		if (e < 0) 
+			tok[top] = scan_symbol(i);
+		if (!tok[top]) 
 			return NULL;
 		top++;
 	}
 	ret[0] = tok;
-	ret[1] = top-1;
+	ret[1] = tok+top-1;
 	return ret;
 }
 
-int scan_numeral(Biobuf *i) {
-	Rune r;
-	int *shape, j, e=0, dot=0;
-	char digits[64];
-	double d;
-	top->n = 0;
-	top->t = number;
-	top->r = 1;
-	top->m = mem.top;
-	shape = alloc(sizeof *shape);
+static array* scan_numeral(Biobuf *i) {
+	Rune r; double d; char n[64];
+	array *a = parray(number, 1, 0);
+	int j, e=0, dot=0;
 
-	for(j=0; j<NELEM(digits);j++) switch(r = Bgetrune(i)) {
-		case 0xAF:
-			if (j < 2 || digits[j-1] == 'e')
-				digits[j] = '-';
+	for(j=0;j<NELEM(n);j++)switch(r=Bgetrune(i)) {
+	case macron: if (j<2 || n[j-1]=='e') n[j]='-'; break;
+	case '.': if (!dot) dot = n[j] = '.'; break;
+	case 'e': if (!e) e = n[j] = 'e'; break;
+	case '0':case '1':case '2':case '3':case '4':
+	case '5':case '6':case '7':case '8':case '9':
+		n[j] = r; break;
+	default:
+		if (j>0) {
+			n[j] = '\0';
+			if(!strcmp(n, "-")) d = INFINITY; else
+			if(!strcmp(n,"--")) d =-INFINITY;
+			else d = strtod(n, 0);
+			push(&d, sizeof d);
+			*ashp(a) = ++a->n;
+		}
+		if (r == '\t' || r == ' ') {
+			j = -1; e = dot = 0;
 			break;
-		case '.':
-			if (!dot) dot = digits[j] = '.';
-			break;
-		case 'e':
-			if (!e) e = digits[j] = 'e';
-			break;
-		case '0':case '1':case '2':case '3':case '4':
-		case '5':case '6':case '7':case '8': case '9':
-			digits[j] = r;
-			break;
-		default:
-			if (j>0) {
-				digits[j] = '\0';
-				if(!strcmp(digits, "-")) 
-					d = INFINITY;
-				else if(!strcmp(digits, "--"))
-					d = -INFINITY;
-				else 
-					d = strtod(digits, 0);
-				push(&d, sizeof d);
-				*shape = ++top->n;
-			}
-			if (r == '\t' || r == ' ') {
-				j = -1; e = dot = 0;
-				break;
-			} else goto End;
+		} else goto End;
 	}
-End: Bungetrune(i);
-	top->r = top->n > 1 ? 1 : 0;
-	if(!top->r) {
-		pop(sizeof d + sizeof *shape);
+	End: Bungetrune(i);
+	a->r = a->n > 1 ? 1 : 0;
+	if(!a->r) {
+		pop(sizeof d + sizeof(int));
 		push(&d, sizeof d);
 	}
-	return 0;
+	return a;
 }
 
-int scan_literal(Biobuf *i) {
-	int end = '\0';
+static array* scan_literal(Biobuf *i) {
 	char q, c;
-	int *shape;
+	array *a = parray(string, 1, 0);
 
 	q = Bgetc(i);
-	top->t = (q == '`') ? subcmd : string;
-	top->m = mem.top;
-	top->r = 1;
-	shape = alloc(sizeof *shape);
 	for(c=Bgetc(i);c!=q||(c=Bgetc(i))==q; c=Bgetc(i)) {
-		if(c == '\n') return -1;
+		if(c == '\n') return NULL;
 		push(&c,1);
 	}
-	Bungetc(i); push(&end,1);
-	top->n = strlen((char*)top->m+sizeof *shape);
-	*shape = utflen((char*)top->m+sizeof *shape);
+	Bungetc(i); push(&zero,1);
+	a->n = strlen(aval(a))+1;
+	*ashp(a) = utflen(aval(a));
 
-	return 0;
+	return a;
 }
 
-int scan_special(Biobuf *i) {
-	int end = '\0';
+static array* scan_special(Biobuf *i) {
 	Rune r = Bgetrune(i);
-	top->r = 0;
-	if(r == 0x2190) {
-		top->t = assign;
-	} else top->t = primitive;
-	top->m = alloc(runelen(r));
-	runetochar(top->m, &r); push(&end,1);
-	top->n = strlen(top->m);
-	return 0;
+	array *a = parray(primitive, 0, 0);
+	if(r == 0x2190) a->t = assign;
+	a->n=runetochar(mem(runelen(r)),&r)+1;
+	push(&zero,1);
+	return a;
 }
 
-int scan_operator(Biobuf *i) {
-	int end = '\0',c;
-	Rune r = Bgetrune(i);
+static array* scan_operator(Biobuf *i) {
+	array *a;
+	int c; Rune r = Bgetrune(i);
 	/* Make sure it's '.' the operator, and
 	   not the start of a decimal number */
 	if (r == '.') {
@@ -179,70 +150,64 @@ int scan_operator(Biobuf *i) {
 			return scan_numeral(i);
 		} else Bungetc(i);
 	}
-	top->t = utfrune(dyad_ops,r)?doperator:moperator;
-	top->m = alloc(runelen(r));
-	top->n = runetochar(top->m, &r);
-	push(&end,1);
-	return 0;
+	a=parray(utfrune(dop,r)?dydop:monop,0,0);
+	a->n = runetochar(mem(runelen(r)), &r)+1;
+	push(&zero,1);
+	return a;
 }
 
-int scan_delims(Biobuf *i) {
-	int end = '\0';
+static array* scan_delims(Biobuf *i) {
 	Rune r = Bgetrune(i);
-	top->r = 0;
-	top->m = alloc(runelen(r));
-	runetochar(top->m, &r); push(&end, 1);
-	top->n = strlen(top->m);
+	array *a = parray(empty,0,0);
+	a->n=runetochar(mem(runelen(r)),&r)+1;
+	push(&zero, 1);
 	switch(r) {
-		case '(': top->t = lparen;		break;
-		case ')': top->t = rparen;		break;
-		case ':': top->t = colon;		break;
+		case '(': a->t = lparen;	break;
+		case ')': a->t = rparen;	break;
+		case ':': a->t = colon;		break;
 	}
-	return 0;
+	return a;
 }
 
-int scan_symbol(Biobuf *i) {
+static array* scan_symbol(Biobuf *i) {
 	Rune r;
-	char *s;
-	int end = '\0';
-	top->n = 0;
-	top->r = 0;
-	top->t = symbol;
-	top->m = mem.top;
+	array *a = parray(symbol,0,0);
 	
 	while((r = Bgetrune(i))>0) {
 		if (isspace(r)) break;
-		if (r!='.'&&utfrune(operators, r)) break;
-		if (utfrune(quotes, r)) break;
+		if (r!='.'&&utfrune(ops, r)) break;
+		if (r == squote) break;
 		if (utfrune(delims, r)) break;
 		if (utfrune(special, r)) break;
-		
-		s = alloc(runelen(r));
-		runetochar(s, &r);
+		a->n+=runetochar(mem(runelen(r)), &r);
 	}
-	push(&end, 1);
+	push(&zero, 1); a->n++;
 	Bungetrune(i);
-	return 0;
+	return a;
 }
 
+static array *parray(enum tag t, unsigned r, unsigned n){
+	array *a = atmp(mem(ASIZE),t,r,n);
+	while(r--) push(&zero, sizeof (int));
+	return a;
+}
 static void *push(void *p, long n) {
 	void *v;
-	if ((mem.top + n) > mem.pool + NELEM(mem.pool))
+	if ((pool.top + n) > pool.bot + NELEM(pool.bot))
 		return NULL;
-	v = memcpy(mem.top, p, n);
-	mem.top += n;
+	v = memcpy(pool.top, p, n);
+	pool.top += n;
 	return v;
 }
-
-static void *alloc(long n) {
-	void *v = mem.top;
-	if ((mem.top + n) > mem.pool + NELEM(mem.pool))
+static void *mem(long n) {
+	void *v = pool.top;
+	if ((pool.top + n) > pool.bot + NELEM(pool.bot))
 		return NULL;
-	mem.top += n;
+	pool.top += n;
 	return v;
 }
-
 static void *pop(long n) {
-	if (mem.top - n < mem.pool) return NULL;
-	else return mem.top -= n;
+	if (pool.top - n < pool.bot) return NULL;
+	return pool.top -= n;
 }
+static void reset_mem(void) { pool.top = pool.bot; }
