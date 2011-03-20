@@ -1,43 +1,58 @@
+#include <utf.h>
+#include <fmt.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include "apl.h"
 
-array zilde = {empty, 0, 0, 0, 0, NULL};
+static int msize(array *a); 
+static int tsize(enum tag);
+
 /* Make sure if you modify the tag order
  * in apl.h that you also modify this table
  * accordingly */
-int type_sizes[] = {
-	sizeof (double),	/* number    */
-	sizeof (char),		/* string    */
-	sizeof (char),		/* symbol    */
-	sizeof (array),		/* function  */
-	sizeof (array),		/* subcmd    */
-	sizeof (array),		/* doperator */
-	sizeof (array),		/* moperator */
-	sizeof (array),		/* niladic   */
-	sizeof (array),		/* boxed     */
+static int type_sizes[] = {
+	sizeof (double), /* number    */
+	sizeof (char),   /* string    */
+	sizeof (char),   /* symbol    */
+	sizeof (void*),  /* function  */
+	sizeof (void*),  /* primitive */
+	sizeof (void*),  /* doperator */
+	sizeof (void*),  /* moperator */
+	sizeof (void*),  /* niladic   */
+	ASIZE,           /* boxed     */
 };
-static int asize(array *a) {
-	unsigned long s,t;
-	/* Does this depend on endianness? */
-	for(s=0,t=a->t;t>>=1;s++);
-	return a->n*(s>NELEM(type_sizes)?0:type_sizes[s]);
+static int msize(array *a) { 
+	return sizeof(int)*a->r + a->n*tsize(a->t); 
 }
-int acopy(array *dst, array *src) {
-	long s = sizeof(int)*src->r + asize(src);
-	memcpy(dst, src, sizeof *dst);
-	if(!(dst->m = malloc(s))) return 0;
-	return !!memcpy(dst->m,src->m,s);
+static int tsize(enum tag t) {
+	unsigned long s; for(s=0;t>>=1;s++); 
+	return (s>NELEM(type_sizes)?0:type_sizes[s]);
+}
+long asize(array *a) {
+	return ASIZE + msize(a);
+}
+array *atmp(void *p,enum tag t, unsigned r, unsigned n) {
+	array *a = p;
+	a->gc=-1; a->t = t; a->f=tmpmem; 
+	a->r = r; a->n = n; a->c = 0;
+	return a;
+}
+array *anew(enum tag t, enum flag f, unsigned r, unsigned n) {
+	array *a;
+	if(!(a=malloc(ASIZE+sizeof(int)*r+tsize(t)*n)))
+		return NULL;
+	a->t=t;a->f=f&~tmpmem;a->r=r;a->n=n;
+	record(a); return a;
 }
 array *aclone(array *a) {
-	array *r;
-	if(!(r = malloc(sizeof *r))) return NULL;
-	if(!acopy(r,a)) { free(r); return NULL; }
-	return a;
+	array *c = anew(a->t, a->f, a->r, a->n);
+	if(!c) return NULL; else memcpy(c->m, a->m, msize(a));
+	return c;
+}
+int *ashp(array *a) {
+	return (int*)a->m;
 }
 void *aval(array *a) {
 	return a->m + (sizeof (int) * a->r);
-}
-void afree(array *a) {
-	free(a->m); free(a);
 }

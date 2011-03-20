@@ -1,7 +1,10 @@
 CC := gcc
 LD := gcc
 BIN := apl
-SRC := main.c eval.c scan.c array.c disp.c env.c
+SRC := \
+	main.c eval.c scan.c \
+	array.c disp.c env.c \
+	memory.c const.c
 INC := apl.h eval.h
 OBJ := $(SRC:.c=.o)
 

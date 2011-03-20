@@ -24,14 +24,9 @@ void disp(array *a) {
 	case string:
 		print("`%s'", (char*)aval(a));
 		break;
-	case subcmd:
-		print("$(%s)", (char*)aval(a));
-		break;
-	case empty:
-		print("⍝"); 
-		break;
-	default:
-		print("%s", (char*)aval(a));
+	case empty: print("⍝"); break;
+	case null: print("∘"); break;
+	default: print("%s", (char*)aval(a));
 	}
 }
 

@@ -31,17 +31,14 @@ static pair *slot(void *v, char *key, pair **u) {
 }
 array *put(void *v, char *k, array *a) {
 	pair *u, *p=slot((env*)v,k,&u);
-	if(u && !p && !(p = u->nxt = malloc(sizeof *p))) 
-		goto err_pa;
-	if(!strncmp(p->k,k,sizeof p->k)) p->a->c--;
-	else{strncpy(p->k,k,sizeof p->k-1); a->c++;}
-	if(!(a->f&tmpmem)){p->a = a; return a;}
-	if(!(p->a = malloc(sizeof(array)))) goto err_aa;
-	if(!acopy(p->a,a)) goto err_ca;
-	p->a->f &= ~tmpmem;
-	return p->a;
-	err_ca: free(p->a);
-	err_aa: if(u) free(p);
+	if(u&&!p&&!(p=u->nxt=malloc(sizeof *p))) goto err_pa;
+	if(!strncmp(p->k,k,sizeof p->k)){
+		if(p->a==a) return a; else decref(p->a);
+	} else strncpy(p->k,k,sizeof p->k-1);
+	if((a->f&tmpmem) && !(a=aclone(a))) goto err_ca;
+	else incref(a);
+	return p->a = a;
+	err_ca: if(u) free(p);
 	err_pa: return NULL;
 }
 array *get(void *v, char *key) {
@@ -50,11 +47,6 @@ array *get(void *v, char *key) {
 		if (!p && e->up) e = e->up;
 		else if(p) return p->a;
 	} while(e->up); return NULL;
-}
-void del(void *v, char *key) {
-	pair *u,*p=slot((env*)v, key,&u); if(!p) return;
-	free(p->a->m); free(p->a); *p->k = '\0';
-	if(u){u->nxt=p->nxt;free(p);}else memset(p,0,sizeof *p);
 }
 static unsigned long hash(char *s) {
 	unsigned long c, h = 5381;
