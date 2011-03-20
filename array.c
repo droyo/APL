@@ -12,15 +12,15 @@ static int tsize(enum tag);
  * in apl.h that you also modify this table
  * accordingly */
 static int type_sizes[] = {
-	sizeof (double),	/* number    */
-	sizeof (char),		/* string    */
-	sizeof (char),		/* symbol    */
-	ASIZE,				/* function  */
-	ASIZE,				/* primitive */
-	ASIZE,				/* doperator */
-	ASIZE,				/* moperator */
-	ASIZE,				/* niladic   */
-	ASIZE,				/* boxed     */
+	sizeof (double), /* number    */
+	sizeof (char),   /* string    */
+	sizeof (char),   /* symbol    */
+	sizeof (void*),  /* function  */
+	sizeof (void*),  /* primitive */
+	sizeof (void*),  /* doperator */
+	sizeof (void*),  /* moperator */
+	sizeof (void*),  /* niladic   */
+	ASIZE,           /* boxed     */
 };
 static int msize(array *a) { 
 	return sizeof(int)*a->r + a->n*tsize(a->t); 
@@ -47,8 +47,8 @@ array *anew(enum tag t, enum flag f, unsigned r, unsigned n) {
 }
 array *aclone(array *a) {
 	array *c = anew(a->t, a->f, a->r, a->n);
-	if(!c) return NULL;
-	return memcpy(c->m, a->m, msize(a));
+	if(!c) return NULL; else memcpy(c->m, a->m, msize(a));
+	return c;
 }
 int *ashp(array *a) {
 	return (int*)a->m;

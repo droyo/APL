@@ -36,6 +36,7 @@ array *put(void *v, char *k, array *a) {
 		if(p->a==a) return a; else decref(p->a);
 	} else strncpy(p->k,k,sizeof p->k-1);
 	if((a->f&tmpmem) && !(a=aclone(a))) goto err_ca;
+	else incref(a);
 	return p->a = a;
 	err_ca: if(u) free(p);
 	err_pa: return NULL;
