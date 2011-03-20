@@ -33,7 +33,7 @@ int main(void) {
 		print("\t");
 		result = eval(global_env,scan(input));
 		if(result) {
-			disp(result); print("\n");
+			disp(result); print("(%d)\n", result->c);
 			mem_coll();
 		}
 	}

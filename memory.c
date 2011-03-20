@@ -1,3 +1,5 @@
+#include <utf.h>
+#include <fmt.h>
 #include <stdlib.h>
 #include <limits.h>
 #include <string.h>
@@ -27,14 +29,13 @@ void mem_free(void) {
 		free(refs[i]);
 }
 void mem_coll(void) {
-	array *t; int i;
+	array *t;
 	while((t=refs[0]) && !t->c) {
-		refs[0] = NULL;
-		if(t==bot) goto kill;
-		swap(t,bot); refs[t->gc] = NULL;
-		for(i=t->gc+1;i && !refs[i];i--);
-		bot = refs[i];
-		kill: free(t);
+		t->c = UINT_MAX;
+		bubbledn(t);
+		refs[t->gc] = NULL;
+		print("free(");disp(t);print(")\n");
+		free(t);
 	}
 }
 void record(array *a) {
