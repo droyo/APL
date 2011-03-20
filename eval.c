@@ -13,14 +13,14 @@
 #define R (~0)
 
 rule cases[] = {
-{{V|M|F|L, V|F,     D,       V|F},doper, 1,3},
-{{V|M|F|L, V,       F,       V},  dyad,  1,3},
-{{V|M|F|L, V|F,     M,       R},  moper, 1,2},
-{{M|F|L,   F,       V,       R},  monad, 1,2},
-{{D,       V,       F,       V},  monad, 2,3},
-{{N,       assign,  V|M|D|F, R},  bind,  0,2},
-{{lparen,  V|M|D|F, rparen,  R},  punc,  0,2},
-{{0,       0,       0,       0},  NULL,  0,0}
+	V|M|F|L, V|F,     D,       V|F, doper, 1,3,
+	V|M|F|L, V,       F,       V,   dyad,  1,3,
+	V|M|F|L, V|F,     M,       R,   moper, 1,2,
+	M|F|L,   F,       V,       R,   monad, 1,2,
+	D,       V,       F,       V,   monad, 2,3,
+	N,       assign,  V|M|D|F, R,   bind,  0,2,
+	lparen,  V|M|D|F, rparen,  R,   punc,  0,2,
+	0,       0,       0,       0,   NULL,  0,0
 };
 
 void showdbg(stack *l, stack *r) {
