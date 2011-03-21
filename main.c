@@ -21,7 +21,7 @@ int main(void) {
 		fprint(2, "Cannot init constants\n");
 		exit(1);
 	}
-	if(!(input = Bfdopen(1, O_RDONLY))) {
+	if(!(input = Bfdopen(0, O_RDONLY))) {
 		fprint(2, "Cannot open input file\n");
 		exit(1);
 	}

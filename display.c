@@ -26,7 +26,13 @@ void disp(array *a) {
 		break;
 	case empty: print("⍝"); break;
 	case null: print("∘"); break;
-	default: print("%s", (char*)aval(a));
+	case primitive: case dydop: case monop:
+		if(a->n==1) {
+			print("%C", *(Rune*)a->m);
+			break;
+		}
+	default: print("%s", (char*)aval(a)); break;
+	case lparen: case rparen: case colon: break;
 	}
 }
 
