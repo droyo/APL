@@ -59,6 +59,8 @@ void decref(array*);
 /* Core interpreter */
 array*** scan(void *);
 array* eval(void*,array ***);
+
+/* Display */
 void disp(array *);
 
 /* Init/Teardown */

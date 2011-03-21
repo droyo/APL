@@ -23,24 +23,6 @@ rule cases[] = {
 	0,       0,       0,       0,   NULL,  0,0
 };
 
-void showdbg(stack *l, stack *r) {
-	array **a;
-	print("[");
-	for(a=l->bot;a <= r->bot;a++) {
-		if(a > l->top && a < r->top) {
-			print(" ");
-			continue;
-		}
-		if(a == r->top) print("♦");
-		disp(*a);
-	} print("]\n");
-}
-void top4(stack *s) {
-	int i; for (i=0;i<4;i++) {
-		disp(nth(s,i));
-		print(",");
-	}print("\n");
-}
 array *eval(void *E, array ***t) {
 	if (!t) return NULL;
 	stack l = mkstack(t[0],+1); l.top = t[1];
@@ -70,7 +52,6 @@ array *parse(void *E, stack *l, stack *r, int lvl) {
 				return NULL;
 			} else push(r,v);
 		}
-		showdbg(l,r);
 		while(exec(E, r));
 	} while(a->t != empty);
 	while(exec(E, r));

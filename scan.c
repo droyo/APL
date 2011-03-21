@@ -28,6 +28,7 @@ static array* scan_delims(Biobuf *i);
 static array* scan_operator(Biobuf *i);
 
 enum special_characters {
+	leftarrow = 0x2190,
 	squote = '\'',
 	macron = 0xAF,
 	lamp = 0x235D
@@ -38,7 +39,7 @@ char dop[] = "¨.⍤⍥";
 char special[] = 
 	"~!@#$%^&*_-=+<≤=≥>≠∨^×÷{},"
 	"⍞⌶⍫⍒⍋⌽⍉⊖⍟⍱⍲⌹?⍵∊⍴↑↓⍳○*→⊢←⊣"
-	"⍷⍐⍗⍸⌷⍇⍈⊣⍺⌈⌊∇∆⎕⍎⍕⌷⊃⊂∩∪⊥⊤|⍂⌻⍪";
+	"⍷⍐⍗⍸⌷⍇⍈⊣⍺⌈⌊∇∆⍎⍕⌷⊃⊂∩∪⊥⊤|⍂⌻⍪";
 
 array*** scan(void *v) {
 	Rune r;
@@ -131,9 +132,8 @@ static array* scan_literal(Biobuf *i) {
 static array* scan_special(Biobuf *i) {
 	Rune r = Bgetrune(i);
 	array *a = parray(primitive, 0, 0);
-	if(r == 0x2190) a->t = assign;
-	a->n=runetochar(mem(runelen(r)),&r)+1;
-	push(&zero,1);
+	if(r == leftarrow) a->t = assign;
+	a->n = 1; push(&r, sizeof r);
 	return a;
 }
 
@@ -151,22 +151,18 @@ static array* scan_operator(Biobuf *i) {
 		} else Bungetc(i);
 	}
 	a=parray(utfrune(dop,r)?dydop:monop,0,0);
-	a->n = runetochar(mem(runelen(r)), &r)+1;
-	push(&zero,1);
+	a->n = 1; push(&r, sizeof r);
 	return a;
 }
 
 static array* scan_delims(Biobuf *i) {
-	Rune r = Bgetrune(i);
-	array *a = parray(empty,0,0);
-	a->n=runetochar(mem(runelen(r)),&r)+1;
-	push(&zero, 1);
-	switch(r) {
-		case '(': a->t = lparen;	break;
-		case ')': a->t = rparen;	break;
-		case ':': a->t = colon;		break;
+	int c = Bgetc(i); enum tag t;
+	switch(c) {
+		case '(': t = lparen;	break;
+		case ')': t = rparen;	break;
+		case ':': t = colon;	break;
 	}
-	return a;
+	return parray(t,0,0);
 }
 
 static array* scan_symbol(Biobuf *i) {
@@ -178,7 +174,7 @@ static array* scan_symbol(Biobuf *i) {
 		if (r!='.'&&utfrune(ops, r)) break;
 		if (r == squote) break;
 		if (utfrune(delims, r)) break;
-		if (utfrune(special, r)) break;
+		if (utfrune(special,r)) break;
 		a->n+=runetochar(mem(runelen(r)), &r);
 	}
 	push(&zero, 1); a->n++;

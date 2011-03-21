@@ -2,3 +2,4 @@ doc/*
 *.o
 apl
 core
+.*.swp
