@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "apl.h"
+#define dirty(a) (a->f&(tmpmem|rdonly))
 
 typedef struct _p{struct _p *nxt;char k[64];array *a;}pair;
 typedef struct _e{struct _e *up;long sz,n;pair *p;}env;
@@ -35,7 +36,7 @@ array *put(void *v, char *k, array *a) {
 	if(!strncmp(p->k,k,sizeof p->k)){
 		if(p->a==a) return a; else decref(p->a);
 	} else strncpy(p->k,k,sizeof p->k-1);
-	if((a->f&tmpmem) && !(a=aclone(a))) goto err_ca;
+	if(dirty(a) && !(a=aclone(a))) goto err_ca;
 	else incref(a);
 	return p->a = a;
 	err_ca: if(u) free(p);

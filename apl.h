@@ -34,8 +34,8 @@ typedef struct {
 
 extern array *zilde;
 extern array *marker;
-extern int quit;
 extern int zero;
+extern int quit;
 extern void *global_env;
 
 /* Hash table for var bindings */

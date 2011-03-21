@@ -1,76 +1,56 @@
 #include <utf.h>
 #include <fmt.h>
 #include <bio.h>
-#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <math.h>
 #include "apl.h"
+#include "const.h"
 
 static array *tok[128];
 static array **ret[2];
+static struct {char bot[1024],*top;} pool;
 
-static struct {
-	char bot[1024];
-	char *top;
-} pool;
-static void *mem(long n);
-static array *parray(enum tag, unsigned, unsigned);
-static void *push(void *p, long n);
-static void *pop(long n);
-static void reset_mem(void);
+static void*  mem(long n);
+static array* parray(enum tag, unsigned, unsigned);
+static void*  push(void *p, long n);
+static void*  pop(long n);
+static void   reset_mem(void);
 
-static array* scan_numeral(Biobuf *i);
-static array* scan_literal(Biobuf *i);
-static array* scan_special(Biobuf *i);
-static array* scan_symbol(Biobuf *i);
-static array* scan_delims(Biobuf *i);
+static array* scan_numeral (Biobuf *i);
+static array* scan_literal (Biobuf *i);
+static array* scan_function(Biobuf *i);
+static array* scan_symbol  (Biobuf *i);
+static array* scan_delims  (Biobuf *i);
 static array* scan_operator(Biobuf *i);
-
-enum special_characters {
-	leftarrow = 0x2190,
-	squote = '\'',
-	macron = 0xAF,
-	lamp = 0x235D
-};
-char delims[] = "():";
-char ops[] = "¨.⍤⍥\\⍀/⌿";
-char dop[] = "¨.⍤⍥";
-char special[] = 
-	"~!@#$%^&*_-=+<≤=≥>≠∨^×÷{},"
-	"⍞⌶⍫⍒⍋⌽⍉⊖⍟⍱⍲⌹?⍵∊⍴↑↓⍳○*→⊢←⊣"
-	"⍷⍐⍗⍸⌷⍇⍈⊣⍺⌈⌊∇∆⍎⍕⌷⊃⊂∩∪⊥⊤|⍂⌻⍪";
+static array* scan_special (Biobuf *i);
 
 array*** scan(void *v) {
-	Rune r;
+	Rune r; 
+	array **t;
 	int top = 0;
 	Biobuf *i = v;
 	tok[top++] = marker;
 	reset_mem();
 
 	while((r=Bgetrune(i))>0) {
+		if(top>NELEM(tok)) return NULL;
+		t = tok+top;
 		if(r == Beof || r == '\n') break;
 		if(isspace(r)) continue;
-		if(top>NELEM(tok)) return NULL;
 		Bungetrune(i);
+
+		if(r==ULAMP){Brdline(i,'\n');break;}
+		else if(isapldig(r))*t=scan_numeral (i);
+		else if(r == '\'')  *t=scan_literal (i);
+		else if(isapldel(r))*t=scan_delims  (i);
+		else if(isaplop(r)) *t=scan_operator(i);
+		else if(isaplfun(r))*t=scan_function(i);
+		else if(isaplchr(r))*t=scan_special (i);
+		else                *t=scan_symbol  (i);
 		
-		if (r == lamp) {
-			Brdline(i,'\n');
-			break;
-		}else if(isdigit(r)||r==macron)
-			tok[top] = scan_numeral(i);
-		else if(r == squote)
-			tok[top] = scan_literal(i);
-		else if(utfrune(delims, r)) 
-			tok[top] = scan_delims(i);
-		else if(utfrune(special, r)) 
-			tok[top] = scan_special(i);
-		else if(utfrune(ops, r))
-			tok[top] = scan_operator(i);
-		else 
-			tok[top] = scan_symbol(i);
-		if (!tok[top]) 
-			return NULL;
+		if (!tok[top]) return NULL;
 		top++;
 	}
 	ret[0] = tok;
@@ -84,7 +64,7 @@ static array* scan_numeral(Biobuf *i) {
 	int j, e=0, dot=0;
 
 	for(j=0;j<NELEM(n);j++)switch(r=Bgetrune(i)) {
-	case macron: if (j<2 || n[j-1]=='e') n[j]='-'; break;
+	case UMACRON:if (j<2||n[j-1]=='e')n[j]='-';break;
 	case '.': if (!dot) dot = n[j] = '.'; break;
 	case 'e': if (!e) e = n[j] = 'e'; break;
 	case '0':case '1':case '2':case '3':case '4':
@@ -129,10 +109,9 @@ static array* scan_literal(Biobuf *i) {
 	return a;
 }
 
-static array* scan_special(Biobuf *i) {
+static array* scan_function(Biobuf *i) {
 	Rune r = Bgetrune(i);
 	array *a = parray(primitive, 0, 0);
-	if(r == leftarrow) a->t = assign;
 	a->n = 1; push(&r, sizeof r);
 	return a;
 }
@@ -150,7 +129,7 @@ static array* scan_operator(Biobuf *i) {
 			return scan_numeral(i);
 		} else Bungetc(i);
 	}
-	a=parray(utfrune(dop,r)?dydop:monop,0,0);
+	a=parray(isapldop(r)?dydop:monop,0,0);
 	a->n = 1; push(&r, sizeof r);
 	return a;
 }
@@ -165,16 +144,29 @@ static array* scan_delims(Biobuf *i) {
 	return parray(t,0,0);
 }
 
+static array* scan_special(Biobuf *i) {
+	Rune r = Bgetrune(i);
+	array *a = parray(empty, 0, 0);
+	switch(r) {
+	case UASSIGN: a->t = assign; break;
+	default: 
+		a->t = symbol;
+		a->n=runetochar(mem(runelen(r)), &r);
+	}
+	return a;
+}
+
 static array* scan_symbol(Biobuf *i) {
 	Rune r;
 	array *a = parray(symbol,0,0);
 	
 	while((r = Bgetrune(i))>0) {
-		if (isspace(r)) break;
-		if (r!='.'&&utfrune(ops, r)) break;
-		if (r == squote) break;
-		if (utfrune(delims, r)) break;
-		if (utfrune(special,r)) break;
+		if(r!='.'&&isaplop(r)) break;
+		else if(isspace(r))    break;
+		else if(r == '\'')     break;
+		else if(isapldel(r))   break;
+		else if(isaplfun(r))   break;
+		else if(isaplchr(r))   break;
 		a->n+=runetochar(mem(runelen(r)), &r);
 	}
 	push(&zero, 1); a->n++;
