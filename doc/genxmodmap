@@ -1,0 +1,65 @@
+#!/bin/sh
+# Map the union apl keyboard to your current keyboard layout.
+
+# The xmodmap file that was used for this script was made
+# by Markus Triska: http://stud4.tuwien.ac.at/~e0225855/
+
+(echo 'APL 1 exclam U00A8 U2336
+APL 2 at U00AF U236B
+APL 3 numbersign U003C U2352
+APL 4 dollar U2264 U234B
+APL 5 percent U003D U233D
+APL 6 asciicircum U2265 U2349
+APL 7 ampersand U003E U2296
+APL 8 asterisk U2260 U235F
+APL 9 parenleft U2228 U2371
+APL 0 parenright U005E U2372
+APL minus underscore U00D7 U0021
+APL equal plus U00F7 U2339
+APL q Q U003F
+APL w W U2375 U2365
+APL e E U220A U2377
+APL r R U2374
+APL t T asciitilde U236C
+APL y Y U2191 U2350
+APL u U U2193 U2357
+APL i I U2373 U2378
+APL o O U25CB U2337
+APL p P asterisk
+APL bracketleft braceleft U2190 U2347
+APL bracketright braceright U2192 U2348
+APL a A U237A
+APL s S U2308
+APL d D U230A
+APL f F underscore
+APL g G U2207
+APL h H U2206 U2359
+APL j J U2218
+APL k K apostrophe U2337
+APL l L U2395
+APL semicolon colon U234E U2261
+APL apostrophe quotedbl U2355 U2262
+APL grave asciitilde U22C4 U235E
+APL backslash bar U22A2 U22A3
+APL z Z U2282
+APL x X U2283
+APL c C U2229
+APL v V U222A
+APL b B U22A5
+APL n N U22A4
+APL m M U007C
+APL comma less U235D U236A
+APL period greater U2340 U2364
+APL slash question U233F
+'; xmodmap -pke )| awk '
+/^APL/ { apl[$2] = substr($0, index($0, $2)) }
+/^keycode/ { num[$4] = $2 }
+
+END {
+	for (k in apl) {
+		if (num[k])
+			printf("keycode %d = %s\n", num[k], apl[k]);
+	}
+}'
+
+echo 'keycode 108 = Mode_switch'
