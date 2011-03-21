@@ -25,7 +25,9 @@ problem is no longer a problem anymore.  This interpreter uses
 utf8 for everything.  Identifiers, primitives, box-drawing
 characters, everything.  So
 
-	nước ← 'USA'⊃'日本'⊃'Việt Nam'⊃'Россия' 右 ← ⊢ 左 ← ⊣
+	nước ← 'USA'⊃'日本'⊃'Việt Nam'⊃'Россия' 
+	右 ← ⊢ 
+	左 ← ⊣
 
 Are all examples of valid code.  There is no special IDE or
 terminal that is required to input the characters; most modern
@@ -43,19 +45,19 @@ os commands and manipulate their stdin/stdout.  Using this we
 can implement many features that are usually baked into the core
 of the language or loaded as libraries, like:
 
-- Matrix visualization - Function plotting - Networking (via
-`netcat` or similar)
+- Matrix visualization 
+- Function plotting 
+- Networking (via `netcat` or similar)
 
 ### Compliance with 'A Dictionary of APL'
 
-The
-[dictionary](http://www.jsoftware.com/papers/APLDictionary.htm)
-was written by the creator of APL himself and is a good formal
-standard to follow.  This interpreter will conform to this
-standard where possible.  Notably, bracketed array
-indexing/assignment(a[n;]) will *not* be in the language in
-favor of the 'from' ({) and 'merge' (}) functions.  All
-functions will have the notion of function rank as well.
+'A dictionary of APL[1]' was written by the creator of APL
+himself and is a good formal standard to follow.  This
+interpreter will conform to this standard where possible.
+Notably, bracketed array indexing/assignment(a[n;]) will *not*
+be in the language in favor of the 'from' ({) and 'merge' (})
+functions.  All functions will have the notion of function rank
+as well.
 
 ## State of the project
 
@@ -65,3 +67,5 @@ management soon to follow.  Once the boring stuff is out of the
 way, one-by-one standard functions will be added.  The project
 is not currently at a state where outside help would be
 beneficial, or a fork useful.  Feel free to stay tuned, however.
+
+[1](http://www.jsoftware.com/papers/APLDictionary.htm)
