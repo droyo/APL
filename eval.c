@@ -47,7 +47,7 @@ array *parse(void *E, stack *l, stack *r, int lvl) {
 			push(r,a);
 		else {
 			if(!(v = lookup(E,a))) {
-				fprint(2, "Unbound variable `%A'\n", a);
+				fprint(2, "Unbound var `%A'\n", a);
 				return NULL;
 			} else push(r,v);
 		}
