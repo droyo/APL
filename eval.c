@@ -5,12 +5,12 @@
 #include "eval.h"
 
 #define L (lparen|assign|empty)
+#define R (~0)
 #define F (function|primitive)
 #define N (symbol|string)
 #define V (string|number)
 #define D (dydop)
 #define M (monop)
-#define R (~0)
 
 rule cases[] = {
 {{	V|M|F|L, V|F,     D,       V|F}, doper, 1,3},
@@ -47,7 +47,7 @@ array *parse(void *E, stack *l, stack *r, int lvl) {
 			push(r,a);
 		else {
 			if(!(v = lookup(E,a))) {
-				fprint(2, "Unbound variable `%s'\n", fmt(a));
+				fprint(2, "Unbound var `%s'\n", fmt(a));
 				return NULL;
 			} else push(r,v);
 		}
@@ -71,11 +71,8 @@ int exec(void *E, stack *s) {
 			a = nth(s,j)->t;
 			p = cases[i].c[j];
 			if(!(a&p)) break;
-		}
-		if(j==4) {
-			print("\t");
+		} if(j==4) {
 			apply(E, &cases[i], s);
-			print("\n");
 			break;
 		}
 	}
@@ -90,24 +87,24 @@ int apply(void *E, rule *r, stack *s) {
 	return 0;
 }
 array* monad(void *E, array **a, int b, int e) {
-	print("(%s %s)", a[b], a[e]);
+	print("\t(%s %s)\n", a[b], a[e]);
 	return a[e];
 }
 array* dyad(void *E, array **a, int b, int e)  {
-	print("(%s %s,%s)",fmt(a[b+1]),fmt(a[b]),fmt(a[e]));
+	print("\t(%s %s,%s)\n",fmt(a[b+1]),fmt(a[b]),fmt(a[e]));
 	return a[e];
 }
 array* moper(void *E, array **a, int b, int e) {
-	print("(op %s%s)",fmt(a[b]),fmt(a[e]));
+	print("\t(op %s%s)\n",fmt(a[b]),fmt(a[e]));
 	return a[b];
 }
 array* doper(void *E, array **a, int b, int e) {
-	print("(op %s%s%s)", fmt(a[b+1]), fmt(a[b]), fmt(a[e]));
+	print("\t(op %s%s%s)\n", fmt(a[b+1]), fmt(a[b]), fmt(a[e]));
 	return a[e];
 }
 array* bind(void *E, array **a, int b, int e) {
 	array *var = a[b], *val = a[e];
-	print("(set %s %s)",fmt(var), fmt(val));
+	print("\t(set %s %s)\n",fmt(var), fmt(val));
 	array *s = put(E, aval(var), val);
 	if(!s) {
 		fprint(2,"Binding error\n");
