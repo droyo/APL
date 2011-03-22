@@ -1,8 +1,5 @@
-#include <utf.h>
-#include <fmt.h>
 #include <string.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include "apl.h"
 
 static int msize(array *a); 

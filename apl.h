@@ -50,15 +50,12 @@ void decref(array*);
 array*** scan(void *);
 array*   eval(void*,array ***);
 
-/* Display */
-char* fmt(array *);
-void  fmt_reset(void);
-
 /* Init,Teardown */
-int const_init(void);
-void const_free(void);
-void *env_init(void);
-void env_free(void*);
-int mem_init(void);
-void mem_coll(void);
-void mem_free(void);
+int   fmt_init(void);
+int   const_init(void);
+void  const_free(void);
+void* env_init(void);
+void  env_free(void*);
+int   mem_init(void);
+void  mem_coll(void);
+void  mem_free(void);

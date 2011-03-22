@@ -1,57 +1,35 @@
 #include <utf.h>
 #include <fmt.h>
 #include <math.h>
-#include <stdlib.h>
-#include <string.h>
 #include <stdarg.h>
 #include "apl.h"
 
-static char buf[1024];
-static char *top;
-static void add(char*, ...);
-static void num(array *);
-#define END (buf+NELEM(buf))
-#define SPACE (END-top)
+static int Afmt(Fmt*);
+static int Afmtn(Fmt*,array*);
 
-/* Calls to fmt trash previous strings returned by fmt. The
- * Return value must be used immediately or copied to a fresh
- * array */
-char* fmt(array *a) {
-	char *s = top;
+static int Afmt(Fmt *f) {
+	array *a = va_arg(f->args, array*);
 	switch(a->t) {
-	case assign: add("←");  break;
-	case number: num(a);    break;
-	case empty:  add("⍝");  break;
-	case null:   add("∘");  break;
-	case lparen: add("(");  break;
-	case rparen: add(")");  break;
-	case colon:  add(":");  break;
-	case dydop:case monop:case function:
+	case function: case dydop: case monop: case niladic:
 		if(a->f&primitive)
-			add("%C",*(Rune*)aval(a));
-		else goto String;
-		break;
-	default:String: add("%s", aval(a));
-	}
-	*top++ = 0;
-	return s;
-}
-
-void fmt_reset(void) { top = buf; }
-static void num(array *a) {
-	int i;
-	double *d = aval(a);
-	for(i = 0; i < a->n; i++) {
-		add(i?" ":"");
-		if(d[i] == INFINITY)add ("∞"); else 
-		if(d[i]==-INFINITY) add("-∞");
-		else add("%g",d[i]);
+			return fmtrune(f, *(Rune*)aval(a));
+		else goto string;
+	case number:
+		return Afmtn(f,a);
+	default:string: 
+		return fmtstrcpy(f,aval(a));
 	}
 }
-
-static void add(char *fmt, ...) {
-	va_list ap;
-	va_start(ap,fmt);
-	top=vseprint(top,END,fmt,ap);
-	va_end(ap);
+static int Afmtn(Fmt *f,array *a){
+	int i; double *d = aval(a);
+	for(i=0;i<a->n;i++) {
+		fmtprint(f,i?" ":"");
+		if(d[i]== INFINITY)fmtprint(f, "∞"); else
+		if(d[i]==-INFINITY)fmtprint(f,"-∞"); else
+		fmtprint(f,"%g", d[i]);
+	}
+	return 0;
+}
+int fmt_init(void) {
+	return fmtinstall('A', Afmt);
 }

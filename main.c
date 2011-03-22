@@ -11,7 +11,7 @@ void *global_env;
 
 int main(void) {
 	Biobuf *input;
-	array *result;
+	array *ans;
 	quit = 0;
 	
 	try(a,mem_init(),"Can't init memory");
@@ -20,18 +20,17 @@ int main(void) {
 		"Cannot open input");
 	try(d,!(global_env=env_init()),
 		"Cannot init environment");
+	try(e,fmt_init(),"Can't init formatter:%r");
 
 	while(!quit) {
 		print("\t");
-		fmt_reset();
 		mem_coll();
-		result = eval(global_env,scan(input));
-		if(result) 
-			print("%s(%d)\n",fmt(result),result->c);
+		ans = eval(global_env,scan(input));
+		if(ans) print("%A\n",ans);
 	}
 	print("\nBye\n");
 
-	  env_free(global_env);
+	e:env_free(global_env);
 	d:Bterm(input);
 	c:const_free();
 	b:mem_free();

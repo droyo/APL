@@ -47,7 +47,7 @@ array *parse(void *E, stack *l, stack *r, int lvl) {
 			push(r,a);
 		else {
 			if(!(v = lookup(E,a))) {
-				fprint(2, "Unbound variable `%s'\n", fmt(a));
+				fprint(2, "Unbound variable `%A'\n", a);
 				return NULL;
 			} else push(r,v);
 		}
@@ -90,24 +90,24 @@ int apply(void *E, rule *r, stack *s) {
 	return 0;
 }
 array* monad(void *E, array **a, int b, int e) {
-	print("(%s %s)", a[b], a[e]);
+	print("(%A %A)", a[b], a[e]);
 	return a[e];
 }
 array* dyad(void *E, array **a, int b, int e)  {
-	print("(%s %s,%s)",fmt(a[b+1]),fmt(a[b]),fmt(a[e]));
+	print("(%A %A,%A)",a[b+1],a[b],a[e]);
 	return a[e];
 }
 array* moper(void *E, array **a, int b, int e) {
-	print("(op %s%s)",fmt(a[b]),fmt(a[e]));
+	print("(op %A%A)",a[b],a[e]);
 	return a[b];
 }
 array* doper(void *E, array **a, int b, int e) {
-	print("(op %s%s%s)", fmt(a[b+1]), fmt(a[b]), fmt(a[e]));
+	print("(op %A%A%A)", a[b+1], a[b], a[e]);
 	return a[e];
 }
 array* bind(void *E, array **a, int b, int e) {
 	array *var = a[b], *val = a[e];
-	print("(set %s %s)",fmt(var), fmt(val));
+	print("(set %A %A)",var, val);
 	array *s = put(E, aval(var), val);
 	if(!s) {
 		fprint(2,"Binding error\n");
