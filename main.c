@@ -23,11 +23,11 @@ int main(void) {
 
 	while(!quit) {
 		print("\t");
+		fmt_reset();
+		mem_coll();
 		result = eval(global_env,scan(input));
-		if(result) {
-			disp(result); print("(%d)\n", result->c);
-			mem_coll();
-		}
+		if(result) 
+			print("%s(%d)\n",fmt(result),result->c);
 	}
 	print("\nBye\n");
 

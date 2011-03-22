@@ -47,8 +47,7 @@ array *parse(void *E, stack *l, stack *r, int lvl) {
 			push(r,a);
 		else {
 			if(!(v = lookup(E,a))) {
-				fprint(2, "Unbound variable `");
-				disp(a); print("'\n");
+				fprint(2, "Unbound variable `%s'\n", fmt(a));
 				return NULL;
 			} else push(r,v);
 		}
@@ -91,29 +90,24 @@ int apply(void *E, rule *r, stack *s) {
 	return 0;
 }
 array* monad(void *E, array **a, int b, int e) {
-	print("("); 
-	disp(a[b]);print(" ");disp(a[e]);
-	print(")");return a[e];
+	print("(%s %s)", a[b], a[e]);
+	return a[e];
 }
 array* dyad(void *E, array **a, int b, int e)  {
-	print("(");disp(a[b+1]); print(" ");
-	disp(a[b]);print(", ");disp(a[e]);
-	print(")");return a[e];
+	print("(%s %s,%s)",fmt(a[b+1]),fmt(a[b]),fmt(a[e]));
+	return a[e];
 }
 array* moper(void *E, array **a, int b, int e) {
-	print("(op ");disp(a[b]);
-	disp(a[e]);print(")");
+	print("(op %s%s)",fmt(a[b]),fmt(a[e]));
 	return a[b];
 }
 array* doper(void *E, array **a, int b, int e) {
-	print("(op ");disp(a[b+1]);
-	disp(a[b]);disp(a[e]);print(")");
+	print("(op %s%s%s)", fmt(a[b+1]), fmt(a[b]), fmt(a[e]));
 	return a[e];
 }
 array* bind(void *E, array **a, int b, int e) {
 	array *var = a[b], *val = a[e];
-	print("(set "); disp(var); 
-	print(" "); disp(val);print(")");
+	print("(set %s %s)",fmt(var), fmt(val));
 	array *s = put(E, aval(var), val);
 	if(!s) {
 		fprint(2,"Binding error\n");

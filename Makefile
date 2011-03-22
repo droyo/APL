@@ -3,7 +3,7 @@ LD := gcc
 BIN := apl
 SRC := \
 	main.c eval.c scan.c \
-	array.c display.c env.c \
+	array.c format.c env.c \
 	memory.c const.c
 INC := apl.h eval.h
 OBJ := $(SRC:.c=.o)

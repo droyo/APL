@@ -51,7 +51,8 @@ array*** scan(void *);
 array*   eval(void*,array ***);
 
 /* Display */
-void disp(array *);
+char* fmt(array *);
+void  fmt_reset(void);
 
 /* Init,Teardown */
 int const_init(void);
