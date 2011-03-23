@@ -1,8 +1,5 @@
-#include <utf.h>
-#include <fmt.h>
 #include <string.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include "apl.h"
 
 static int msize(array *a); 
@@ -16,11 +13,10 @@ static int type_sizes[] = {
 	sizeof (char),   /* string    */
 	sizeof (char),   /* symbol    */
 	sizeof (void*),  /* function  */
-	sizeof (void*),  /* primitive */
-	sizeof (void*),  /* doperator */
-	sizeof (void*),  /* moperator */
+	sizeof (void*),  /* dydop     */
+	sizeof (void*),  /* monop     */
 	sizeof (void*),  /* niladic   */
-	ASIZE,           /* boxed     */
+	sizeof (array*), /* boxed     */
 };
 static int msize(array *a) { 
 	return sizeof(int)*a->r + a->n*tsize(a->t); 
@@ -34,7 +30,7 @@ long asize(array *a) {
 }
 array *atmp(void *p,enum tag t, unsigned r, unsigned n) {
 	array *a = p;
-	a->gc=-1; a->t = t; a->f=tmpmem; 
+	a->t = t; a->f=tmpmem; 
 	a->r = r; a->n = n; a->c = 0;
 	return a;
 }

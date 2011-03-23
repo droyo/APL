@@ -111,8 +111,8 @@ static array* scan_literal(Biobuf *i) {
 
 static array* scan_function(Biobuf *i) {
 	Rune r = Bgetrune(i);
-	array *a = parray(primitive, 0, 0);
-	a->n = 1; push(&r, sizeof r);
+	array *a = parray(function, 0, 0);
+	a->f|=primitive; a->n = 1; push(&r, sizeof r);
 	return a;
 }
 
@@ -130,7 +130,7 @@ static array* scan_operator(Biobuf *i) {
 		} else Bungetc(i);
 	}
 	a=parray(isapldop(r)?dydop:monop,0,0);
-	a->n = 1; push(&r, sizeof r);
+	a->f|=primitive;a->n = 1; push(&r, sizeof r);
 	return a;
 }
 

@@ -7,40 +7,31 @@
 #include "apl.h"
 int quit;
 void *global_env;
+#define try(e,f,s) do{if(f){fprint(2,s"\n");goto e;}}while(0)
 
 int main(void) {
 	Biobuf *input;
-	array *result;
+	array *ans;
 	quit = 0;
 	
-	if(mem_init()) {
-		fprint(2, "Cannot init memory manager.\n");
-		exit(1);
-	}
-	if(const_init()) {
-		fprint(2, "Cannot init constants\n");
-		exit(1);
-	}
-	if(!(input = Bfdopen(0, O_RDONLY))) {
-		fprint(2, "Cannot open input file\n");
-		exit(1);
-	}
-	if(!(global_env = env_init())) {
-		fprint(2, "Cannot init environment\n");
-		exit(1);
-	}
+	try(a,mem_init(),"Can't init memory");
+	try(b,!(input=Bfdopen(0,O_RDONLY)),
+		"Cannot open input");
+	try(c,!(global_env=env_init()),"Can't init env");
+	try(d,const_init(global_env),"Can't init constants");
+	try(e,fmt_init(),"Can't init formatter:%r");
+
 	while(!quit) {
 		print("\t");
-		result = eval(global_env,scan(input));
-		if(result) {
-			disp(result); print("(%d)\n", result->c);
-			mem_coll();
-		}
+		mem_coll();
+		ans = eval(global_env,scan(input));
+		if(ans) print("%A\n",ans);
 	}
 	print("\nBye\n");
-	Bterm(input);
-	env_free(global_env);
-	const_free();
-	mem_free();
-	return 0;
+
+	e:const_free();
+	d:env_free(global_env);
+	c:Bterm(input);
+	b:mem_free();
+	a:return 0;
 }
