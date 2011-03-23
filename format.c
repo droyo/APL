@@ -11,24 +11,30 @@ enum boxdrawing {
   UUR = 0x2557, DDR = 0x255D, UUL = 0x2554, DDL = 0x255A
 };
 static int Afmt(Fmt*);
-static int Afmtn(Fmt*,array*);
-static int Afmtb(Fmt*,array*);
+static int Afmtn(Fmt*,int,array*);
+static int Afmtb(Fmt*,int,array*);
 
 static int N   (Fmt*,double*,int);
 static int Nx1 (Fmt*,double*,int,int);
-static int NxM (Fmt*,double*,int,int,int);
-static int NxMx(Fmt*,double*,int,int*,int);
+static int NxM (Fmt*,int,double*,int,int,int);
+static int NxMx(Fmt*,int,double*,int,int*,int);
 static int getw(array*);
+static int geti(Fmt*);
+static int frame(Fmt*,int,Rune,Rune);
 
+int fmt_init(void) {
+	return fmtinstall('A', Afmt);
+}
 static int Afmt(Fmt *f) {
+	int i = geti(f);
 	array *a = va_arg(f->args, array*);
 	switch(a->t) {
 	case function: case dydop: case monop: case niladic:
 		if(a->f&primitive)
 			return fmtrune(f, *(Rune*)aval(a));
 		else break;
-	case number: return Afmtn(f,a);
-	case boxed:  return Afmtb(f,a);
+	case number: return Afmtn(f,i,a);
+	case boxed:  return Afmtb(f,i,a);
 	case null:   return fmtprint(f,"∘");
 	case empty:  return fmtprint(f,"⍝");
 	case assign: return fmtprint(f,"←");
@@ -39,13 +45,13 @@ static int Afmt(Fmt *f) {
 	}
 	return 0;
 }
-static int Afmtn(Fmt *f,array *a) {
+static int Afmtn(Fmt *f,int indent,array *a) {
 	int *s = ashp(a), w = getw(a);
 	switch(a->r) {
 	case 0:  return N(f,aval(a),0);
 	case 1:  return Nx1(f,aval(a),w,s[0]);
-	case 2:  return NxM(f,aval(a),w,s[0],s[1]);
-	default: return NxMx(f,aval(a),w,s,a->r);
+	case 2:  return NxM(f,indent,aval(a),w,s[0],s[1]);
+	default: return NxMx(f,indent,aval(a),w,s,a->r);
 	}
 }
 
@@ -63,22 +69,24 @@ static int Nx1(Fmt *f, double *d, int w, int n) {
 	return 0;
 }
 
-static int NxM(Fmt *f, double *d, int w, int m, int n) {
+static int NxM(Fmt *f, int ind, double *d, int w, int m, int n) {
+	print("DBG:%d\n",ind);
 	int i; for(i=0;i<m;i++) {
 		if(Nx1(f, d+i*n,w,n)<0) return -1;
-		fmtprint(f,i<m?"\n":"");
+		if(fmtprint(f,i<m?"\n%*c":"",ind,0))
+			return -1;
 	}
 	return 0;
 }
 
-static int NxMx(Fmt *f, double *d, int w, int *s, int r) {
+static int NxMx(Fmt *f, int ind,double *d, int w, int *s, int r) {
 	int i, o;
-	if(r == 2) return NxM(f,d,w,s[0],s[1]);
+	if(r == 2) return NxM(f,ind,d,w,s[0],s[1]);
 	for(i=o=1;i<r;i++) o *= s[i];
 	for(i=0;i<s[0];i++) {
-		if(NxMx(f,d+(o*i),w,s+1,r-1)<0) 
+		if(NxMx(f,ind,d+(o*i),w,s+1,r-1)<0) 
 			return -1;
-		else if(fmtprint(f,i<s[0]-1?"\n":"")) 
+		else if(fmtprint(f,i<s[0]-1?"\n%*c":"",ind,0)) 
 			return -1;
 	}
 	return 0;
@@ -91,10 +99,15 @@ static int getw(array *a) {
 		m=m<(n=snprint(buf,8,"%g",d[i]))?n:m;
 	return m;
 }
-		
-static int Afmtb(Fmt *f, array *a) {
+static int geti(Fmt *f) {
+	return 1 + f->to - f->start;
+}
+static int frame(Fmt *f, int w, Rune b, Rune e) {
+	if(fmtprint(f,"%C",b)) return -1;
+	if(fmtprint(f,"%*C",w,HO)) return -1;
+	if(fmtprint(f,"%C",e)) return -1;
 	return 0;
 }
-int fmt_init(void) {
-	return fmtinstall('A', Afmt);
+static int Afmtb(Fmt *f, int indent, array *a) {
+	return 0;
 }
