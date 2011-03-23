@@ -78,8 +78,8 @@ static int NxMx(Fmt *f, double *d, int w, int *s, int r) {
 	for(i=0;i<s[0];i++) {
 		if(NxMx(f,d+(o*i),w,s+1,r-1)<0) 
 			return -1;
-		else
-			fmtprint(f,i<s[0]?"\n":"");
+		else if(fmtprint(f,i<s[0]-1?"\n":"")) 
+			return -1;
 	}
 	return 0;
 }
