@@ -18,9 +18,10 @@ static int N   (Fmt*,double*,int);
 static int Nx1 (Fmt*,double*,int,int);
 static int NxM (Fmt*,int,double*,int,int,int);
 static int NxMx(Fmt*,int,double*,int,int*,int);
+
 static int getw(array*);
 static int geti(Fmt*);
-static int frame(Fmt*,int,Rune,Rune);
+static int llen(char*);
 
 int fmt_init(void) {
 	return fmtinstall('A', Afmt);
@@ -45,6 +46,19 @@ static int Afmt(Fmt *f) {
 	}
 	return 0;
 }
+
+static int Afmtb(Fmt *f, int indent, array *a) {
+	char **s; int i,j;
+	array **x = aval(a);
+	if(!(s = malloc(sizeof *s * a->n))) return -1;
+	for(j=0;j<a->n;j++) {
+		if(!(s[j] = smprint("%A",x[j])))
+			goto Free;
+	}
+	Free: while(--j>=0) free(s[j]);
+	return -1;
+}
+
 static int Afmtn(Fmt *f,int indent,array *a) {
 	int *s = ashp(a), w = getw(a);
 	switch(a->r) {
@@ -70,10 +84,9 @@ static int Nx1(Fmt *f, double *d, int w, int n) {
 }
 
 static int NxM(Fmt *f, int ind, double *d, int w, int m, int n) {
-	print("DBG:%d\n",ind);
 	int i; for(i=0;i<m;i++) {
 		if(Nx1(f, d+i*n,w,n)<0) return -1;
-		if(fmtprint(f,i<m?"\n%*c":"",ind,0))
+		if(fmtprint(f,i<m?"\n%*C":"",ind,0))
 			return -1;
 	}
 	return 0;
@@ -102,12 +115,8 @@ static int getw(array *a) {
 static int geti(Fmt *f) {
 	return 1 + f->to - f->start;
 }
-static int frame(Fmt *f, int w, Rune b, Rune e) {
-	if(fmtprint(f,"%C",b)) return -1;
-	if(fmtprint(f,"%*C",w,HO)) return -1;
-	if(fmtprint(f,"%C",e)) return -1;
-	return 0;
-}
-static int Afmtb(Fmt *f, int indent, array *a) {
-	return 0;
+static int llen(char *s) {
+	int i; for(i=0;s[i];i++)
+		if(s[i] == '\n') return i-1;
+	return i-1;
 }
