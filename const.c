@@ -5,6 +5,9 @@
 int zero = 0;
 array *zilde;
 array *marker;
+array *NN;
+array *NNN;
+array *NNNN;
 
 static enum codepoint utfdyadicop[] = {
 	UEACH,  UDOT,       UHOOT, UHOLLER, 
@@ -58,9 +61,29 @@ int isaplchr(long x) {
 		if(x==utfextra[i]) return 1;
 	return 0;
 }
-int const_init(void) {
+int const_init(void *E) {
+	double *d; int *s, i;
 	if (!(zilde=anew(null,rdonly,0,0))) return -1;
 	if (!(marker=anew(empty,rdonly,0,0))) return -1;
+	if (!(NN=anew(number,0,2,9))) return -1;
+	if (!(NNN=anew(number,0,3,27))) return -1;
+	if (!(NNNN=anew(number,0,4,81))) return -1;
+
+	s = ashp(NN); d = aval(NN);
+	s[0] = s[1] = 3;
+	for(i=0;i<NN->n;i++) d[i] = i;
+	if(!put(E, "A", NN)) return -1;
+
+	s = ashp(NNN); d = aval(NNN);
+	s[0] = s[1] = s[2] = 3;
+	for(i=0;i<NNN->n;i++) d[i] = i;
+	if(!put(E, "B", NNN)) return -1;
+
+	s = ashp(NNNN); d = aval(NNNN);
+	s[0] = s[1] = s[2] = s[3] = 3;
+	for(i=0;i<NNNN->n;i++) d[i] = i;
+	if(!put(E, "C", NNNN)) return -1;
+
 	return 0;
 }
 void const_free(void) {

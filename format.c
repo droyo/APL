@@ -12,8 +12,13 @@ enum boxdrawing {
 };
 static int Afmt(Fmt*);
 static int Afmtn(Fmt*,array*);
-static int Afmts(Fmt*,array*);
 static int Afmtb(Fmt*,array*);
+
+static int N   (Fmt*,double*,int);
+static int Nx1 (Fmt*,double*,int,int);
+static int NxM (Fmt*,double*,int,int,int);
+static int NxMx(Fmt*,double*,int,int*,int);
+static int getw(array*);
 
 static int Afmt(Fmt *f) {
 	array *a = va_arg(f->args, array*);
@@ -30,30 +35,63 @@ static int Afmt(Fmt *f) {
 	case colon:  return fmtprint(f,":");
 	case lparen: return fmtprint(f,"(");
 	case rparen: return fmtprint(f,")");
-	default:     return Afmts(f,a);
+	default:     return fmtstrcpy(f,aval(a));
 	}
 	return 0;
 }
-static int Afmtn(Fmt *f,array *a){
-	int i; double *d = aval(a);
-	char buf[8]; int max,n;
-	for(i=0,max=2;i<a->n;i++) {
-		n=snprint(buf,sizeof buf,"%g",d[i]);
-		max = max < n ? n : max;
+static int Afmtn(Fmt *f,array *a) {
+	int *s = ashp(a), w = getw(a);
+	switch(a->r) {
+	case 0:  return N(f,aval(a),0);
+	case 1:  return Nx1(f,aval(a),w,s[0]);
+	case 2:  return NxM(f,aval(a),w,s[0],s[1]);
+	default: return NxMx(f,aval(a),w,s,a->r);
 	}
-	for(i=0;i<a->n;i++) {
-		fmtprint(f,i?" ":"");
-		if(d[i]== INFINITY)
-			fmtprint(f, "%*s", max, "∞");
-		else if(d[i]==-INFINITY)
-			fmtprint(f,"%*s", max, "-∞");
-		else fmtprint(f,"%*g", max, d[i]);
+}
+
+static int N(Fmt *f, double *d, int w) {
+	if(*d == INFINITY) return fmtprint(f, "%*s", w, "∞");
+	if(*d ==-INFINITY) return fmtprint(f, "%*s", w,"-∞");
+	return fmtprint(f,"%*g", w, *d);
+}
+
+static int Nx1(Fmt *f, double *d, int w, int n) {
+	int i;for(i=0;i<n;i++) {
+		if(fmtprint(f,i?" ":"")<0) return -1;
+		else if(N(f,d+i,w)<0) return -1;
 	}
 	return 0;
 }
-static int Afmts(Fmt *f, array *a) {
-	return fmtstrcpy(f,aval(a));
+
+static int NxM(Fmt *f, double *d, int w, int m, int n) {
+	int i; for(i=0;i<m;i++) {
+		if(Nx1(f, d+i*n,w,n)<0) return -1;
+		fmtprint(f,i<m?"\n":"");
+	}
+	return 0;
 }
+
+static int NxMx(Fmt *f, double *d, int w, int *s, int r) {
+	int i, o;
+	if(r == 2) return NxM(f,d,w,s[0],s[1]);
+	for(i=o=1;i<r;i++) o *= s[i];
+	for(i=0;i<s[0];i++) {
+		if(NxMx(f,d+(o*i),w,s+1,r-1)<0) 
+			return -1;
+		else
+			fmtprint(f,i<s[0]?"\n":"");
+	}
+	return 0;
+}
+
+static int getw(array *a) {
+	int i,m,n; char buf[8];
+	double *d = aval(a);
+	for(i=0,m=0;i<a->n;i++)
+		m=m<(n=snprint(buf,8,"%g",d[i]))?n:m;
+	return m;
+}
+		
 static int Afmtb(Fmt *f, array *a) {
 	return 0;
 }

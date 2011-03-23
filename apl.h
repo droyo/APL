@@ -52,7 +52,7 @@ array*   eval(void*,array ***);
 
 /* Init,Teardown */
 int   fmt_init(void);
-int   const_init(void);
+int   const_init(void*);
 void  const_free(void);
 void* env_init(void);
 void  env_free(void*);

@@ -15,11 +15,10 @@ int main(void) {
 	quit = 0;
 	
 	try(a,mem_init(),"Can't init memory");
-	try(b,const_init(),"Can't init constants");
-	try(c,!(input=Bfdopen(0,O_RDONLY)),
+	try(b,!(input=Bfdopen(0,O_RDONLY)),
 		"Cannot open input");
-	try(d,!(global_env=env_init()),
-		"Cannot init environment");
+	try(c,!(global_env=env_init()),"Can't init env");
+	try(d,const_init(global_env),"Can't init constants");
 	try(e,fmt_init(),"Can't init formatter:%r");
 
 	while(!quit) {
@@ -30,9 +29,9 @@ int main(void) {
 	}
 	print("\nBye\n");
 
-	e:env_free(global_env);
-	d:Bterm(input);
-	c:const_free();
+	e:const_free();
+	d:env_free(global_env);
+	c:Bterm(input);
 	b:mem_free();
 	a:return 0;
 }
