@@ -1,3 +1,4 @@
+#include <utf.h>
 #include <string.h>
 #include <stdlib.h>
 #include "apl.h"
@@ -10,8 +11,8 @@ static int tsize(enum tag);
  * accordingly */
 static int type_sizes[] = {
 	sizeof (double), /* number    */
-	sizeof (char),   /* string    */
-	sizeof (char),   /* symbol    */
+	sizeof (Rune),   /* string    */
+	sizeof (Rune),   /* symbol    */
 	sizeof (void*),  /* function  */
 	sizeof (void*),  /* dydop     */
 	sizeof (void*),  /* monop     */

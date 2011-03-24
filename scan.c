@@ -94,17 +94,18 @@ static array* scan_numeral(Biobuf *i) {
 }
 
 static array* scan_literal(Biobuf *i) {
-	char q, c;
+	Rune r,q;
 	array *a = parray(string, 1, 0);
-
-	q = Bgetc(i);
-	for(c=Bgetc(i);c!=q||(c=Bgetc(i))==q; c=Bgetc(i)) {
-		if(c == '\n') return NULL;
-		push(&c,1);
+	a->n = 0;
+	q = Bgetrune(i);
+	
+	for(r=Bgetrune(i);r!=q||(r=Bgetrune(i))==q; r=Bgetrune(i)) {
+		if(r == '\n') return NULL;
+		push(&r,sizeof r);
+		a->n++;
 	}
-	Bungetc(i); push(&zero,1);
-	a->n = strlen(aval(a))+1;
-	*ashp(a) = utflen(aval(a));
+	Bungetrune(i);
+	*ashp(a) = a->n;
 
 	return a;
 }
@@ -149,9 +150,10 @@ static array* scan_special(Biobuf *i) {
 	array *a = parray(empty, 0, 0);
 	switch(r) {
 	case UASSIGN: a->t = assign; break;
-	default: 
+	default:
+		push(&r, sizeof r);
 		a->t = symbol;
-		a->n=runetochar(mem(runelen(r)), &r);
+		a->n=1;
 	}
 	return a;
 }
@@ -159,6 +161,7 @@ static array* scan_special(Biobuf *i) {
 static array* scan_symbol(Biobuf *i) {
 	Rune r;
 	array *a = parray(symbol,0,0);
+	a->n = 0;
 	
 	while((r = Bgetrune(i))>0) {
 		if(r!='.'&&isaplop(r)) break;
@@ -167,9 +170,9 @@ static array* scan_symbol(Biobuf *i) {
 		else if(isapldel(r))   break;
 		else if(isaplfun(r))   break;
 		else if(isaplchr(r))   break;
-		a->n+=runetochar(mem(runelen(r)), &r);
+		push(&r, sizeof r);
+		a->n++;
 	}
-	push(&zero, 1); a->n++;
 	Bungetrune(i);
 	return a;
 }
