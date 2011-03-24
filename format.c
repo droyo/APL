@@ -242,6 +242,7 @@ static int fmt_boxrow(Fmt *f, Rune **blocks, int *w, int n) {
 		e = rfind(s,'\n');
 		if(!i && fmtrune(f,'\n')) return -1;
 		if(*e) { blocks[i] = e+1; *e = 0; }
+		else blocks[i] = e;
 		if(fmtprint(f,"%C%*S%C",VE,w[i]+1,s,VE)) return -1;
 	}
 	return 0;

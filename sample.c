@@ -8,7 +8,7 @@ int sample_init(void *E) {
 	int *s,i; double *d;
 	array *NN, *NNN, *NNNN;
 	array *SS, *SSS, *SSSS;
-	array *B, *BB;
+	array *B, *BB, *BBB;
 
 	if (!(NN=anew(number,0,2,12))) return -1;
 	if (!(NNN=anew(number,0,3,32))) return -1;
@@ -18,6 +18,7 @@ int sample_init(void *E) {
 	if (!(SSSS=anew(string,0,4,16))) return -1;
 	if (!(B=anew(boxed,0,0,1))) return -1;
 	if (!(BB=anew(boxed,0,1,2))) return -1;
+	if (!(BBB=anew(boxed,0,1,2))) return -1;
 
 	s = ashp(NN); d = aval(NN);
 	s[0] = 2; s[1] = 6;
@@ -53,7 +54,12 @@ int sample_init(void *E) {
 	if(!put(E, "⎕G", B)) return -1;
 
 	s = ashp(BB); s[0] = 2;
-	a = aval(BB); a[1] = NN; a[0] = SSS;
+	a = aval(BB); a[1] = B; a[0] = NNNN;
 	if(!put(E, "⎕H", BB)) return -1;
+
+	s = ashp(BBB); s[0] = 2;
+	a = aval(BBB); a[0] = B; a[1] = BB;
+	if(!put(E, "⎕I", BBB)) return -1;
+
 	return 0;
 }
