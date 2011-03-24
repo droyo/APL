@@ -53,7 +53,7 @@ int sample_init(void *E) {
 	if(!put(E, "⎕G", B)) return -1;
 
 	s = ashp(BB); s[0] = 2;
-	a = aval(BB); a[1] = NNN; a[0] = SS;
+	a = aval(BB); a[1] = NN; a[0] = SSS;
 	if(!put(E, "⎕H", BB)) return -1;
 	return 0;
 }

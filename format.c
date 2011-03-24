@@ -35,6 +35,8 @@ static int getw(array*);
 static int llen(Rune*);
 static int frame(Fmt*,int,Rune,Rune);
 static int any(Rune**,int);
+static int fmt_boxrow(Fmt*,Rune**,int*,int);
+static Rune* rfind(Rune*, Rune);
 
 int fmt_init(void) {
 	return fmtinstall('A', Afmt);
@@ -131,48 +133,25 @@ static int Nx1(Fmt *f, double *d, int w, int n) {
 }
 
 static int Bx1(Fmt *f, array **a, int n) {
-	Rune **u,**t,*s; int i,j,k,*w,r = -1;
-	if(!(u = malloc(sizeof *u * n))) return -1;
-	if(!(t = malloc(sizeof *t * n))) goto Error1;
-	if(!(w = malloc(sizeof *w * n))) goto Error2;
+	Rune **u,**t; int i,k,*w,e = -1;
+	if(!(w = malloc(sizeof *w * n))) return -1;
+	if(!(u = malloc(sizeof *u * n))) goto Error1;
+	if(!(t = malloc(sizeof *t * n))) goto Error2;
 	
 	for(k=0;k<n;k++){
-		if(!(u[k] = runesmprint("%A",a[k]))) 
-			goto Error3;
+		if(!(u[k] = runesmprint("%A",a[k]))) goto Error3;
 		else { t[k] = u[k]; w[k] = llen(u[k]); }
 	}
-	for(i=0;i<n;i++)
-		if(frame(f,w[i],UL,UR))     goto Error3;
-	if(fmtprint(f,"\n")) goto Error3;
-	
-	while(any(t,n)) for(i=0;i<n;i++) {
-		s = t[i];
-		if(!*s&&w[i]<0) {
-			if(frame(f,-w[i],DL,DR)) goto Error3;
-			else w[i] = -w[i];
-		} else if(!*s&&fmtprint(f,"%*c",w[i]+4,0)) 
-			goto Error3;
-		for(j=0;s[j];j++){
-			if(s[j] == '\n') {
-				s[j] = 0; t[i] = s+j+1;
-				if(fmtprint(f,"%C%*S%C",VE,w[i]+1,s,VE))
-					goto Error3;
-				if(!**t) w[i] = -w[i];
-				break;
-			}
-		}
-		if(i==n-1 && fmtstrcpy(f,"\n"))     goto Error3;
-	}
-	for(i=0;i<n;i++) {
-		if(w[i]>0 && fmtprint(f,"%*c",w[i]+2,0)) goto Error3;
-		if(w[i]<0 && frame(f,-w[i],DL,DR))      goto Error3;
-	}
-	r = 0;
+	for(i=0;i<n;i++)if (frame(f,w[i],UL,UR)) goto Error3;
+	while(any(t,n)) if (fmt_boxrow(f,t,w,n)) goto Error3;
+	if(fmtrune(f,'\n'))                      goto Error3;
+	for(i=0;i<n;i++)if (frame(f,w[i],DL,DR)) goto Error3;
+	e = 0;
 	Error3: while(--k>=0) free(u[k]);
-	        free(w);
+	        free(t);
 	Error2: free(u); 
-	Error1: free(t);
-	return r;
+	Error1: free(w);
+	return e;
 }
 static int Sx1(Fmt *f, Rune *s, int n) {
 	int i; for(i=0;i<n;i++)
@@ -238,10 +217,13 @@ static int getw(array *a) {
 		m=m<(n=snprint(buf,8,"%g",d[i]))?n:m;
 	return m;
 }
+static Rune* rfind(Rune *s, Rune r) {
+	int i; for(i=0;s[i];i++)
+		if(s[i] == r) break;
+	return s+i;
+}
 static int llen(Rune *s) {
-	int i; for(i=0;s[i];i++) 
-		if(s[i] == '\n') break;
-	return i-1;
+	return rfind(s,'\n') - s - 1;
 }
 static int frame(Fmt *f, int n, Rune b, Rune e) {
 	int i;
@@ -253,3 +235,15 @@ static int any(Rune **r, int n) {
 	int i; for(i=0;i<n;i++) if(*r[i]) return 1;
 	return 0;
 }
+static int fmt_boxrow(Fmt *f, Rune **blocks, int *w, int n) {
+	int i; Rune *s, *e;
+	for(i=0;i<n;i++) {
+		s = blocks[i];
+		e = rfind(s,'\n');
+		if(!i && fmtrune(f,'\n')) return -1;
+		if(*e) { blocks[i] = e+1; *e = 0; }
+		if(fmtprint(f,"%C%*S%C",VE,w[i]+1,s,VE)) return -1;
+	}
+	return 0;
+}
+
