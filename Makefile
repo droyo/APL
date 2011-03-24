@@ -4,7 +4,7 @@ BIN := apl
 SRC := \
 	main.c eval.c scan.c \
 	array.c format.c env.c \
-	memory.c const.c
+	memory.c const.c sample.c
 INC := apl.h eval.h
 OBJ := $(SRC:.c=.o)
 

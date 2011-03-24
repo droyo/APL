@@ -53,7 +53,7 @@ array*   eval(void*,array ***);
 /* Init,Teardown */
 int   fmt_init(void);
 int   const_init(void*);
-void  const_free(void);
+int   sample_init(void*);
 void* env_init(void);
 void  env_free(void*);
 int   mem_init(void);

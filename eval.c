@@ -106,9 +106,10 @@ array* doper(void *E, array **a, int b, int e) {
 	return a[e];
 }
 array* bind(void *E, array **a, int b, int e) {
-	array *var = a[b], *val = a[e];
-	print("(set %A %A)",var, val);
-	array *s = put(E, aval(var), val);
+	char k[64];
+	print("(set %A %A)",a[b], a[e]);
+	snprint(k,sizeof k,"%S",aval(a[b]));
+	array *s = put(E, k, a[e]);
 	if(!s) {
 		fprint(2,"Binding error\n");
 		return zilde;

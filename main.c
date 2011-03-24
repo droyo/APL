@@ -14,12 +14,13 @@ int main(void) {
 	array *ans;
 	quit = 0;
 	
-	try(a,mem_init(),"Can't init memory");
-	try(b,!(input=Bfdopen(0,O_RDONLY)),
+	try(e1,mem_init(),"Can't init memory");
+	try(e2,!(input=Bfdopen(0,O_RDONLY)),
 		"Cannot open input");
-	try(c,!(global_env=env_init()),"Can't init env");
-	try(d,const_init(global_env),"Can't init constants");
-	try(e,fmt_init(),"Can't init formatter:%r");
+	try(e3,!(global_env=env_init()),"Can't init env");
+	try(e4,const_init(global_env),"Can't init constants");
+	try(e4,sample_init(global_env),"Can't init samples");
+	try(e4,fmt_init(),"Can't init formatter:%r");
 
 	while(!quit) {
 		print("\t");
@@ -29,9 +30,8 @@ int main(void) {
 	}
 	print("\nBye\n");
 
-	e:const_free();
-	d:env_free(global_env);
-	c:Bterm(input);
-	b:mem_free();
-	a:return 0;
+	e4:env_free(global_env);
+	e3:Bterm(input);
+	e2:mem_free();
+	e1:return 0;
 }
