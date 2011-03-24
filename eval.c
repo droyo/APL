@@ -62,7 +62,11 @@ array *parse(void *E, stack *l, stack *r, int lvl) {
 }
 
 array *lookup(void *E,array *a) {
-	return a->t==symbol?get(E,aval(a)):a;
+	char k[64];
+	if(a->t == symbol) {
+		snprint(k,sizeof k,"%S",aval(a));
+		return get(E,k);
+	} else return a;
 }
 int exec(void *E, stack *s) {
 	int i, j, a, p;
