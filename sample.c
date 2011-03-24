@@ -17,8 +17,8 @@ int sample_init(void *E) {
 	if (!(SSS=anew(string,0,3,32))) return -1;
 	if (!(SSSS=anew(string,0,4,16))) return -1;
 	if (!(B=anew(boxed,0,0,1))) return -1;
-	if (!(BB=anew(boxed,0,1,2))) return -1;
-	if (!(BBB=anew(boxed,0,1,2))) return -1;
+	if (!(BB=anew(boxed,0,0,1))) return -1;
+	if (!(BBB=anew(boxed,0,2,4))) return -1;
 
 	s = ashp(NN); d = aval(NN);
 	s[0] = 2; s[1] = 6;
@@ -53,12 +53,12 @@ int sample_init(void *E) {
 	a = aval(B); a[0] = SS;
 	if(!put(E, "⎕G", B)) return -1;
 
-	s = ashp(BB); s[0] = 2;
-	a = aval(BB); a[1] = B; a[0] = NNNN;
+	a = aval(BB); a[0] = NN;
 	if(!put(E, "⎕H", BB)) return -1;
 
-	s = ashp(BBB); s[0] = 2;
-	a = aval(BBB); a[0] = B; a[1] = BB;
+	a = aval(BBB); 
+	s = ashp(BBB); s[0] = s[1] = 2;
+	a[0] = a[2] = SS; a[1] = a[3] = BB;
 	if(!put(E, "⎕I", BBB)) return -1;
 
 	return 0;

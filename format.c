@@ -98,31 +98,27 @@ static int N(Fmt *f, double *d, int w) {
 	return fmtprint(f,"%*g", w, *d);
 }
 static int B(Fmt *f,array **a) {
-	Rune *s,*t; int i,w;
+	Rune *s,*t,*l,*n; 
+	int w, e=-1;
 	if(!(s = runesmprint("%A",*a)))
 		return -1;
-	else w = llen(s);
+	else { t = s;  w = llen(s);}
 	if(frame(f,w,UL,UR)) goto Error;
-	if(fmtprint(f,"\n")) return -1;
-	for(i=0,t=s;t[i];i++) {
-		if(t[i]=='\n') {
-			t[i] = 0;
-			if(fmtprint(f,"%C%S%C\n",VE,t,VE))
-				goto Error;
-			if(t[i+1]=='\n') {
-				if(fmtprint(f,"%C%*c%C\n",VE,w+2,0,VE))
-					goto Error;
-				t+=i+2;
-			} else t+=i+1; 
-			i=0;
-		}
+
+	while(*t) {
+		if(fmtrune(f,'\n')) goto Error;
+		l = rfind(t,'\n');
+		n = *l? l + 1 : l; *l = 0;
+		if(fmtprint(f,"%C%S%C",VE,t,VE))
+			goto Error;
+		t = n;
 	}
-	if(frame(f,llen(s),DL,DR)) goto Error;
+	if(fmtrune(f,'\n'))  goto Error;
+	if(frame(f,w,DL,DR)) goto Error;
+	e = 0;
+Error:
 	free(s);
-	return 0;
-	
-	Error: free(s);
-	return -1;
+	return e;
 }
 static int Nx1(Fmt *f, double *d, int w, int n) {
 	int i;for(i=0;i<n;i++) {
@@ -178,10 +174,11 @@ static int SxM(Fmt *f, Rune *s, int m, int n) {
 }
 
 static int BxM(Fmt *f, array **a, int m, int n) {
-	return 0;
-}
-
-static int BxMx(Fmt *f, array **a, int *s, int r) {
+	int i; for(i=0;i<m;i++) {
+		if(Bx1(f, a+i*n,n)) return -1;
+		if(fmtstrcpy(f,i<m?"\n":""))
+			return -1;
+	}
 	return 0;
 }
 
@@ -197,6 +194,20 @@ static int NxMx(Fmt *f,double *d, int w, int *s, int r) {
 	}
 	return 0;
 }
+
+static int BxMx(Fmt *f, array **a, int *s, int r) {
+	int i, o;
+	if(r == 2) return BxM(f,a,s[0],s[1]);
+	for(i=o=1;i<r;i++) o *= s[i];
+	for(i=0;i<s[0];i++) {
+		if(BxMx(f,a+(o*i),s+1,r-1))
+			return -1;
+		else if(fmtstrcpy(f,i<s[0]-1?"\n":""))
+			return -1;
+	}
+	return 0;
+}
+
 static int SxMx(Fmt *f, Rune *s, int *sh, int r) {
 	int i, o;
 	if(r == 2) return SxM(f,s,sh[0],sh[1]);
