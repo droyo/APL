@@ -20,7 +20,7 @@ int mem_init(void) {
 	if(!(toofar = anew(empty,rdonly,0,0))) return -1;
 	if(!(toocls = anew(empty,rdonly,0,0))) return -1;
 	toocls->c = 0;
-	toofar->c = UINT_MAX;
+	toofar->c = UCHAR_MAX;
 	memset(refs, 0, sizeof refs); 
 	return 0;
 }
@@ -31,7 +31,7 @@ void mem_free(void) {
 void mem_coll(void) {
 	array *t;
 	while((t=refs[0]) && !t->c) {
-		t->c = UINT_MAX;
+		t->c = UCHAR_MAX;
 		bubbledn(t);
 		refs[t->gc] = NULL;
 		print("free(%A)\n",t);

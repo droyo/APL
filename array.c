@@ -3,8 +3,10 @@
 #include <stdlib.h>
 #include "apl.h"
 
+#define max(a,b) ((a)>(b))?(a):(b)
 static int msize(array *a); 
 static int tsize(enum tag);
+enum { def_rank = 4 };
 
 /* Make sure if you modify the tag order
  * in apl.h that you also modify this table
@@ -20,7 +22,7 @@ static int type_sizes[] = {
 	sizeof (array*), /* boxed     */
 };
 static int msize(array *a) { 
-	return sizeof(int)*a->r + a->n*tsize(a->t); 
+	return sizeof(int)*a->k + a->n*tsize(a->t); 
 }
 static int tsize(enum tag t) {
 	unsigned long s; for(s=0;t>>=1;s++); 
@@ -30,16 +32,17 @@ long asize(array *a) {
 	return ASIZE + msize(a);
 }
 array *atmp(void *p,enum tag t, unsigned r, unsigned n) {
-	array *a = p;
+	array *a = p; a->k = max(def_rank,r);
 	a->t = t; a->f=tmpmem; 
 	a->r = r; a->n = n; a->c = 0;
 	return a;
 }
 array *anew(enum tag t, enum flag f, unsigned r, unsigned n) {
 	array *a;
-	if(!(a=malloc(ASIZE+sizeof(int)*r+tsize(t)*n)))
+	int s = max(def_rank,r);
+	if(!(a=malloc(ASIZE+sizeof(int)*s+tsize(t)*n)))
 		return NULL;
-	a->t=t;a->f=f&~tmpmem;a->r=r;a->n=n;
+	a->t=t;a->f=f&~tmpmem;a->r=r;a->n=n;a->k=s;
 	record(a); return a;
 }
 array *aclone(array *a) {
@@ -51,5 +54,5 @@ int *ashp(array *a) {
 	return (int*)a->m;
 }
 void *aval(array *a) {
-	return a->m + (sizeof (int) * a->r);
+	return a->m+(sizeof(int)*a->k);
 }

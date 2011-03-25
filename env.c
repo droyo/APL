@@ -6,7 +6,7 @@
 
 typedef struct   {char k[64]; array *a;}              pair;
 typedef struct   {long n,max; pair *p;}               bucket;
-typedef struct _e{struct _e *up; bucket b[512];} env;
+typedef struct _e{struct _e *up; bucket b[768];} env;
 
 static unsigned long hash(char *s) {
 	unsigned long c,h=3581;
@@ -77,11 +77,11 @@ array *put(void *v, char *k, array *a) {
 		if(old->a == a) return a;
 		else decref(old->a);
 	} 
-	if (dirty(a) && !(p.a = aclone(a))) 
+	if (dirty(a) && !(a = aclone(a))) 
 		return NULL;
 	else p.a = a;
 	if(add(b,p)) return NULL;
-	else incref(p.a);
+	incref(p.a);
 	return p.a;
 }
 

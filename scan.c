@@ -15,7 +15,6 @@ static struct {char bot[1024],*top;} pool;
 static void*  mem(long n);
 static array* parray(enum tag, unsigned, unsigned);
 static void*  push(void *p, long n);
-static void*  pop(long n);
 static void   reset_mem(void);
 
 static array* scan_numeral (Biobuf *i);
@@ -86,10 +85,6 @@ static array* scan_numeral(Biobuf *i) {
 	}
 	End: Bungetrune(i);
 	a->r = a->n > 1 ? 1 : 0;
-	if(!a->r) {
-		pop(sizeof d + sizeof(int));
-		push(&d, sizeof d);
-	}
 	return a;
 }
 
@@ -179,7 +174,8 @@ static array* scan_symbol(Biobuf *i) {
 
 static array *parray(enum tag t, unsigned r, unsigned n){
 	array *a = atmp(mem(ASIZE),t,r,n);
-	while(r--) push(&zero, sizeof (int));
+	int i = a->k;
+	while(i--) push(&zero, sizeof (int));
 	return a;
 }
 static void *push(void *p, long n) {
@@ -196,9 +192,5 @@ static void *mem(long n) {
 		return NULL;
 	pool.top += n;
 	return v;
-}
-static void *pop(long n) {
-	if (pool.top - n < pool.bot) return NULL;
-	return pool.top -= n;
 }
 static void reset_mem(void) { pool.top = pool.bot; }

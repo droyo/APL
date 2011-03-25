@@ -7,20 +7,20 @@
 #define L (lparen|assign|empty)
 #define F (function|primitive)
 #define N (symbol|string)
-#define V (string|number)
+#define V (string|number|boxed)
 #define D (dydop)
 #define M (monop)
 #define R (~0)
 
 rule cases[] = {
-	V|M|F|L, V|F,     D,       V|F, doper, 1,3,
-	V|M|F|L, V,       F,       V,   dyad,  1,3,
-	V|M|F|L, V|F,     M,       R,   moper, 1,2,
-	M|F|L,   F,       V,       R,   monad, 1,2,
-	D,       V,       F,       V,   monad, 2,3,
-	N,       assign,  V|M|D|F, R,   bind,  0,2,
-	lparen,  V|M|D|F, rparen,  R,   punc,  0,2,
-	0,       0,       0,       0,   NULL,  0,0
+{{	V|M|F|L, V|F,     D,       V|F}, doper, 1,3},
+{{	V|M|F|L, V,       F,       V},   dyad,  1,3},
+{{	V|M|F|L, V|F,     M,       R},   moper, 1,2},
+{{	M|F|L,   F,       V,       R},   monad, 1,2},
+{{	D,       V,       F,       V},   monad, 2,3},
+{{	N,       assign,  V|M|D|F, R},   bind,  0,2},
+{{	lparen,  V|M|D|F, rparen,  R},   punc,  0,2},
+{{	0,       0,       0,       0},   NULL,  0,0}
 };
 
 array *eval(void *E, array ***t) {
@@ -78,7 +78,6 @@ int exec(void *E, stack *s) {
 			if(!(a&p)) break;
 		}
 		if(j==4) {
-			print("\t");
 			apply(E, &cases[i], s);
 			print("\n");
 			break;
@@ -99,7 +98,7 @@ array* monad(void *E, array **a, int b, int e) {
 	return a[e];
 }
 array* dyad(void *E, array **a, int b, int e)  {
-	print("(%A %A,%A)",a[b+1],a[b],a[e]);
+	print("(%A %A,%A)",a[b+1],a[e],a[b]);
 	return a[e];
 }
 array* moper(void *E, array **a, int b, int e) {

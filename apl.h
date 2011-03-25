@@ -18,7 +18,9 @@ enum flag {
 #define ASIZE (sizeof(array))
 typedef struct {
 	enum tag t; enum flag f;
-	unsigned r, n, c, gc;
+	unsigned char r, k, c;
+	unsigned short gc;
+	unsigned long n;
 	char m[];
 } array;
 
