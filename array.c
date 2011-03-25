@@ -16,10 +16,10 @@ static int type_sizes[] = {
 	sizeof (double), /* number    */
 	sizeof (Rune),   /* string    */
 	sizeof (Rune),   /* symbol    */
-	sizeof (void*),  /* function  */
-	sizeof (void*),  /* dydop     */
-	sizeof (void*),  /* monop     */
-	sizeof (void*),  /* niladic   */
+	sizeof (array*), /* function  */
+	sizeof (array*), /* dydop     */
+	sizeof (array*), /* monop     */
+	sizeof (array*), /* niladic   */
 	sizeof (array*), /* boxed     */
 };
 static int msize(array *a) { 
