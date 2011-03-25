@@ -11,8 +11,10 @@ int quit;
 void *G;
 
 int main(void) {
+	int x;
 	Biobuf *input;
-	array *ans;
+	char buf[1024];
+	array *tok[128], **r[2], *ans;
 	quit = 0;
 	
 	try(e1,mem_init(),"Can't init memory");
@@ -26,8 +28,13 @@ int main(void) {
 	while(!quit) {
 		print("\t");
 		mem_coll();
-		ans = eval(G,scan(input));
-		if(ans) print("%A\n",ans);
+		x = scan(input,tok,NELEM(tok),buf,NELEM(buf));
+		if(x < 0) {
+			fprint(2, "Lex error\n");
+			continue;
+		}
+		r[0] = tok; r[1] = tok + x;
+		if((ans=eval(G,r))) print("%A\n",ans);
 	}
 	print("\nBye\n");
 

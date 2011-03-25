@@ -8,58 +8,54 @@
 #include "apl.h"
 #include "const.h"
 
-static array *tok[128];
-static array **ret[2];
-static struct {char bot[1024],*top;} pool;
+typedef struct{char *bot,*top,*end;} pool;
+static pool mkpool(char *b, int n);
 
-static void*  mem(long n);
-static array* parray(enum tag, unsigned, unsigned);
-static void*  push(void *p, long n);
-static void   reset_mem(void);
+static void*  mem(pool*,long);
+static array* parray(pool*,enum tag,unsigned,unsigned);
+static void*  push(pool*,void*,long);
 
-static array* scan_numeral (Biobuf *i);
-static array* scan_literal (Biobuf *i);
-static array* scan_function(Biobuf *i);
-static array* scan_symbol  (Biobuf *i);
-static array* scan_delims  (Biobuf *i);
-static array* scan_operator(Biobuf *i);
-static array* scan_special (Biobuf *i);
+static array* scan_numeral (pool*,Biobuf*);
+static array* scan_literal (pool*,Biobuf*);
+static array* scan_function(pool*,Biobuf*);
+static array* scan_symbol  (pool*,Biobuf*);
+static array* scan_delims  (pool*,Biobuf*);
+static array* scan_operator(pool*,Biobuf*);
+static array* scan_special (pool*,Biobuf*);
 
-array*** scan(void *v) {
+int scan(void *v, array **tok, int tn, char *buf, int bn) {
 	Rune r; 
 	array **t;
 	int top = 0;
 	Biobuf *i = v;
 	tok[top++] = marker;
-	reset_mem();
+	pool p = mkpool(buf,bn);
 
 	while((r=Bgetrune(i))>0) {
-		if(top>NELEM(tok)) return NULL;
+		if(top>tn) return -1;
 		t = tok+top;
 		if(r == Beof || r == '\n') break;
 		if(isspace(r)) continue;
 		Bungetrune(i);
 
 		if(r==ULAMP){Brdline(i,'\n');break;}
-		else if(isapldig(r))*t=scan_numeral (i);
-		else if(r == '\'')  *t=scan_literal (i);
-		else if(isapldel(r))*t=scan_delims  (i);
-		else if(isaplop(r)) *t=scan_operator(i);
-		else if(isaplfun(r))*t=scan_function(i);
-		else if(isaplchr(r))*t=scan_special (i);
-		else                *t=scan_symbol  (i);
+		else if(isapldig(r))*t=scan_numeral (&p,i);
+		else if(r == '\'')  *t=scan_literal (&p,i);
+		else if(isapldel(r))*t=scan_delims  (&p,i);
+		else if(isaplop(r)) *t=scan_operator(&p,i);
+		else if(isaplfun(r))*t=scan_function(&p,i);
+		else if(isaplchr(r))*t=scan_special (&p,i);
+		else                *t=scan_symbol  (&p,i);
 		
-		if (!tok[top]) return NULL;
+		if (!tok[top]) return -1;
 		top++;
 	}
-	ret[0] = tok;
-	ret[1] = tok+top-1;
-	return ret;
+	return top-1;
 }
 
-static array* scan_numeral(Biobuf *i) {
+static array* scan_numeral(pool *p, Biobuf *i) {
 	Rune r; double d; char n[64];
-	array *a = parray(number, 1, 0);
+	array *a = parray(p,number, 1, 0);
 	int j, e=0, dot=0;
 
 	for(j=0;j<NELEM(n);j++)switch(r=Bgetrune(i)) {
@@ -75,7 +71,7 @@ static array* scan_numeral(Biobuf *i) {
 			if(!strcmp(n, "-")) d = INFINITY; else
 			if(!strcmp(n,"--")) d =-INFINITY;
 			else d = strtod(n, 0);
-			push(&d, sizeof d);
+			push(p,&d, sizeof d);
 			*ashp(a) = ++a->n;
 		}
 		if (r == '\t' || r == ' ') {
@@ -88,15 +84,15 @@ static array* scan_numeral(Biobuf *i) {
 	return a;
 }
 
-static array* scan_literal(Biobuf *i) {
+static array* scan_literal(pool *p,Biobuf *i) {
 	Rune r,q;
-	array *a = parray(string, 1, 0);
+	array *a = parray(p,string, 1, 0);
 	a->n = 0;
 	q = Bgetrune(i);
 	
 	for(r=Bgetrune(i);r!=q||(r=Bgetrune(i))==q; r=Bgetrune(i)) {
 		if(r == '\n') return NULL;
-		push(&r,sizeof r);
+		push(p,&r,sizeof r);
 		a->n++;
 	}
 	Bungetrune(i);
@@ -105,14 +101,14 @@ static array* scan_literal(Biobuf *i) {
 	return a;
 }
 
-static array* scan_function(Biobuf *i) {
+static array* scan_function(pool *p,Biobuf *i) {
 	Rune r = Bgetrune(i);
-	array *a = parray(function, 0, 0);
-	a->f|=primitive; a->n = 1; push(&r, sizeof r);
+	array *a = parray(p,function, 0, 0);
+	a->f|=primitive; a->n = 1; push(p,&r, sizeof r);
 	return a;
 }
 
-static array* scan_operator(Biobuf *i) {
+static array* scan_operator(pool *p,Biobuf *i) {
 	array *a;
 	int c; Rune r = Bgetrune(i);
 	/* Make sure it's '.' the operator, and
@@ -122,40 +118,40 @@ static array* scan_operator(Biobuf *i) {
 		Bgetc(i); c = Bgetc(i);
 		if(isdigit(c)) {
 			Bungetc(i); Bungetc(i);
-			return scan_numeral(i);
+			return scan_numeral(p,i);
 		} else Bungetc(i);
 	}
-	a=parray(isapldop(r)?dydop:monop,0,0);
-	a->f|=primitive;a->n = 1; push(&r, sizeof r);
+	a=parray(p,isapldop(r)?dydop:monop,0,0);
+	a->f|=primitive;a->n = 1; push(p,&r, sizeof r);
 	return a;
 }
 
-static array* scan_delims(Biobuf *i) {
+static array* scan_delims(pool *p,Biobuf *i) {
 	int c = Bgetc(i); enum tag t;
 	switch(c) {
 		case '(': t = lparen;	break;
 		case ')': t = rparen;	break;
 		case ':': t = colon;	break;
 	}
-	return parray(t,0,0);
+	return parray(p,t,0,0);
 }
 
-static array* scan_special(Biobuf *i) {
+static array* scan_special(pool *p,Biobuf *i) {
 	Rune r = Bgetrune(i);
-	array *a = parray(empty, 0, 0);
+	array *a = parray(p,empty, 0, 0);
 	switch(r) {
 	case UASSIGN: a->t = assign; break;
 	default:
-		push(&r, sizeof r);
+		push(p,&r, sizeof r);
 		a->t = symbol;
 		a->n=1;
 	}
 	return a;
 }
 
-static array* scan_symbol(Biobuf *i) {
+static array* scan_symbol(pool *p, Biobuf *i) {
 	Rune r;
-	array *a = parray(symbol,0,0);
+	array *a = parray(p,symbol,0,0);
 	a->n = 0;
 	
 	while((r = Bgetrune(i))>0) {
@@ -165,32 +161,33 @@ static array* scan_symbol(Biobuf *i) {
 		else if(isapldel(r))   break;
 		else if(isaplfun(r))   break;
 		else if(isaplchr(r))   break;
-		push(&r, sizeof r);
+		push(p,&r, sizeof r);
 		a->n++;
 	}
 	Bungetrune(i);
 	return a;
 }
 
-static array *parray(enum tag t, unsigned r, unsigned n){
-	array *a = atmp(mem(ASIZE),t,r,n);
+static array *parray(pool *p,enum tag t, unsigned r, unsigned n){
+	array *a = atmp(mem(p,ASIZE),t,r,n);
 	int i = a->k;
-	while(i--) push(&zero, sizeof (int));
+	while(i--) push(p,&zero, sizeof (int));
 	return a;
 }
-static void *push(void *p, long n) {
-	void *v;
-	if ((pool.top + n) > pool.bot + NELEM(pool.bot))
-		return NULL;
-	v = memcpy(pool.top, p, n);
-	pool.top += n;
-	return v;
+static void *push(pool *p,void *v, long n) {
+	void *r;
+	if (p->top+n > p->end) return NULL;
+	r = memcpy(p->top, v, n);
+	p->top += n;
+	return r;
 }
-static void *mem(long n) {
-	void *v = pool.top;
-	if ((pool.top + n) > pool.bot + NELEM(pool.bot))
-		return NULL;
-	pool.top += n;
-	return v;
+static void *mem(pool *p, long n) {
+	void *r = p->top;
+	if (p->top+n > p->end) return NULL;
+	p->top += n;
+	return r;
 }
-static void reset_mem(void) { pool.top = pool.bot; }
+static pool mkpool(char *buf, int n) {
+	pool p; p.bot = p.top = buf; p.end = buf + n;
+	return p;
+}
