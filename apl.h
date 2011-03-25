@@ -20,7 +20,7 @@ typedef struct {
 	enum tag t; enum flag f;
 	unsigned char r, k, c;
 	unsigned short gc;
-	unsigned long n;
+	unsigned long n,z;
 	char m[];
 } array;
 

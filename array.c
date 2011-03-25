@@ -7,6 +7,7 @@
 static int msize(array *a); 
 static int tsize(enum tag);
 enum { def_rank = 4 };
+enum { def_size = 32};
 
 /* Make sure if you modify the tag order
  * in apl.h that you also modify this table
@@ -40,9 +41,11 @@ array *atmp(void *p,enum tag t, unsigned r, unsigned n) {
 array *anew(enum tag t, enum flag f, unsigned r, unsigned n) {
 	array *a;
 	int s = max(def_rank,r);
-	if(!(a=malloc(ASIZE+sizeof(int)*s+tsize(t)*n)))
+	int z = max(def_size,n);
+	if(!(a=malloc(ASIZE+sizeof(int)*s+tsize(t)*z)))
 		return NULL;
-	a->t=t;a->f=f&~tmpmem;a->r=r;a->n=n;a->k=s;
+	a->t=t;a->f=f&~tmpmem;
+	a->r=r;a->n=n;a->k=s;a->z=z;
 	record(a); return a;
 }
 array *aclone(array *a) {
