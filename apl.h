@@ -26,10 +26,10 @@ extern array *zilde;
 extern array *marker;
 extern int zero;
 extern int quit;
-extern void *global_env;
+extern void *G;
 
 /* Hash table for var bindings */
-void*  shadow(void *, int);
+void*  shadow(void *);
 array* put(void *, char*, array*);
 array* get(void *, char*);
 
