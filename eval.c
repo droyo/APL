@@ -64,9 +64,10 @@ array *parse(void *E, stack *l, stack *r, int lvl) {
 array *lookup(void *E,array *a) {
 	char k[64];
 	if(a->t == symbol) {
-		snprint(k,sizeof k,"%S",aval(a));
+		snprint(k, sizeof k, "%*R",a->n,aval(a));
 		return get(E,k);
-	} else return a;
+	}
+	return a;
 }
 int exec(void *E, stack *s) {
 	int i, j, a, p;
@@ -111,7 +112,7 @@ array* doper(void *E, array **a, int b, int e) {
 array* bind(void *E, array **a, int b, int e) {
 	char k[64];
 	print("(set %A %A)",a[b], a[e]);
-	snprint(k,sizeof k,"%S",aval(a[b]));
+	snprint(k,sizeof k,"%*R", a[b]->n, aval(a[b]));
 	array *s = put(E, k, a[e]);
 	if(!s) {
 		fprint(2,"Binding error\n");

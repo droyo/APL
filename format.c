@@ -11,6 +11,7 @@ enum boxdrawing {
   UR  = 0x2510, DR  = 0x2518,
   UL  = 0x250C, DL  = 0x2514
 };
+static int Rfmt (Fmt*);
 static int Afmt (Fmt*);
 static int Afmtn(Fmt*,array*);
 static int Afmts(Fmt*,array*);
@@ -39,7 +40,15 @@ static int fmt_boxrow(Fmt*,Rune**,int*,int);
 static Rune* rfind(Rune*, Rune);
 
 int fmt_init(void) {
+	if(fmtinstall('R', Rfmt)) return -1;
 	return fmtinstall('A', Afmt);
+}
+static int Rfmt(Fmt *f) {
+	int i;
+	Rune *s = va_arg(f->args, Rune*);
+	for(i=0;s[i]&&i<f->width;i++)
+		if(fmtrune(f,s[i])) return -1;
+	return fmtrune(f,0);
 }
 
 static int Afmt(Fmt *f) {

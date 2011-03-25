@@ -1,3 +1,4 @@
+#include <utf.h>
 #include <string.h>
 #include <stdlib.h>
 #include "apl.h"
@@ -70,7 +71,7 @@ static bucket *slot(env *e, char *k) {
 array *put(void *v, char *k, array *a) {
 	bucket *b = slot((env*)v, k);
 	pair p,*old = find(b,k);
-	p.a = NULL;
+
 	strncpy(p.k, k, sizeof p.k-1);
 	if(old) {
 		if(old->a == a) return a;
@@ -84,7 +85,7 @@ array *put(void *v, char *k, array *a) {
 	return p.a;
 }
 
-array *get(void *v, char *k) {
+array *get(void *v,char *k) {
 	env *e = v; pair *p;
 	do{ p = find(slot(e,k),k);
 		if(!p && e->up) e=e->up;
