@@ -1,4 +1,4 @@
-# An open-source, utf8 APL interpreter
+# An open-source, unicode APL interpreter
 
 This project is my endeavour to create an open-source APL
 interpreter that is useful for every-day use.  I want this
@@ -25,7 +25,7 @@ share programs.
 
 These days Unicode is pretty wide-spread, and the encoding
 problem is no longer a problem anymore.  This interpreter
-uses utf8 for everything.  Identifiers, primitives,
+uses unicode for everything.  Identifiers, primitives,
 box-drawing characters, everything.  So
 
 	nước ← 'USA'⊃'日本'⊃'Việt Nam'⊃'Россия' 
