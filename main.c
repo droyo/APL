@@ -21,9 +21,9 @@ int main(void) {
 	try(e2,!(input=Bfdopen(0,O_RDONLY)),
 		"Cannot open input");
 	try(e3,!(G=shadow(0)),"Can't init env");
+	try(e4,fmt_init(),"Can't init formatter:%r");
 	try(e4,const_init(G),"Can't init constants");
 	try(e4,sample_init(G),"Can't init samples");
-	try(e4,fmt_init(),"Can't init formatter:%r");
 
 	while(!quit) {
 		print("\t");

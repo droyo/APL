@@ -74,7 +74,8 @@ array *put(void *v, char *k, array *a) {
 
 	strncpy(p.k, k, sizeof p.k-1);
 	if(old) {
-		if(old->a == a) return a;
+		if(old->a->f&rdonly) return NULL;
+		else if(old->a == a) return a;
 		else decref(old->a);
 	} 
 	if (dirty(a) && !(a = aclone(a))) 

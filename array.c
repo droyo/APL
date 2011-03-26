@@ -46,6 +46,7 @@ array *anew(enum tag t, enum flag f, unsigned r, unsigned n) {
 		return NULL;
 	a->t=t;a->f=f&~tmpmem;
 	a->r=r;a->n=n;a->k=s;a->z=z;
+	if(r == 1) *ashp(a) = n;
 	record(a); return a;
 }
 array *aclone(array *a) {
