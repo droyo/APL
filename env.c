@@ -93,4 +93,3 @@ array *get(void *v,char *k) {
 		else if(p) return p->a;
 	} while(e->up); return NULL;
 }
-

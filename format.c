@@ -54,10 +54,6 @@ static int Rfmt(Fmt *f) {
 static int Afmt(Fmt *f) {
 	array *a = va_arg(f->args, array*);
 	switch(a->t) {
-	case function: case dydop: case monop: case niladic:
-		if(a->f&primitive)
-			return fmtrune(f, *(Rune*)aval(a));
-		else break;
 	case number: return Afmtn(f,a);
 	case boxed:  return Afmtb(f,a);
 	case string: return Afmts(f,a);
@@ -68,7 +64,7 @@ static int Afmt(Fmt *f) {
 	case colon:  return fmtprint(f,":");
 	case lparen: return fmtprint(f,"(");
 	case rparen: return fmtprint(f,")");
-	default:     return fmtrune(f,*(Rune*)aval(a));
+	default:     return fmtprint(f,"%*R",a->n,aval(a));
 	}
 	return 0;
 }

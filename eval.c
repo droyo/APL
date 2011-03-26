@@ -102,6 +102,7 @@ array* dyad(void *E, array **a, int b, int e)  {
 	return a[e];
 }
 array* moper(void *E, array **a, int b, int e) {
+	print("(op '%A%A')",a[b],a[e]);
 	return a[b];
 }
 array* doper(void *E, array **a, int b, int e) {
