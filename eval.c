@@ -68,7 +68,7 @@ array *lookup(void *E,array *a) {
 }
 int exec(void *E, stack *s) {
 	int i, j, a, p;
-	for(i = 0; i < NELEM(cases); i++) {
+	for(i = 0; i <NELEM(cases); i++) {
 		for(j=0;j<NELEM(cases[0].c);j++) {
 			a = nth(s,j)->t;
 			p = cases[i].c[j];
@@ -84,9 +84,9 @@ int exec(void *E, stack *s) {
 }
 int apply(void *E, rule *r, stack *s) {
 	int i; array *x, *a[4];
-	
 	for(i=0;i<=r->e;i++) a[i] = pop(s);
 	x = (*r->f)(E, a, r->b, r->e);
+	if(!x) return -1;
 	push(s,x);for(i=r->b-1;i>=0;i--) push(s,a[i]);
 	return 0;
 }

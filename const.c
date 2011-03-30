@@ -40,13 +40,13 @@ static int checksym(void *E, char *s, Rune r) {
 		if(c[i] == r) return 1;
 	return 0;
 };
-int isapldig(long x) {return (x>='0' && x<='9')|| x==UMACRON;}
-int isapldel(long x) {return x == '(' || x == ')' || x == ':';}
-int isaplmop(long x) {return checksym(G, "⎕pm", x);}
-int isapldop(long x) {return checksym(G, "⎕pd", x);}
-int isaplfun(long x) {return checksym(G, "⎕pf", x);}
-int isaplchr(long x) {return checksym(G, "⎕pe", x);}
-int isaplop (long x) {return isaplmop(x) || isapldop(x);}
+int isapldig(long x){return (x>='0' && x<='9')||x==UMACRON;}
+int isapldel(long x){return x == '(' || x == ')' || x == ':';}
+int isaplmop(long x){return checksym(G, "⎕pm", x);}
+int isapldop(long x){return checksym(G, "⎕pd", x);}
+int isaplfun(long x){return checksym(G, "⎕pf", x);}
+int isaplchr(long x){return checksym(G, "⎕pe", x);}
+int isaplop (long x){return isaplmop(x) || isapldop(x);}
 int const_init(void *E) {
 	int n;
 	array *Func, *Dyop, *Moop, *Extra;
