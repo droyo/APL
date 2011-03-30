@@ -33,5 +33,5 @@ Scanner memory exhausted.
 [lexerr]
 Garbled input.
 
-[testfun array* int char*]
-First array %1 then char %3 then array %1 then int %2 then char %3 then array "%1"
+[nomem]
+Out of memory.

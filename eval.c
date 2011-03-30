@@ -3,6 +3,7 @@
 #include <fmt.h>
 #include "apl.h"
 #include "eval.h"
+#include "error.h"
 
 #define L (lparen|assign|empty)
 #define F (function|primitive)
@@ -46,18 +47,14 @@ array *parse(void *E, stack *l, stack *r, int lvl) {
 		}else if (top(r)->t == assign)
 			push(r,a);
 		else {
-			if(!(v = lookup(E,a))) {
-				fprint(2, "Unbound var `%A'\n", a);
-				return NULL;
-			} else push(r,v);
+			if(!(v = lookup(E,a)))
+				return enil(Eunbound, a);
+			else push(r,v);
 		}
 		while(exec(E, r));
 	} while(a->t != empty);
 	while(exec(E, r));
-	if (count(r) > 2) {
-		print("Parsing error\n");
-		return NULL;
-	}
+	if (count(r) > 2) return enil(Esyntax);
 	return nth(r,lvl?0:1);
 }
 
@@ -114,10 +111,7 @@ array* bind(void *E, array **a, int b, int e) {
 	print("(set %A %A)",a[b], a[e]);
 	snprint(k,sizeof k,"%*R", a[b]->n, aval(a[b]));
 	array *s = put(E, k, a[e]);
-	if(!s) {
-		fprint(2,"Binding error\n");
-		return zilde;
-	} 
+	if(!s) return ezil(Ebind, a[b]);
 	return s;
 }
 array* punc(void *E, array **a, int b, int e) {

@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "apl.h"
+#include "error.h"
 
 #define max(a,b) ((a)>(b))?(a):(b)
 static int msize(array *a); 
@@ -43,7 +44,7 @@ array *anew(enum tag t, enum flag f, unsigned r, unsigned n) {
 	int s = max(def_rank,r);
 	int z = max(def_size,n);
 	if(!(a=malloc(ASIZE+sizeof(int)*s+tsize(t)*z)))
-		return NULL;
+		return enil(Enomem);
 	a->t=t;a->f=f&~tmpmem;
 	a->r=r;a->n=n;a->k=s;a->z=z;
 	if(r == 1) *ashp(a) = n;
