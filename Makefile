@@ -8,7 +8,9 @@ SRC := \
 	memory.c const.c sample.c \
 	error.c error-msg.c
 
-INC := apl.h eval.h error.h error-enm.h
+INC := apl.h eval.h error.h \
+       error-enm.h const.h
+
 OBJ := $(SRC:.c=.o)
 
 CFLAGS = -Wall -I/usr/local/include -g
@@ -27,11 +29,13 @@ error-enm.h: error.msg aux/enmake.awk
 error-msg.c: error.msg aux/efmake.awk
 	$(AWK) -f aux/efmake.awk $< > $@
 
+$(OBJ) : apl.h error.h
+
 .c.o:
 	$(CC) $(CFLAGS) -c $<
 
-$(OBJ) : apl.h error.h
-eval.o : eval.h
+eval.o  : eval.h
+const.o : const.h
 error-msg.o error.o : error.h error-enm.h
 
 clean:
