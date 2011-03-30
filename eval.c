@@ -42,7 +42,7 @@ array *parse(void *E, stack *l, stack *r, int lvl) {
 				return NULL; 
 			else push(r,e);
 		}else if(a->t == lparen) {
-			if (!lvl) return NULL;
+			if (!lvl) return enil(Eparen);
 			push(r,a); break;
 		}else if (top(r)->t == assign)
 			push(r,a);
