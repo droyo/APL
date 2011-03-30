@@ -9,8 +9,8 @@ array *zilde;
 array *marker;
 
 static Rune utfdyadicop[] = {
-	UEACH,  UDOT,       UHOOT, UHOLLER, 
-	UUNION, UINTERSECT, UDFNS, UWITHE, 0
+	UEACH,  UDOT,   UHOOT, UHOLLER, 
+	UUNION, UISECT, UDFNS, UWITHE, 0
 };
 static Rune utfmonadop[] = {
 	UBSLASH, UBSLASHB, USLASH, 
