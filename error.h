@@ -3,8 +3,8 @@
 #include "error-enm.h"
 #endif
 
-void*  enil (int(*f)(va_list),...);
-int    eneg (int(*f)(va_list),...);
-void*  ezil (int(*f)(va_list),...);
-int    ezro (int(*f)(va_list),...);
-void   edie (int(*f)(va_list),...);
+void*  enil (int(*f)(),...);
+int    eneg (int(*f)(),...);
+void*  ezil (int(*f)(),...);
+int    ezro (int(*f)(),...);
+void   edie (int(*f)(),...);
