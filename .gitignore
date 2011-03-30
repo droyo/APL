@@ -3,3 +3,5 @@ doc/*
 apl
 core
 .*.swp
+error-enm.h
+error-msg.c
