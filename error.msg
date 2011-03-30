@@ -3,26 +3,23 @@
 # in error.c
 
 [unbound array*] 
-The variable `%1' does not refer to any function, operator, or value. In
-fact, I don't even know what `%1' means. What the hell kind of word is
-`%1', anyway?
+Unbound variable `%1'
 
 [rdonly array*]
 `%1' is read-only. You can look, but you can't touch~
 
 [malloc]
-You've not enough memory. You must construct additional RAM modules.
+You must construct additional RAM modules.
 
 [syntax]
-I know you think what you just wrote made sense, but it confused the
-hell out of me. Can we try this again?
+That doesn't make sense.
 
 [bind array*]
 Could not bind `%1'. I can only remember so many things at once (don't
 laugh, I bet you can't remember more than 7!).
 
 [paren]
-Balance your parenthesis!
+Not balancing your parenthesis is like not finishing your sentences. Rude.
 
 [lexline int]
 Maximum line length of %1 exceeded.
