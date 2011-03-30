@@ -74,15 +74,17 @@ functions/operators. Perhaps using backticks would be acceptable.
 
 ## State of the project
 
-Work in progress - rudimentary lexer and parser are
-complete.  Unified array data structure is implemented.
-Basic memory management based on ref-counting implemented.
-Most of the boring stuff is out of the way.  I am still
-planning out the core execution loop and function
-dispatch/definition.  One-by-one standard functions
-will be added.  The project is not currently at a state
-where outside help would be beneficial, or a fork useful.
-Feel free to stay tuned, however. I'm having a lot of fun
-writing this and am actively updating it. As of Mar. 2011
+Work in progress - rudimentary lexer and parser are complete.
+Unified array data structure is implemented.  Basic memory
+management based on ref-counting implemented.  Handy
+error-reporting system is in place.
+
+Most of the boring stuff is out of the way.  I am still planning
+out the core execution loop and function dispatch/definition.
+One-by-one standard functions will be added.  The project is not
+currently at a state where outside help would be beneficial, or
+a fork useful.  Feel free to stay tuned, however.  I'm having a
+lot of fun writing this and am actively updating it  as of Apr.
+2011
 
 [1](http://www.jsoftware.com/papers/APLDictionary.htm)
