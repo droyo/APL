@@ -29,10 +29,7 @@ int main(void) {
 		print("\t");
 		mem_coll();
 		x = scan(input,tok,NELEM(tok),buf,NELEM(buf));
-		if(x < 0) {
-			fprint(2, "Lex error\n");
-			continue;
-		}
+		if(x < 0) continue;
 		r[0] = tok; r[1] = tok + x;
 		if((ans=eval(G,r))) print("%A\n",ans);
 	}

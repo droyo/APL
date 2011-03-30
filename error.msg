@@ -28,8 +28,10 @@ Balance your parenthesis!
 Maximum line length of %1 exceeded.
 
 [lexmem]
-Scanner memory exhausted. Either you put "War and Peace" on one line,
-or my creator was lazy and used stack allocation.
+Scanner memory exhausted. 
+
+[lexerr]
+Garbled input.
 
 [testfun array* int char*]
 First array %1 then char %3 then array %1 then int %2 then char %3 then array "%1"

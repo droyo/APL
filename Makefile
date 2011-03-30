@@ -19,8 +19,7 @@ all: $(BIN)
 $(BIN): $(OBJ)
 	$(LD) -o $@ $^ $(LDFLAGS)
 
-.c.o:
-	$(CC) $(CFLAGS) -c $<
+error.h: error-enm.h
 
 error-enm.h: error.msg aux/enmake.awk
 	$(AWK) -f aux/enmake.awk $< > $@
@@ -28,7 +27,10 @@ error-enm.h: error.msg aux/enmake.awk
 error-msg.c: error.msg aux/efmake.awk
 	$(AWK) -f aux/efmake.awk $< > $@
 
-$(OBJ) : apl.h
+.c.o:
+	$(CC) $(CFLAGS) -c $<
+
+$(OBJ) : apl.h error.h
 eval.o : eval.h
 error-msg.o error.o : error.h error-enm.h
 

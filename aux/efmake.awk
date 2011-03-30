@@ -25,7 +25,7 @@ function print_error(x) {
 		a=sprintf("%s,%s",a,var[x,idx])
 		sub(n,t,s)
 	}
-	printf(cfunc,x,dec[x],s,a)
+	printf(cfunc,x,dec[x],s"\\n",a)
 }
 /^#/ { next; }
 /^\[/ {

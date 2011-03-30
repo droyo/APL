@@ -7,6 +7,7 @@
 #include <math.h>
 #include "apl.h"
 #include "const.h"
+#include "error.h"
 
 typedef struct{char *bot,*top,*end;} pool;
 static pool mkpool(char *b, int n);
@@ -32,11 +33,14 @@ int scan(void *v, array **tok, int tn, char *buf, int bn) {
 	pool p = mkpool(buf,bn);
 
 	while((r=Bgetrune(i))>0) {
-		if(top>tn) return -1;
-		t = tok+top;
+		if(top>tn) {
+			Brdline(i,'\n');
+			return eneg(Elexline,tn);
+		}
 		if(r == Beof || r == '\n') break;
 		if(isspace(r)) continue;
 		Bungetrune(i);
+		t = tok+top;
 
 		if(r==ULAMP){Brdline(i,'\n');break;}
 		else if(isapldig(r))*t=scan_numeral (&p,i);
@@ -47,7 +51,10 @@ int scan(void *v, array **tok, int tn, char *buf, int bn) {
 		else if(isaplchr(r))*t=scan_special (&p,i);
 		else                *t=scan_symbol  (&p,i);
 		
-		if (!tok[top]) return -1;
+		if (!tok[top]) {
+			Brdline(i,'\n');
+			return -1;
+		}
 		top++;
 	}
 	return top-1;
@@ -56,6 +63,7 @@ int scan(void *v, array **tok, int tn, char *buf, int bn) {
 static array* scan_numeral(pool *p, Biobuf *i) {
 	Rune r; double d; char n[64];
 	array *a = parray(p,number, 1, 0);
+	if(!a) return NULL;
 	int j, e=0, dot=0;
 
 	for(j=0;j<NELEM(n);j++)switch(r=Bgetrune(i)) {
@@ -87,6 +95,7 @@ static array* scan_numeral(pool *p, Biobuf *i) {
 static array* scan_literal(pool *p,Biobuf *i) {
 	Rune r,q;
 	array *a = parray(p,string, 1, 0);
+	if(!a) return NULL;
 	a->n = 0;
 	q = Bgetrune(i);
 	
@@ -104,6 +113,7 @@ static array* scan_literal(pool *p,Biobuf *i) {
 static array* scan_function(pool *p,Biobuf *i) {
 	Rune r = Bgetrune(i);
 	array *a = parray(p,function, 0, 0);
+	if(!a) return NULL;
 	a->f|=primitive; a->n = 1; push(p,&r, sizeof r);
 	return a;
 }
@@ -122,6 +132,7 @@ static array* scan_operator(pool *p,Biobuf *i) {
 		} else Bungetc(i);
 	}
 	a=parray(p,isapldop(r)?dydop:monop,0,0);
+	if(!a) return NULL;
 	a->f|=primitive;a->n = 1; push(p,&r, sizeof r);
 	return a;
 }
@@ -139,6 +150,7 @@ static array* scan_delims(pool *p,Biobuf *i) {
 static array* scan_special(pool *p,Biobuf *i) {
 	Rune r = Bgetrune(i);
 	array *a = parray(p,empty, 0, 0);
+	if (!a) return NULL;
 	switch(r) {
 	case UASSIGN: a->t = assign; break;
 	default:
@@ -152,6 +164,7 @@ static array* scan_special(pool *p,Biobuf *i) {
 static array* scan_symbol(pool *p, Biobuf *i) {
 	Rune r;
 	array *a = parray(p,symbol,0,0);
+	if(!a) return NULL;
 	a->n = 0;
 	
 	while((r = Bgetrune(i))>0) {
@@ -169,9 +182,14 @@ static array* scan_symbol(pool *p, Biobuf *i) {
 }
 
 static array *parray(pool *p,enum tag t, unsigned r, unsigned n){
-	array *a = atmp(mem(p,ASIZE),t,r,n);
+	void *m = mem(p,ASIZE);
+	if(!m) return enil(Elexmem);
+	array *a = atmp(m,t,r,n);
 	int i = a->k;
-	while(i--) push(p,&zero, sizeof (int));
+	while(i--) {
+		if(!push(p,&zero, sizeof (int)))
+			return enil(Elexmem);
+	}
 	return a;
 }
 static void *push(pool *p,void *v, long n) {
