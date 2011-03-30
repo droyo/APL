@@ -7,8 +7,10 @@
 int main(void) {
 	Rune r;
 	Biobuf *i = Bfdopen(0,O_RDONLY);
-	while((r=Bgetrune(i))>0 && !isspace(r))
+	while((r=Bgetrune(i))>0) {
+		if(isspace(r)) continue;
 		print("\t%C = 0x%X\n",r,r);
+	}
 	Bterm(i);
 	return 0;
 }
