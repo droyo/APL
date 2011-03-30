@@ -2,27 +2,34 @@
 # C source code that is handled by the functions
 # in error.c
 
-[unbound var] 
-The variable `$var' does not refer to any function, operator, or value. In fact, I don't even know what `$var' means. What the hell kind of word is `$var', anyway?
+[unbound array*] 
+The variable `%1' does not refer to any function, operator, or value. In
+fact, I don't even know what `%1' means. What the hell kind of word is
+`%1', anyway?
 
-[rdonly var]
-`$var' is read-only. You can look, but you can't touch~
+[rdonly array*]
+`%1' is read-only. You can look, but you can't touch~
 
 [malloc]
-Tell your OS to give me moar memory. Or add RAM, 'cause I'm all out.
-
+You've not enough memory. You must construct additional RAM modules.
 
 [syntax]
-I know you think what you just wrote made sense, but it confused the hell out of me. Can we try this again?
+I know you think what you just wrote made sense, but it confused the
+hell out of me. Can we try this again?
 
-[bind name val]
-Could not bind `$name'. I can only remember so many things at once (don't laugh, I bet you can't remember more than 7!). 
+[bind array*]
+Could not bind `%1'. I can only remember so many things at once (don't
+laugh, I bet you can't remember more than 7!).
 
 [paren]
-Unbalanced parenthesis
+Balance your parenthesis!
 
-[lexline max]
-Maximum line length of $max exceeded.
+[lexline int]
+Maximum line length of %1 exceeded.
 
 [lexmem]
-Scanner memory exhausted. Either you put "War and Peace" on one line, or my creator was lazy and used stack allocation.
+Scanner memory exhausted. Either you put "War and Peace" on one line,
+or my creator was lazy and used stack allocation.
+
+[testfun array* int char*]
+First array %1 then char %3 then array %1 then int %2 then char %3 then array "%1"
