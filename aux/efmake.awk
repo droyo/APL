@@ -7,7 +7,6 @@ BEGIN {
 	print("#include \"apl.h\"")
 	print("#include <stdarg.h>")
 	print("#include \"error.h\"")
-	print("#include \"error-enm.h\"")
 	print("extern int errfmt(char*,...);");
 	print("extern char *err_txt[];");
 	fmt["array*"]	= "%A"
