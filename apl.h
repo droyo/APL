@@ -28,6 +28,7 @@ extern array *zilde;
 extern array *marker;
 extern int zero;
 extern int quit;
+extern int echo;
 extern void *G;
 
 /* Hash table for var bindings */

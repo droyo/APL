@@ -8,6 +8,7 @@
 #define try(e,f,s) do{if(f){fprint(2,s"\n");goto e;}}while(0)
 
 int quit;
+int echo;
 void *G;
 
 int main(void) {
@@ -16,6 +17,7 @@ int main(void) {
 	char buf[1024];
 	array *tok[128], **r[2], *ans;
 	quit = 0;
+	echo = 1;
 	
 	try(e1,mem_init(),"Can't init memory");
 	try(e2,!(input=Bfdopen(0,O_RDONLY)),
@@ -31,7 +33,8 @@ int main(void) {
 		x = scan(input,tok,NELEM(tok),buf,NELEM(buf));
 		if(x < 0) continue;
 		r[0] = tok; r[1] = tok + x;
-		if((ans=eval(G,r))) print("%A\n",ans);
+		ans = eval(G, r);
+		if(ans && echo) print("%A\n", ans);
 	}
 	print("\nBye\n");
 

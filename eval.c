@@ -76,6 +76,7 @@ int exec(void *E, stack *s) {
 		if(j==4) {
 			apply(E, &cases[i], s);
 			print("\n");
+			echo = i != 5;
 			break;
 		}
 	}
