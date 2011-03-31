@@ -12,7 +12,7 @@ enum tag {
 enum flag {
 	tmpmem    = 0x01, rdonly = 0x02,
 	managed   = 0x04, active = 0x08,
-	primitive = 0x10
+	primitive = 0x10, quiet  = 0x20
 };
 
 #define ASIZE (sizeof(array))
@@ -28,7 +28,6 @@ extern array *zilde;
 extern array *marker;
 extern int zero;
 extern int quit;
-extern int echo;
 extern void *G;
 
 /* Hash table for var bindings */

@@ -76,7 +76,6 @@ int exec(void *E, stack *s) {
 		if(j==4) {
 			apply(E, &cases[i], s);
 			print("\n");
-			echo = i != 5;
 			break;
 		}
 	}
@@ -92,18 +91,22 @@ int apply(void *E, rule *r, stack *s) {
 }
 array* monad(void *E, array **a, int b, int e) {
 	print("(%A %A)", a[b], a[e]);
+	a[e]->f &= ~quiet;
 	return a[e];
 }
 array* dyad(void *E, array **a, int b, int e)  {
 	print("(%A %A,%A)",a[b+1],a[e],a[b]);
+	a[e]->f &= ~quiet;
 	return a[e];
 }
 array* moper(void *E, array **a, int b, int e) {
 	print("(op '%A%A')",a[b],a[e]);
+	a[e]->f &= ~quiet;
 	return a[b];
 }
 array* doper(void *E, array **a, int b, int e) {
 	print("(op %A%A%A)", a[b+1], a[b], a[e]);
+	a[e]->f &= ~quiet;
 	return a[e];
 }
 array* bind(void *E, array **a, int b, int e) {
@@ -111,6 +114,7 @@ array* bind(void *E, array **a, int b, int e) {
 	print("(set %A %A)",a[b], a[e]);
 	array *s = put(E, akey(a[b],k,sizeof k), a[e]);
 	if(!s) return ezil(Ebind, a[b]);
+	s->f |= quiet;
 	return s;
 }
 array* punc(void *E, array **a, int b, int e) {

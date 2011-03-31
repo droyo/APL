@@ -8,7 +8,6 @@
 #define try(e,f,s) do{if(f){fprint(2,s"\n");goto e;}}while(0)
 
 int quit;
-int echo;
 void *G;
 
 int main(void) {
@@ -17,7 +16,6 @@ int main(void) {
 	char buf[1024];
 	array *tok[128], **r[2], *ans;
 	quit = 0;
-	echo = 1;
 	
 	try(e1,mem_init(),"Can't init memory");
 	try(e2,!(input=Bfdopen(0,O_RDONLY)),
@@ -34,7 +32,8 @@ int main(void) {
 		if(x < 0) continue;
 		r[0] = tok; r[1] = tok + x;
 		ans = eval(G, r);
-		if(ans && echo) print("%A\n", ans);
+		if(ans && !(ans->f & quiet))
+			print("%A\n", ans);
 	}
 	print("\nBye\n");
 
