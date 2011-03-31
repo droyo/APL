@@ -1,4 +1,5 @@
 #include <utf.h>
+#include <fmt.h>
 #include <string.h>
 #include <stdlib.h>
 #include "apl.h"
@@ -32,6 +33,11 @@ static int tsize(enum tag t) {
 }
 long asize(array *a) {
 	return ASIZE + msize(a);
+}
+/* Suitable for passing to put() */
+char *akey(array *a, char *buf, int n) {
+	snprint(buf, n, "%*R", a->n, aval(a));
+	return buf;
 }
 array *atmp(void *p,enum tag t, unsigned r, unsigned n) {
 	array *a = p; a->k = max(def_rank,r);

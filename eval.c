@@ -61,8 +61,7 @@ array *parse(void *E, stack *l, stack *r, int lvl) {
 array *lookup(void *E,array *a) {
 	char k[64];
 	if(a->t == symbol) {
-		snprint(k, sizeof k, "%*R",a->n,aval(a));
-		return get(E,k);
+		return get(E,akey(a,k,sizeof k));
 	}
 	return a;
 }
@@ -109,8 +108,7 @@ array* doper(void *E, array **a, int b, int e) {
 array* bind(void *E, array **a, int b, int e) {
 	char k[64];
 	print("(set %A %A)",a[b], a[e]);
-	snprint(k,sizeof k,"%*R", a[b]->n, aval(a[b]));
-	array *s = put(E, k, a[e]);
+	array *s = put(E, akey(a[b],k,sizeof k), a[e]);
 	if(!s) return ezil(Ebind, a[b]);
 	return s;
 }

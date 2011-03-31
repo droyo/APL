@@ -41,7 +41,8 @@ array* aclone(array*);
 array* atmp(void*, enum tag, unsigned, unsigned);
 array* anew(enum tag, enum flag, unsigned, unsigned);
 int*   ashp(array*);
-void*  aval(array *);
+void*  aval(array*);
+char*  akey(array*,char*,int);
 
 /* Memory management */
 void record(array*);
