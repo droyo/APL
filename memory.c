@@ -34,7 +34,6 @@ void mem_coll(void) {
 		t->c = UCHAR_MAX;
 		bubbledn(t);
 		refs[t->gc] = NULL;
-		print("free(%A)\n",t);
 		free(t);
 	}
 }
