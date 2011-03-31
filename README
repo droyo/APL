@@ -83,8 +83,8 @@ Most of the boring stuff is out of the way.  I am still planning
 out the core execution loop and function dispatch/definition.
 One-by-one standard functions will be added.  The project is not
 currently at a state where outside help would be beneficial, or
-a fork useful.  Feel free to stay tuned, however.  I'm having a
-lot of fun writing this and am actively updating it  as of Apr.
-2011
+a fork useful.  The lexer, while trivial, may be of interest as
+it accepts utf-8 input. An earlier version of the lexer also
+output tokens in a fairly portable streaming format.
 
 [1](http://www.jsoftware.com/papers/APLDictionary.htm)
