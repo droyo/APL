@@ -113,9 +113,9 @@ static array* scan_literal(pool *p,Biobuf *i) {
 
 static array* scan_function(pool *p,Biobuf *i) {
 	Rune r = Bgetrune(i);
-	array *a = parray(p,function, 0, 0);
+	array *a = parray(p,symbol, 0, 0);
 	if(!a) return NULL;
-	a->f|=primitive; a->n = 1; push(p,&r, sizeof r);
+	a->n = 1; push(p,&r, sizeof r);
 	return a;
 }
 
