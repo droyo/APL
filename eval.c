@@ -71,15 +71,9 @@ array *parse(void *E, stack *l, stack *r, int lvl) {
 }
 
 array *mkfun(stack *s) {
-	int i;
-	array *a, *b, **n;
-	if(!(a=anew(boxed,0,1,count(s)+1)))
+	array *a;
+	if(!(a=afun("fn:",count(s),s->top)))
 		return enil(Enomem);
-	n = aval(a); n[0] = anon;
-	for(i=1;(b=pop(s))!=zilde;i++)
-		if(!(n[i]=acln(b)))
-			return enil(Enomem);
-	a->t=function;
 	return a;
 }
 

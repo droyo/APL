@@ -71,20 +71,28 @@ array *abox(unsigned n, array **x) {
 	if(!(a=anew(boxed,0,n>1?1:0,n)))
 		return NULL;
 	for(i=0,y=aval(a);i<n;i++) {
-		if(x[i]->f & tmpmem)
+		if(x[i]->f & tmpmem) {
 			if(!(y[i]=acln(x[i]))) return NULL;
-		else
+		}else
 			y[i] = x[i];
 	}
 	s=ashp(a); s[0] = n;
 	return a;
 }
+array *astr(char *s) {
+	array *a;
+	if(!(a=anew(string,0,1,utflen(s))))
+		return NULL;
+	runesnprint(aval(a),utflen(s)+1, "%s", s);
+	return a;
+}
 array *afun(char *s, unsigned n, array **x) {
-	array *a, *id, **y;
-	if(!(id = anew(string,0,0,utflen(s)))) return NULL;
-	if(!(a  = anew(boxed, 0,1,n+1)))       return NULL;
-	y = aval(a); y[0] = id;
+	int i; array *a, *k, **y;
+	if(!(k=astr(s)))             return NULL;
+	if(!(a=anew(boxed,0,1,n+1))) return NULL;
+	y = aval(a); y[0] = k;
 	for(i=0;i<n;i++)
 		y[i+1] = x[i];
+	a->t = function;
 	return a;
 }

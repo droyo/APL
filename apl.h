@@ -30,7 +30,6 @@ typedef struct {
 
 extern array *zilde;
 extern array *marker;
-extern array *anon;
 extern char quit;
 extern void *G;
 
@@ -47,6 +46,8 @@ array* anew(enum tag, enum flag, unsigned, unsigned);
 int*   ashp(array*);
 void*  aval(array*);
 char*  akey(array*,char*,int);
+array* afun(char*,unsigned,array**);
+array* abox(unsigned,array**);
 
 /* Memory management */
 void record(array*);
