@@ -37,6 +37,7 @@ int main(void) {
 		ans = eval(G, tok, tok+x);
 		if(ans && !(ans->f & quiet))
 			print("%A\n", ans);
+		else ans->f &= ~quiet;
 	}
 	print("\nBye\n");
 
