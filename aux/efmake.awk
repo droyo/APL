@@ -14,8 +14,13 @@ BEGIN {
 	fmt["char*"]	= "%s"
 	fmt["Rune*"]	= "%S"
 }
+function format(s) {
+	gsub(/[ \t\n]+/, " ", s);
+	gsub(/(^[ \t\n]+|[ \t\n]+$)/, "", s)
+	return s
+}
 function print_error(x) {
-	s = body[x]
+	s = format(body[x])
 	a = ""
 	gsub("\"", "\\\"", s)
 	while(match(s,/%[0-9]+/)) {
