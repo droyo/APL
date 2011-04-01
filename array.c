@@ -50,7 +50,7 @@ array *anew(enum tag t, enum flag f, unsigned r, unsigned n) {
 	int z = max(def_size,n);
 	if(!(a=malloc(ASIZE+sizeof(int)*s+tsize(t)*z)))
 		return enil(Enomem);
-	a->t=t;a->f=f&~tmpmem;
+	a->t=t;a->f &= ~tmpmem;
 	a->r=r;a->n=n;a->k=s;a->z=z;
 	if(r == 1) *ashp(a) = n;
 	record(a); return a;
