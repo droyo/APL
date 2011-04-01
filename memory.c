@@ -45,12 +45,22 @@ void record(array *a) {
 	a->f |= managed;
 }
 void incref(array *a) { 
+	int i; array **x;
 	if(!(a->f&managed)) return;
 	if(a->c+1>a->c) a->c++; bubbledn(a);
+	if(a->t == boxed || a->t == function) {
+		x = aval(a);
+		for(i=0;i<a->n;i++) incref(x[i]);
+	}
 }
 void decref(array *a) {
+	int i; array **x;
 	if(a->f&(tmpmem|rdonly)) return;
 	if(a->c) a->c--; bubbleup(a); 
+	if(a->t == boxed || a->t == function) {
+		x = aval(a);
+		for(i=0;i<a->n;i++) incref(x[i]);
+	}
 }
 static void bubbledn(array *a) {
 	array *u; int n = a->c;
