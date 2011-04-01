@@ -34,7 +34,17 @@ array *parse(void *E, stack *l, stack *r, int lvl) {
 	array *a, *e, *v;
 	do {
 		a = pop(l);
-		if(a->t == rparen) {
+		if(lvl < 0) {
+			if(a->t == ldfns)
+				return (e=mkfun(r))?e:NULL;
+			push(r,a);
+			continue;
+		}else if(a->t == rdfns) {
+			n=mkstack(r->top-1,-1);
+			if(!(e = parse(E,l,&n,-1)))
+				return NULL;
+			else push(r,e);
+		}else if(a->t == rparen) {
 			n=mkstack(r->top-1,-1);
 			push(&n,a);
 			if(!(e = parse(E,l,&n,lvl+1)))

@@ -142,8 +142,8 @@ static array* scan_delims(pool *p,Biobuf *i) {
 	int c = Bgetc(i); enum tag t;
 	switch(c) {
 		case ':': t = colon;  break;
-		case '[': t = lbrack; break;
-		case ']': t = rbrack; break;
+		case '[': t = ldfns;  break;
+		case ']': t = rdfns;  break;
 		case '(': t = lparen; break;
 		case ')': t = rparen; break;
 	}

@@ -10,7 +10,7 @@ enum tag {
 	lparen    = 0x0100, rparen   = 0x0200, 
 	assign    = 0x0400, colon    = 0x0800, 
 	empty     = 0x1000, null     = 0x2000,
-	lbrack    = 0x4000, rbrack   = 0x8000
+	ldfns     = 0x4000, rdfns    = 0x8000
 };
 
 enum flag {

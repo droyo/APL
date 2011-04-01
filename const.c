@@ -42,15 +42,16 @@ static int checksym(void *E, char *s, Rune r) {
 	return 0;
 };
 int isapldig(long x){return (x>='0' && x<='9')||x==UMACRON;}
-int isapldel(long x){return x == '(' || x == ')' || x == ':';}
+int isapldel(long x){return checksym(G, "⎕dl", x);}
 int isaplmop(long x){return checksym(G, "⎕pm", x);}
 int isapldop(long x){return checksym(G, "⎕pd", x);}
 int isaplfun(long x){return checksym(G, "⎕pf", x);}
 int isaplchr(long x){return checksym(G, "⎕pe", x);}
 int isaplop (long x){return isaplmop(x) || isapldop(x);}
+
 int const_init(void *E) {
 	int n;
-	array *Func, *Dyop, *Moop, *Extra;
+	array *Func, *Dyop, *Moop, *Extra, *Delim;
 	
 	n = NELEM(utffunctions) + 
 			NELEM(utfmonadop) + 
@@ -62,15 +63,18 @@ int const_init(void *E) {
 	if (!(Dyop=anew(string,rdonly,1,NELEM(utfdyadicop)))) return -1;
 	if (!(Moop=anew(string,rdonly,1,NELEM(utfmonadop)))) return -1;
 	if(!(Extra=anew(string,rdonly,1,NELEM(utfextra)))) return -1;
+	if(!(Delim=anew(string,rdonly,1,NELEM(utfdelim)))) return -1;
 	
 	runesprint(aval(Func), "%*R", NELEM(utffunctions), utffunctions);
 	runesprint(aval(Dyop), "%*R", NELEM(utfdyadicop), utfdyadicop);
 	runesprint(aval(Moop), "%*R", NELEM(utfmonadop), utfmonadop);
 	runesprint(aval(Extra),"%*R", NELEM(utfextra), utfextra);
+	runesprint(aval(Delim), "%s", utfdelim);
 	if(!put(E,"⎕pf",Func)) return -1;
 	if(!put(E,"⎕pd",Dyop)) return -1;
 	if(!put(E,"⎕pm",Moop)) return -1;
 	if(!put(E,"⎕pe",Extra))return -1;
+	if(!put(E,"⎕dl",Delim))return -1;
 	if(!put(E,"⍬",zilde))  return -1;
 
 	return 0;
