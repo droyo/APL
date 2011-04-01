@@ -66,3 +66,25 @@ int *ashp(array *a) {
 void *aval(array *a) {
 	return a->m+(sizeof(int)*a->k);
 }
+array *abox(unsigned n, array **x) {
+	int i, *s; array *a, **y;
+	if(!(a=anew(boxed,0,n>1?1:0,n)))
+		return NULL;
+	for(i=0,y=aval(a);i<n;i++) {
+		if(x[i]->f & tmpmem)
+			if(!(y[i]=acln(x[i]))) return NULL;
+		else
+			y[i] = x[i];
+	}
+	s=ashp(a); s[0] = n;
+	return a;
+}
+array *afun(char *s, unsigned n, array **x) {
+	array *a, *id, **y;
+	if(!(id = anew(string,0,0,utflen(s)))) return NULL;
+	if(!(a  = anew(boxed, 0,1,n+1)))       return NULL;
+	y = aval(a); y[0] = id;
+	for(i=0;i<n;i++)
+		y[i+1] = x[i];
+	return a;
+}
