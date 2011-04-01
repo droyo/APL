@@ -25,18 +25,6 @@ rule cases[] = {
 {{	0,       0,       0,       0},   NULL,  0,0}
 };
 
-void showdbg(stack *l, stack *r) {
-	array **a;
-	print("[");
-	for(a=l->bot;a <= r->bot;a++) {
-		if(a > l->top && a < r->top) {
-			print(" ");
-			continue;
-		}
-		if(a == r->top) print("♦");
-		print("%A",*a);
-	} print("]\n");
-}
 array *eval(void *E, array **beg, array **end) {
 	stack l = mkstack(beg,+1); l.top = end;
 	stack r = mkstack(end,-1);
@@ -73,7 +61,6 @@ array *parse(void *E, stack *l, stack *r, int lvl) {
 				return enil(Eunbound, a);
 			else push(r,v);
 		}
-		showdbg(l,r);
 		while(exec(E,r));
 	} while(a->t != empty);
 	while(exec(E,r));
