@@ -30,6 +30,7 @@ typedef struct {
 
 extern array *zilde;
 extern array *marker;
+extern array *anon;
 extern char quit;
 extern void *G;
 

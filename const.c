@@ -6,7 +6,9 @@
 
 array *zilde;
 array *marker;
+array *anon;
 
+static const char anon_fun[] = "fn:";
 static char utfdelim[] = "()[]";
 static Rune utfdyadicop[] = {
 	UEACH,  UDOT,   UHOOT, UHOLLER, 
@@ -59,6 +61,7 @@ int const_init(void *E) {
 	
 	if (!(zilde=anew(null,rdonly,0,0))) return -1;
 	if (!(marker=anew(empty,rdonly,0,0))) return -1;
+	if (!(anon=anew(string,rdonly,1,sizeof anon_fun))) return -1;
 	if (!(Func=anew(string,rdonly,1,NELEM(utffunctions)))) return -1;
 	if (!(Dyop=anew(string,rdonly,1,NELEM(utfdyadicop)))) return -1;
 	if (!(Moop=anew(string,rdonly,1,NELEM(utfmonadop)))) return -1;
@@ -70,6 +73,7 @@ int const_init(void *E) {
 	runesprint(aval(Moop), "%*R", NELEM(utfmonadop), utfmonadop);
 	runesprint(aval(Extra),"%*R", NELEM(utfextra), utfextra);
 	runesprint(aval(Delim), "%s", utfdelim);
+	runesprint(aval(anon),  "%s", anon_fun);
 	if(!put(E,"⎕pf",Func)) return -1;
 	if(!put(E,"⎕pd",Dyop)) return -1;
 	if(!put(E,"⎕pm",Moop)) return -1;

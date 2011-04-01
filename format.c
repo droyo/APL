@@ -64,6 +64,10 @@ static int Afmt(Fmt *f) {
 	case colon:  return fmtprint(f,":");
 	case lparen: return fmtprint(f,"(");
 	case rparen: return fmtprint(f,")");
+	case function:
+		if(a->f&primitive) 
+			return fmtrune(f,*(Rune*)aval(a));
+		else return Afmtb(f,a);
 	default:     return fmtprint(f,"%*R",a->n,aval(a));
 	}
 	return 0;
