@@ -8,7 +8,7 @@ extern const struct err_msg *error_messages;
 
 int errfmt(char *fmt, ...) {
 	int r; va_list ap;
-	fprint(2, "! ");
+	fprint(2, "!");
 	va_start(ap, fmt);
 	r = vfprint(2,fmt,ap);
 	va_end(ap);
