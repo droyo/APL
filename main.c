@@ -18,7 +18,7 @@ int main(void) {
 	int x;
 	Biobuf *input;
 	char buf[1024];
-	array *tok[128], **r[2], *ans;
+	array *tok[128], *ans;
 	quit = 0;
 	
 	try(e1,mem_init(),"Can't init memory");
@@ -34,8 +34,7 @@ int main(void) {
 		mem_coll();
 		x = scan(input,tok,NELEM(tok),buf,NELEM(buf));
 		if(x < 0) continue;
-		r[0] = tok; r[1] = tok + x;
-		ans = eval(G, r);
+		ans = eval(G, tok, tok+x);
 		if(ans && !(ans->f & quiet))
 			print("%A\n", ans);
 	}

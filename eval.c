@@ -24,10 +24,9 @@ rule cases[] = {
 {{	0,       0,       0,       0},   NULL,  0,0}
 };
 
-array *eval(void *E, array ***t) {
-	if (!t) return NULL;
-	stack l = mkstack(t[0],+1); l.top = t[1];
-	stack r = mkstack(t[1],-1);
+array *eval(void *E, array **beg, array **end) {
+	stack l = mkstack(beg,+1); l.top = end;
+	stack r = mkstack(end,-1);
 	return parse(E, &l, &r, 0);
 }
 array *parse(void *E, stack *l, stack *r, int lvl) {

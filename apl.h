@@ -50,7 +50,7 @@ void decref(array*);
 
 /* Core interpreter */
 int      scan(void *,array**,int,char*,int);
-array*   eval(void*,array ***);
+array*   eval(void*,array **, array **);
 
 /* Init,Teardown */
 int   fmt_init(void);
