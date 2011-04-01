@@ -4,17 +4,16 @@
 #include "apl.h"
 #include "const.h"
 
-int zero = 0;
 array *zilde;
 array *marker;
 
 static Rune utfdyadicop[] = {
 	UEACH,  UDOT,   UHOOT, UHOLLER, 
-	UUNION, UISECT, UDFNS, UWITHE, 0
+	UUNION, UISECT, UDFNS, UWITHE
 };
 static Rune utfmonadop[] = {
 	UBSLASH, UBSLASHB, USLASH, 
-	USLASHB, UMERGE,   USWAP, 0
+	USLASHB, UMERGE,   USWAP
 };
 static Rune utffunctions[] = {
 	UBAR,    UCAT,     UCATBAR, UCIRC,   UDECODE,
@@ -26,7 +25,7 @@ static Rune utffunctions[] = {
 	UMATCH,  UMAX,     UMEMB,   UMIN,    UMINUS,
 	UMIX,    UNEQUAL,  UPLUS,   UPOW,    UPROD,
 	URAND,   UREVERSE, URHO,    UROTATE, URTACK,
-	UTAKE,   UTILDE,   UTRANSP, 0
+	UTAKE,   UTILDE,   UTRANSP
 };
 static enum codepoint utfextra[] = {
 	ULAMP, UASSIGN, UBRANCH, UQQUAD
