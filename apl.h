@@ -6,7 +6,8 @@ enum tag {
 	niladic   = 0x0040, boxed    = 0x0080, 
 	lparen    = 0x0100, rparen   = 0x0200, 
 	assign    = 0x0400, colon    = 0x0800, 
-	empty     = 0x1000, null     = 0x2000
+	empty     = 0x1000, null     = 0x2000,
+	lbrack    = 0x4000, rbrack   = 0x8000
 };
 
 enum flag {

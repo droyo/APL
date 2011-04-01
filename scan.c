@@ -141,9 +141,11 @@ static array* scan_operator(pool *p,Biobuf *i) {
 static array* scan_delims(pool *p,Biobuf *i) {
 	int c = Bgetc(i); enum tag t;
 	switch(c) {
-		case '(': t = lparen;	break;
-		case ')': t = rparen;	break;
-		case ':': t = colon;	break;
+		case ':': t = colon;  break;
+		case '[': t = lbrack; break;
+		case ']': t = rbrack; break;
+		case '(': t = lparen; break;
+		case ')': t = rparen; break;
 	}
 	return parray(p,t,0,0);
 }
