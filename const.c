@@ -7,6 +7,7 @@
 array *zilde;
 array *marker;
 
+static char utfdelim[] = "()[]";
 static Rune utfdyadicop[] = {
 	UEACH,  UDOT,   UHOOT, UHOLLER, 
 	UUNION, UISECT, UDFNS, UWITHE
@@ -27,9 +28,10 @@ static Rune utffunctions[] = {
 	URAND,   UREVERSE, URHO,    UROTATE, URTACK,
 	UTAKE,   UTILDE
 };
-static enum codepoint utfextra[] = {
+static Rune utfextra[] = {
 	ULAMP, UASSIGN, UBRANCH, UQQUAD
 };
+	
 static int checksym(void *E, char *s, Rune r) {
 	int i; Rune *c;
 	array *a = get(E, s);

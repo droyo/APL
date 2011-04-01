@@ -5,7 +5,6 @@
 #include "apl.h"
 #include "error.h"
 
-#define max(a,b) ((a)>(b))?(a):(b)
 static int msize(array *a); 
 static int tsize(enum tag);
 enum { def_rank = 4 };

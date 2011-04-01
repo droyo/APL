@@ -1,4 +1,7 @@
 #define NELEM(x)(sizeof(x)/sizeof(*x))
+#define max(a,b) ((a)>(b))?(a):(b)
+#define min(a,b) ((a)<(b))?(a):(b)
+
 enum tag {
 	number    = 0x0001, string   = 0x0002,
 	symbol    = 0x0004, function = 0x0008,

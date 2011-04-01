@@ -50,10 +50,11 @@ array *parse(void *E, stack *l, stack *r, int lvl) {
 				return enil(Eunbound, a);
 			else push(r,v);
 		}
-		while(exec(E, r));
+		while(exec(E,r));
 	} while(a->t != empty);
-	while(exec(E, r));
-	if (count(r) > 2) return enil(Esyntax);
+	while(exec(E,r));
+	if (lvl < 0)    return enil(Esyntax);
+	if (count(r)>2) return enil(Esyntax);
 	return nth(r,lvl?0:1);
 }
 
