@@ -35,8 +35,8 @@ array* put(void *, char*, array*);
 array* get(void *, char*);
 
 /* Array operations */
-long   asize(array*);
-array* aclone(array*);
+long   asiz(array*);
+array* acln(array*);
 array* atmp(void*, enum tag, unsigned, unsigned);
 array* anew(enum tag, enum flag, unsigned, unsigned);
 int*   ashp(array*);

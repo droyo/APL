@@ -78,7 +78,7 @@ array *put(void *v, char *k, array *a) {
 		else if(old->a == a) return a;
 		else decref(old->a);
 	} 
-	if (dirty(a) && !(a = aclone(a))) 
+	if (dirty(a) && !(a = acln(a))) 
 		return NULL;
 	else p.a = a;
 	if(add(b,p)) return NULL;

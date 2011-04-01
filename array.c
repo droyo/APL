@@ -31,7 +31,7 @@ static int tsize(enum tag t) {
 	unsigned long s; for(s=0;t>>=1;s++); 
 	return (s>NELEM(type_sizes)?0:type_sizes[s]);
 }
-long asize(array *a) {
+long asiz(array *a) {
 	return ASIZE + msize(a);
 }
 /* Suitable for passing to put() */
@@ -56,7 +56,7 @@ array *anew(enum tag t, enum flag f, unsigned r, unsigned n) {
 	if(r == 1) *ashp(a) = n;
 	record(a); return a;
 }
-array *aclone(array *a) {
+array *acln(array *a) {
 	array *c = anew(a->t, a->f, a->r, a->n);
 	if(!c) return NULL; else memcpy(c->m, a->m, msize(a));
 	return c;
