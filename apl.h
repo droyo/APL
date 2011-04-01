@@ -26,8 +26,7 @@ typedef struct {
 
 extern array *zilde;
 extern array *marker;
-extern int zero;
-extern int quit;
+extern char quit;
 extern void *G;
 
 /* Hash table for var bindings */

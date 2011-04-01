@@ -5,10 +5,14 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "apl.h"
-#define try(e,f,s) do{if(f){fprint(2,s"\n");goto e;}}while(0)
 
-int quit;
-void *G;
+#define try(e,f,s) do{\
+	if(f){fprint(2,s"\n");\
+	goto e;\
+}}while(0)
+
+void* G;
+char  quit;
 
 int main(void) {
 	int x;

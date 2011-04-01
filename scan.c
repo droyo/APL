@@ -9,12 +9,13 @@
 #include "const.h"
 #include "error.h"
 
+const int zero = 0;
 typedef struct{char *bot,*top,*end;} pool;
 static pool mkpool(char *b, int n);
 
 static void*  mem(pool*,long);
 static array* parray(pool*,enum tag,unsigned,unsigned);
-static void*  push(pool*,void*,long);
+static void*  push(pool*,const void*,long);
 
 static array* scan_numeral (pool*,Biobuf*);
 static array* scan_literal (pool*,Biobuf*);
@@ -192,7 +193,7 @@ static array *parray(pool *p,enum tag t, unsigned r, unsigned n){
 	}
 	return a;
 }
-static void *push(pool *p,void *v, long n) {
+static void *push(pool *p,const void *v, long n) {
 	void *r;
 	if (p->top+n > p->end) return NULL;
 	r = memcpy(p->top, v, n);
