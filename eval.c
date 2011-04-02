@@ -26,7 +26,6 @@ rule cases[] = {
 };
 
 array *eval(void *E, array *tok) {
-	print("%A\n", tok);
 	array **a = aval(tok);
 	stack l = mkstack(a,+1); l.top = a+tok->n-1;
 	stack r = mkstack(a+tok->n-1,-1);
