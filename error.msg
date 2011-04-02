@@ -10,9 +10,6 @@ Unbound variable `%1'
 `%1' is read-only. You can look, but you can't
 touch~
 
-[malloc]
-You must construct additional RAM modules.
-
 [syntax]
 That doesn't make sense.
 
@@ -23,7 +20,7 @@ remember more than 7!).
 
 [paren]
 Not balancing your parenthesis is like not
-finishing your sentences. Rude.
+finishing your
 
 [lexline int]
 Maximum line length of %1 exceeded.
@@ -35,4 +32,4 @@ Scanner memory exhausted.
 Garbled input.
 
 [nomem]
-Out of memory.
+You must construct additional RAM modules.
