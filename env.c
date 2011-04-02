@@ -4,8 +4,8 @@
 #include "apl.h"
 #define dirty(a) (a->f&(tmpmem|rdonly))
 
-typedef struct   {char k[64]; array *a;}              pair;
-typedef struct   {long n,max; pair *p;}               bucket;
+typedef struct   {char k[64]; array *a;}         pair;
+typedef struct   {long n,max; pair *p;}          bucket;
 typedef struct _e{struct _e *up; bucket b[768];} env;
 
 static unsigned long hash(char *s) {
