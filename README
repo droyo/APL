@@ -70,14 +70,17 @@ I'm still undecided on function definition; the Dictionary uses
 the function ∇ with string arguments for the monadic and dyadic
 cases.  I find this clumsy.  I like Dyalog's Dfns, but the '{}'
 symbols they use for delimiters are already in use as
-functions/operators. Perhaps using backticks would be acceptable.
+functions/operators.
 
 ## State of the project
 
 Work in progress - rudimentary lexer and parser are complete.
 Unified array data structure is implemented.  Basic memory
 management based on ref-counting implemented.  Handy
-error-reporting system is in place.
+error-reporting system is in place. Function definition syntax
+using bracket delimiters is recognized.  Multi-dimensional
+arrays are printed correctly, as are arbitrarily nested boxed
+arrays using unicode box-drawing characters.
 
 Most of the boring stuff is out of the way.  I am still planning
 out the core execution loop and function dispatch/definition.
