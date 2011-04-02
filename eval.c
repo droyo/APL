@@ -42,7 +42,7 @@ array *parse(void *E, stack *l, stack *r, int lvl) {
 				if(!(e=parse(E,l,&n,lvl-1)))
 					return NULL;
 				else push(r,e);
-			}else if(a->t == ldfns) return mkfun(r);
+			}else if(a->t == ldfns) return mkfun(E,r);
 			else push(r,a);
 			continue;
 		}else if(a->t == rdfns) {
@@ -74,7 +74,7 @@ array *parse(void *E, stack *l, stack *r, int lvl) {
 	return nth(r,lvl?0:1);
 }
 
-array *mkfun(stack *s) {
+array *mkfun(void *E, stack *s) {
 	array *a;
 	if(!(a=afun("fn:",count(s),s->top)))
 		return enil(Enomem);

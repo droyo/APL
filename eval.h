@@ -19,7 +19,7 @@ array* punc(void *env, array**, int,int);
 
 array *lookup(void*,array *);
 array *parse(void*,stack*,stack*,int);
-array *mkfun(stack*);
+array *mkfun(void*,stack*);
 int exec(void*,stack *);
 int apply(void*,rule *, stack *);
 
