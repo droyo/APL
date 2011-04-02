@@ -32,6 +32,7 @@ typedef struct {
 extern array *zilde;
 extern array *marker;
 extern char quit;
+extern void *S;
 extern void *G;
 
 /* Hash table for var bindings */
@@ -65,7 +66,7 @@ array* eval(void*,array*);
 
 /* Init,Teardown */
 int   fmt_init(void);
-int   const_init(void*);
+int   const_init(void);
 int   sample_init(void*);
 void* env_init(void);
 void  env_free(void*);

@@ -11,6 +11,7 @@
 	r=1; goto e;}}while(0)
 
 void* G;
+void* S;
 char  quit;
 
 int main(void) {
@@ -23,11 +24,12 @@ int main(void) {
 	try(e,e2,!(in=Bfdopen(0,O_RDONLY)),
 		"Can't open input");
 	try(e,e3,!(G=shadow(0)),"Can't init env");
-	try(e,e4,!(buf=anew(boxed,0,1,256)),"Tokm");
-	try(e,e4,!(mem=anew(byte,0,1,2048)),"Memm");
-	try(e,e4,fmt_init(),"Can't init formatter:%r");
-	try(e,e4,const_init(G),"Can't init constants");
-	try(e,e4,sample_init(G),"Can't init samples");
+	try(e,e4,!(S=shadow(0)),"Can't init sysenv");
+	try(e,e5,!(buf=anew(boxed,0,1,256)),"Tokm");
+	try(e,e5,!(mem=anew(byte,0,1,2048)),"Memm");
+	try(e,e5,fmt_init(),"Can't init formatter:%r");
+	try(e,e5,const_init(),"Can't init constants");
+	try(e,e5,sample_init(G),"Can't init samples");
 
 	aclr(mem); aclr(buf);
 	incref(mem); incref(buf);
@@ -44,6 +46,7 @@ int main(void) {
 	}
 	print("\nBye\n");
 
+	e5:env_free(S);
 	e4:env_free(G);
 	e3:Bterm(in);
 	e2:mem_free();
