@@ -37,10 +37,13 @@ array *parse(void *E, stack *l, stack *r, int lvl) {
 	do {
 		a = pop(l);
 		if(lvl < 0) {
-			if(a->t == rdfns) lvl--;
-			if(a->t == ldfns) lvl++;
-			if(!lvl) return mkfun(r);
-			push(r,a);
+			if(a->t == rdfns) {
+				n=mkstack(r->top-1,-1);
+				if(!(e=parse(E,l,&n,lvl-1)))
+					return NULL;
+				else push(r,e);
+			}else if(a->t == ldfns) return mkfun(r);
+			else push(r,a);
 			continue;
 		}else if(a->t == rdfns) {
 			n=mkstack(r->top-1,-1);
