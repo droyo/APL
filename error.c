@@ -14,6 +14,11 @@ int errfmt(char *fmt, ...) {
 	va_end(ap);
 	return r;
 }
+
+void esay(int(*f)(va_list),...) {
+	va_list ap; va_start(ap,f);
+	f(ap); va_end(ap);
+}
 void *enil(int(*f)(va_list),...) {
 	va_list ap; va_start(ap,f);
 	f(ap); va_end(ap);
@@ -37,4 +42,3 @@ void *edie(int(*f)(va_list),...) {
 	f(ap); va_end(ap);
 	exit(1);
 }
-
