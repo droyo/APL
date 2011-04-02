@@ -195,6 +195,5 @@ static array *parray(array *p,enum tag t, unsigned r, unsigned n){
 static void *push(array *p,const void *v, long n) {
 	void *r;
 	if(!(r = amem(p,n))) return NULL;
-	else memcpy(r,v,n);
-	return r;
+	else memcpy(r,v,n);  return r;
 }
