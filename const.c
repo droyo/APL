@@ -69,7 +69,7 @@ int const_init(void) {
 	if(!put(S,"⎕pm",Moop)) return -1;
 	if(!put(S,"⎕pe",Extra))return -1;
 	if(!put(S,"⎕dl",Delim))return -1;
-	if(!put(S,"⍬",zilde))  return -1;
+	if(!put(G,"⍬",zilde))  return -1;
 
 	return 0;
 }

@@ -36,9 +36,9 @@ extern void *S;
 extern void *G;
 
 /* Hash table for var bindings */
-void*  shadow(void *);
-array* put(void *, char*, array*);
-array* get(void *, char*);
+array* shadow(array*);
+array* put(array*,char*,array*);
+array* get(array*,char*);
 
 /* Array operations */
 long   asiz(array*);
@@ -54,6 +54,7 @@ array* abox(unsigned,array**);
 array* astr(char*);
 void*  amem(array*,long);
 int    afull(array*);
+array* agrow(array*,long);
 
 /* Memory management */
 void record(array*);
@@ -62,14 +63,12 @@ void decref(array*);
 
 /* Core interpreter */
 array* scan(void*,array*,array*);
-array* eval(void*,array*);
+array* eval(array*,array*);
 
 /* Init,Teardown */
 int   fmt_init(void);
 int   const_init(void);
 int   sample_init(void*);
-void* env_init(void);
-void  env_free(void*);
 int   mem_init(void);
 void  mem_coll(void);
 void  mem_free(void);

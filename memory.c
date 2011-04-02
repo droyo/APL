@@ -50,7 +50,8 @@ void incref(array *a) {
 	if(a->c+1>a->c) a->c++; bubbledn(a);
 	if(a->t == boxed || a->t == function) {
 		x = aval(a);
-		for(i=0;i<a->n;i++) incref(x[i]);
+		for(i=0;i<a->n;i++) if(x[i])
+			incref(x[i]);
 	}
 }
 void decref(array *a) {
@@ -59,7 +60,8 @@ void decref(array *a) {
 	if(a->c) a->c--; bubbleup(a); 
 	if(a->t == boxed || a->t == function) {
 		x = aval(a);
-		for(i=0;i<a->n;i++) incref(x[i]);
+		for(i=0;i<a->n;i++) if(x[i])
+			incref(x[i]);
 	}
 }
 static void bubbledn(array *a) {

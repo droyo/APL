@@ -25,13 +25,13 @@ rule cases[] = {
 {{	0,       0,       0,       0},   NULL,  0,0}
 };
 
-array *eval(void *E, array *tok) {
+array *eval(array *E, array *tok) {
 	array **a = aval(tok);
 	stack l = mkstack(a,+1); l.top = a+tok->n-1;
 	stack r = mkstack(a+tok->n-1,-1);
 	return parse(E, &l, &r, 0);
 }
-array *parse(void *E, stack *l, stack *r, int lvl) {
+array *parse(array *E, stack *l, stack *r, int lvl) {
 	stack n;
 	array *a, *e, *v;
 	do {
@@ -74,21 +74,21 @@ array *parse(void *E, stack *l, stack *r, int lvl) {
 	return nth(r,lvl?0:1);
 }
 
-array *mkfun(void *E, stack *s) {
+array *mkfun(array *E, stack *s) {
 	array *a;
 	if(!(a=afun("fn:",count(s),s->top)))
 		return enil(Enomem);
 	return a;
 }
 
-array *lookup(void *E,array *a) {
+array *lookup(array *E,array *a) {
 	char k[64];
 	if(a->t == symbol) {
 		return get(E,akey(a,k,sizeof k));
 	}
 	return a;
 }
-int exec(void *E, stack *s) {
+int exec(array *E, stack *s) {
 	int i, j, a, p;
 	for(i = 0; i <NELEM(cases); i++) {
 		for(j=0;j<NELEM(cases[0].c);j++) {
@@ -104,7 +104,7 @@ int exec(void *E, stack *s) {
 	}
 	return j == 4;
 }
-int apply(void *E, rule *r, stack *s) {
+int apply(array *E, rule *r, stack *s) {
 	int i; array *x, *a[4];
 	for(i=0;i<=r->e;i++) a[i] = pop(s);
 	x = (*r->f)(E, a, r->b, r->e);
@@ -112,27 +112,27 @@ int apply(void *E, rule *r, stack *s) {
 	push(s,x);for(i=r->b-1;i>=0;i--) push(s,a[i]);
 	return 0;
 }
-array* monad(void *E, array **a, int b, int e) {
+array* monad(array *E, array **a, int b, int e) {
 	print("(%A %A)", a[b], a[e]);
 	a[e]->f &= ~quiet;
 	return a[e];
 }
-array* dyad(void *E, array **a, int b, int e)  {
+array* dyad(array *E, array **a, int b, int e)  {
 	print("(%A %A,%A)",a[b+1],a[e],a[b]);
 	a[e]->f &= ~quiet;
 	return a[e];
 }
-array* moper(void *E, array **a, int b, int e) {
+array* moper(array *E, array **a, int b, int e) {
 	print("(op '%A%A')",a[b],a[e]);
 	a[e]->f &= ~quiet;
 	return a[b];
 }
-array* doper(void *E, array **a, int b, int e) {
+array* doper(array *E, array **a, int b, int e) {
 	print("(op %A%A%A)", a[b+1], a[b], a[e]);
 	a[e]->f &= ~quiet;
 	return a[e];
 }
-array* bind(void *E, array **a, int b, int e) {
+array* bind(array *E, array **a, int b, int e) {
 	char k[64];
 	print("(set %A %A)",a[b], a[e]);
 	array *s = put(E, akey(a[b],k,sizeof k), a[e]);
@@ -140,7 +140,7 @@ array* bind(void *E, array **a, int b, int e) {
 	s->f |= quiet;
 	return s;
 }
-array* punc(void *E, array **a, int b, int e) {
+array* punc(array *E, array **a, int b, int e) {
 	return a[b+1];
 }
 static stack mkstack(array **beg, char d) {

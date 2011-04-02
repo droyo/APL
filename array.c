@@ -71,6 +71,10 @@ array *abox(unsigned n, array **x) {
 	int i, *s; array *a, **y;
 	if(!(a=anew(boxed,0,n>1?1:0,n)))
 		return NULL;
+	if(!x) {
+		a->n = 0;
+		return a;
+	}
 	for(i=0,y=aval(a);i<n;i++) {
 		if(x[i]->f & tmpmem) {
 			if(!(y[i]=acln(x[i]))) return NULL;
@@ -107,3 +111,7 @@ void *amem(array *a, long sz) {
 
 void aclr(array *a) { a->n = 0; }
 int afull(array *a) { return a->n == a->z; }
+array *agrow(array *a, long n) {
+	if(!(a=realloc(a,msize(a)+n*tsize(a->t)))) return NULL;
+	else a->z += n; return a;
+}
