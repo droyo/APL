@@ -7,14 +7,14 @@
 Unbound variable `%1'
 
 [rdonly array*]
-`%1' is read-only. You can look, but you can't
+"%1" is read-only. You can look, but you can't
 touch~
 
 [syntax]
 That doesn't make sense.
 
 [bind array*]
-Could not bind `%1'. I can only remember so many
+Could not bind "%1". I can only remember so many
 things at once (don't laugh, I bet you can't
 remember more than 7!).
 
