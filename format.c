@@ -125,7 +125,7 @@ static int B(Fmt *f,int ind,array **a) {
 		n = *l? l + 1 : l; *l = 0;
 		if(pad(f,ind))
 			goto Error;
-		if(fmtprint(f,"%C%S%C",VE,t,VE))
+		if(fmtprint(f,"%C%*S%C",VE,w+1,t,VE))
 			goto Error;
 		t = n;
 	}
@@ -267,7 +267,10 @@ static int llen(Rune *s) {
 	return rfind(s,'\n') - s - 1;
 }
 static int pad(Fmt *f, int x) {
-	return fmtprint(f,"%*c",x+1,0);
+	int i; for(i=0;i<x;i++) {
+		if(fmtrune(f,' ')) return -1;
+	}
+	return 0;
 }
 static int frame(Fmt *f, int n, Rune b, Rune e) {
 	int i;
