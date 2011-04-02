@@ -9,7 +9,7 @@
 #define L (lparen|assign|empty)
 #define F (function|primitive)
 #define N (symbol|string)
-#define V (string|number|boxed)
+#define V (string|number|boxed|null)
 #define D (dydop)
 #define M (monop)
 #define R (~0)
