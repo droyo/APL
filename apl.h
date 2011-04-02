@@ -3,14 +3,15 @@
 #define min(a,b) ((a)<(b))?(a):(b)
 
 enum tag {
-	number    = 0x0001, string   = 0x0002,
-	symbol    = 0x0004, function = 0x0008,
-	dydop     = 0x0010, monop    = 0x0020, 
-	niladic   = 0x0040, boxed    = 0x0080, 
-	lparen    = 0x0100, rparen   = 0x0200, 
-	assign    = 0x0400, colon    = 0x0800, 
-	empty     = 0x1000, null     = 0x2000,
-	ldfns     = 0x4000, rdfns    = 0x8000
+	number  = 0x00001, string   = 0x00002,
+	symbol  = 0x00004, function = 0x00008,
+	dydop   = 0x00010, monop    = 0x00020, 
+	niladic = 0x00040, boxed    = 0x00080, 
+	byte    = 0x00100, lparen   = 0x00200, 
+	rparen  = 0x00400, colon    = 0x00800, 
+	empty   = 0x01000, null     = 0x02000,
+	ldfns   = 0x04000, rdfns    = 0x08000,
+	assign  = 0x10000
 };
 
 enum flag {
@@ -41,6 +42,7 @@ array* get(void *, char*);
 /* Array operations */
 long   asiz(array*);
 array* acln(array*);
+void   aclr(array*);
 array* atmp(void*, enum tag, unsigned, unsigned);
 array* anew(enum tag, enum flag, unsigned, unsigned);
 int*   ashp(array*);
@@ -48,6 +50,8 @@ void*  aval(array*);
 char*  akey(array*,char*,int);
 array* afun(char*,unsigned,array**);
 array* abox(unsigned,array**);
+void*  amem(array*,long);
+int    afull(array*);
 
 /* Memory management */
 void record(array*);
@@ -55,8 +59,8 @@ void incref(array*);
 void decref(array*);
 
 /* Core interpreter */
-int      scan(void *,array**,int,char*,int);
-array*   eval(void*,array **, array **);
+array* scan(void*,array*,array*);
+array* eval(void*,array*);
 
 /* Init,Teardown */
 int   fmt_init(void);

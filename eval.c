@@ -25,9 +25,11 @@ rule cases[] = {
 {{	0,       0,       0,       0},   NULL,  0,0}
 };
 
-array *eval(void *E, array **beg, array **end) {
-	stack l = mkstack(beg,+1); l.top = end;
-	stack r = mkstack(end,-1);
+array *eval(void *E, array *tok) {
+	print("%A\n", tok);
+	array **a = aval(tok);
+	stack l = mkstack(a,+1); l.top = a+tok->n-1;
+	stack r = mkstack(a+tok->n-1,-1);
 	return parse(E, &l, &r, 0);
 }
 array *parse(void *E, stack *l, stack *r, int lvl) {

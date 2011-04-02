@@ -22,6 +22,7 @@ static int type_sizes[] = {
 	sizeof (array*), /* monop     */
 	sizeof (array*), /* niladic   */
 	sizeof (array*), /* boxed     */
+	sizeof (char),   /* byte      */
 };
 static int msize(array *a) { 
 	return sizeof(int)*a->k + a->n*tsize(a->t); 
@@ -96,3 +97,11 @@ array *afun(char *s, unsigned n, array **x) {
 	a->t = function;
 	return a;
 }
+void *amem(array *a, long sz) {
+	void *m = a->m + a->n*tsize(a->t);
+	if(a->n+sz > a->z) return NULL;
+	else a->n += sz;   return m;
+}
+
+void aclr(array *a) { a->n = 0; }
+int afull(array *a) { return a->n == a->z; }
