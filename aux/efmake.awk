@@ -4,23 +4,18 @@ BEGIN {
 		"%s"\
 		"\tr = errfmt(\"%s\"%s);\n"\
 		"\treturn r;\n}\n"
-	print("#include \"apl.h\"")
-	print("#include <stdarg.h>")
-	print("#include \"error.h\"")
-	print("extern int errfmt(char*,...);");
-	print("extern char *err_txt[];");
-	fmt["array*"]	= "%A"
-	fmt["int"]		= "%d"
-	fmt["char*"]	= "%s"
-	fmt["Rune*"]	= "%S"
+	print("#include <stdarg.h>\n#include \"apl.h\"")
+	print("#include \"error.h\"\nextern int errfmt(char*,...);");
+	fmt["array*"] = "%A"; fmt["int"]   = "%d"
+	fmt["char*"]  = "%s"; fmt["Rune*"] = "%S"
 }
-function format(s) {
+function trim(s) {
 	gsub(/[ \t\n]+/, " ", s);
 	gsub(/(^[ \t\n]+|[ \t\n]+$)/, "", s)
 	return s
 }
 function print_error(x) {
-	s = format(body[x])
+	s = trim(body[x])
 	a = ""
 	gsub("\"", "\\\"", s)
 	while(match(s,/%[0-9]+/)) {
@@ -47,12 +42,5 @@ function print_error(x) {
 	next
 }
 !e{ next; }
-
-e {
-	body[e] = body[e]" "$0
-}
-
-END {
-	for(e in numarg) print_error(e)
-}
-
+e { body[e] = body[e]" "$0 }
+END { for(e in numarg) print_error(e) }
