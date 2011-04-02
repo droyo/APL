@@ -92,8 +92,10 @@ array *afun(char *s, unsigned n, array **x) {
 	if(!(k=astr(s)))             return NULL;
 	if(!(a=anew(boxed,0,1,n+1))) return NULL;
 	y = aval(a); y[0] = k;
-	for(i=0;i<n;i++)
-		y[i+1] = x[i];
+	for(i=0;i<n;i++) {
+		y[i+1] = x[i]->f&tmpmem?acln(x[i]):x[i];
+		if(!y[i+1]) return NULL;
+	}
 	a->t = function;
 	return a;
 }
