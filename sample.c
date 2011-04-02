@@ -50,15 +50,16 @@ int sample_init(void *E) {
 	for(i=0;i<SSSS->n;i++) r[i] = UHOOT;
 	if(!put(E, "⎕F", SSSS)) return -1;
 
-	a = aval(B); a[0] = SS;
+	a = aval(B); a[0] = get(E,"⎕C");
 	if(!put(E, "⎕G", B)) return -1;
 
-	a = aval(BB); a[0] = NN;
+	a = aval(BB); a[0] = get(E, "⎕A");
 	if(!put(E, "⎕H", BB)) return -1;
 
 	a = aval(BBB); 
 	s = ashp(BBB); s[0] = s[1] = 2;
-	a[0] = a[2] = SS; a[1] = a[3] = BB;
+	a[0] = a[3] = get(E,"⎕H"); 
+	a[1] = a[2] = get(E,"⎕D");
 	if(!put(E, "⎕I", BBB)) return -1;
 
 	return 0;
