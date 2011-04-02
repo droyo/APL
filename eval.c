@@ -149,12 +149,12 @@ static stack mkstack(array **beg, char d) {
 	return s;
 }
 static array *pop(stack *s) {
-	if (!count(s)) return zilde;
+	if (!count(s)) return marker;
 	s->top -= s->dir;
 	return s->top[s->dir];
 }
 static array *nth(stack *s, int n) {
-	if (count(s) <= n) return zilde;
+	if (count(s) <= n) return marker;
 	return *(s->top - s->dir*n);
 }
 static array *top(stack *s) { 
