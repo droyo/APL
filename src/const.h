@@ -1,10 +1,6 @@
-int isaplop (long);
-int isaplfun(long);
-int isapldig(long);
-int isaplmop(long);
-int isapldop(long);
-int isapldel(long);
-int isaplchr(long);
+int isapldig(Rune);
+int isapldel(Rune);
+int isaplch(Rune);
 enum codepoint {
 	UASSIGN		= 0x2190, UBAR		= 0x007C,
 	UBRANCH		= 0x2192, UBSLASH	= 0x005C,

@@ -12,14 +12,11 @@
 const int zero = 0;
 static array* parray(array*,enum tag,unsigned,unsigned);
 static void*  push(array*,const void*,long);
-
-static array* scan_numeral  (array*,Biobuf*);
-static array* scan_literal  (array*,Biobuf*);
-static array* scan_function (array*,Biobuf*);
-static array* scan_symbol   (array*,Biobuf*);
-static array* scan_delims   (array*,Biobuf*);
-static array* scan_operator (array*,Biobuf*);
-static array* scan_special  (array*,Biobuf*);
+static array* scan_numeral (array*,Biobuf*);
+static array* scan_literal (array*,Biobuf*);
+static array* scan_symbol  (array*,Biobuf*);
+static array* scan_delims  (array*,Biobuf*);
+static array* scan_special (array*,Biobuf*);
 
 array *scan(void *v, array **tok, array **buf) {
 	Rune r; 
@@ -41,9 +38,7 @@ array *scan(void *v, array **tok, array **buf) {
 		else if(isapldig(r)) a=scan_numeral (*buf,i);
 		else if(r == '\'')   a=scan_literal (*buf,i);
 		else if(isapldel(r)) a=scan_delims  (*buf,i);
-		else if(isaplop(r))  a=scan_operator(*buf,i);
-		else if(isaplfun(r)) a=scan_function(*buf,i);
-		else if(isaplchr(r)) a=scan_special (*buf,i);
+		else if(isaplch(r))  a=scan_special (*buf,i);
 		else                 a=scan_symbol  (*buf,i);
 		
 		if (!a) {
@@ -105,34 +100,6 @@ static array* scan_literal(array *p,Biobuf *i) {
 	return a;
 }
 
-static array* scan_function(array *p,Biobuf *i) {
-	Rune r = Bgetrune(i);
-	array *a = parray(p,symbol,0,0);
-	if(!a) return NULL;
-	a->f |= primitive;
-	a->n = 1; push(p,&r, sizeof r);
-	return a;
-}
-
-static array* scan_operator(array *p,Biobuf *i) {
-	array *a;
-	int c; Rune r = Bgetrune(i);
-	/* Make sure it's '.' the operator, and
-	   not the start of a decimal number */
-	if (r == '.') {
-		Bungetrune(i);
-		Bgetc(i); c = Bgetc(i);
-		if(isdigit(c)) {
-			Bungetc(i); Bungetc(i);
-			return scan_numeral(p,i);
-		} else Bungetc(i);
-	}
-	a=parray(p,isapldop(r)?dydop:monop,0,0);
-	if(!a) return NULL;
-	a->f|=primitive;a->n = 1; push(p,&r, sizeof r);
-	return a;
-}
-
 static array* scan_delims(array *p,Biobuf *i) {
 	int c = Bgetc(i); enum tag t;
 	switch(c) {
@@ -151,6 +118,12 @@ static array* scan_special(array *p,Biobuf *i) {
 	if (!a) return NULL;
 	switch(r) {
 	case UASSIGN: a->t = assign; break;
+	case '.':
+	Bungetrune(i);Bgetc(i);
+	if(isdigit(Bgetc(i))) {
+		Bungetc(i); Bungetc(i);
+		return scan_numeral(p,i);
+	}
 	default:
 		push(p,&r, sizeof r);
 		a->t = symbol;
@@ -166,12 +139,10 @@ static array* scan_symbol(array *p, Biobuf *i) {
 	a->n = 0;
 	
 	while((r = Bgetrune(i))>0) {
-		if(r!='.'&&isaplop(r)) break;
+		if(isaplch(r)&&r!='.') break;
 		else if(isspace(r))    break;
 		else if(r == '\'')     break;
 		else if(isapldel(r))   break;
-		else if(isaplfun(r))   break;
-		else if(isaplchr(r))   break;
 		push(p,&r, sizeof r);
 		a->n++;
 	}

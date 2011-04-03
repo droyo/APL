@@ -8,15 +8,7 @@ array *zilde;
 array *marker;
 
 static char utfdelim[] = "()[]";
-static const Rune utfdyadicop[] = {
-	UEACH,  UDOT,   UHOOT, UHOLLER, 
-	UUNION, UISECT, UDFNS, UWITHE
-};
-static const Rune utfmonadop[] = {
-	UBSLASH, UBSLASHB, USLASH, 
-	USLASHB, UMERGE,   USWAP
-};
-static const Rune utffunctions[] = {
+static const Rune utfspecial[] = {
 	UBAR,    UCAT,     UCATBAR, UCIRC,   UDECODE,
 	UDIV,    UDOMINO,  UDROP,   UENCODE, UEQUAL,
 	UEXEC,   UFACT,    UFIND,   UFMT,    UFROM,
@@ -26,10 +18,10 @@ static const Rune utffunctions[] = {
 	UMATCH,  UMAX,     UMEMB,   UMIN,    UMINUS,
 	UTRANSP, UNEQUAL,  UPLUS,   UPOW,    UPROD,
 	URAND,   UREVERSE, URHO,    UROTATE, URTACK,
-	UTAKE,   UTILDE
-};
-static const Rune utfextra[] = {
-	ULAMP, UASSIGN, UBRANCH, UQQUAD
+	UTAKE,   UTILDE,   UWITHE,  UASSIGN, UBRANCH,
+	UQQUAD,  USLASHB,  UMERGE,  USWAP,   UHOLLER, 
+	UEACH,   UDOT,     UHOOT,   UBSLASH, UBSLASHB,
+	USLASH,  UUNION,   UISECT,  UDFNS,   ULAMP
 };
 	
 static int checksym(char *s, Rune r) {
@@ -41,35 +33,22 @@ static int checksym(char *s, Rune r) {
 		if(c[i] == r) return 1;
 	return 0;
 };
-int isapldig(long x){return (x>='0' && x<='9')||x==UMACRON;}
-int isapldel(long x){return checksym("⎕dl", x);}
-int isaplmop(long x){return checksym("⎕pm", x);}
-int isapldop(long x){return checksym("⎕pd", x);}
-int isaplfun(long x){return checksym("⎕pf", x);}
-int isaplchr(long x){return checksym("⎕pe", x);}
-int isaplop (long x){return isaplmop(x) || isapldop(x);}
+int isapldig(Rune x){return (x>='0' && x<='9')||x==UMACRON;}
+int isapldel(Rune x){return checksym("⎕dl", x);}
+int isaplch (Rune x){return checksym("⎕pc", x);}
 
 int const_init(void) {
-	array *Func, *Dyop, *Moop, *Extra, *Delim;
+	array *Aplch, *Delim;
 	
 	if (!(zilde=anew(null,rdonly,0,0))) return -1;
 	if (!(marker=anew(empty,rdonly,0,0))) return -1;
-	if (!(Func=anew(string,rdonly,1,NELEM(utffunctions)))) return -1;
-	if (!(Dyop=anew(string,rdonly,1,NELEM(utfdyadicop)))) return -1;
-	if (!(Moop=anew(string,rdonly,1,NELEM(utfmonadop)))) return -1;
-	if(!(Extra=anew(string,rdonly,1,NELEM(utfextra)))) return -1;
-	if(!(Delim=astr(utfdelim))) return -1;
+	if (!(Aplch=anew(string,rdonly,1,NELEM(utfspecial)))) return -1;
+	if (!(Delim=astr(utfdelim))) return -1;
 	
-	runesprint(aval(Func), "%*R", NELEM(utffunctions), utffunctions);
-	runesprint(aval(Dyop), "%*R", NELEM(utfdyadicop), utfdyadicop);
-	runesprint(aval(Moop), "%*R", NELEM(utfmonadop), utfmonadop);
-	runesprint(aval(Extra),"%*R", NELEM(utfextra), utfextra);
-	if(!put(S,"⎕pf",Func)) return -1;
-	if(!put(S,"⎕pd",Dyop)) return -1;
-	if(!put(S,"⎕pm",Moop)) return -1;
-	if(!put(S,"⎕pe",Extra))return -1;
-	if(!put(S,"⎕dl",Delim))return -1;
-	if(!put(G,"⍬",zilde))  return -1;
+	runesprint(aval(Aplch),"%*R",NELEM(utfspecial), utfspecial);
+	if(!put(S,"⎕pc",Aplch)) return -1;
+	if(!put(S,"⎕dl",Delim)) return -1;
+	if(!put(G,"⍬",zilde))   return -1;
 
 	return 0;
 }
