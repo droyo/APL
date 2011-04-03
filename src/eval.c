@@ -76,8 +76,10 @@ array *parse(array *E, stack *l, stack *r, int lvl) {
 
 array *mkfun(array *E, stack *s) {
 	array *a;
-	if(!(a=afun("fn:",count(s),s->top)))
+	if(!count(s)) return zilde;
+	if(!(a=abox(count(s),s->top)))
 		return enil(Enomem);
+	a->t = function;
 	return a;
 }
 
@@ -114,22 +116,18 @@ int apply(array *E, rule *r, stack *s) {
 }
 array* monad(array *E, array **a, int b, int e) {
 	print("(%A %A)", a[b], a[e]);
-	a[e]->f &= ~quiet;
 	return a[e];
 }
 array* dyad(array *E, array **a, int b, int e)  {
 	print("(%A %A,%A)",a[b+1],a[e],a[b]);
-	a[e]->f &= ~quiet;
 	return a[e];
 }
 array* moper(array *E, array **a, int b, int e) {
 	print("(op '%A%A')",a[b],a[e]);
-	a[e]->f &= ~quiet;
 	return a[b];
 }
 array* doper(array *E, array **a, int b, int e) {
 	print("(op %A%A%A)", a[b+1], a[b], a[e]);
-	a[e]->f &= ~quiet;
 	return a[e];
 }
 array* bind(array *E, array **a, int b, int e) {

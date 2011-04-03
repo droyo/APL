@@ -147,9 +147,9 @@ static int Nx1(Fmt *f, double *d, int w, int n) {
 
 static int Bx1(Fmt *f, int ind, array **a, int n) {
 	Rune **u,**t; int i,k,*w,e = -1;
-	if(!(w = malloc(sizeof *w * n))) return -1;
-	if(!(u = malloc(sizeof *u * n))) goto Error1;
-	if(!(t = malloc(sizeof *t * n))) goto Error2;
+	if(!(w = calloc(sizeof *w,n))) return -1;
+	if(!(u = calloc(sizeof *u,n))) goto Error1;
+	if(!(t = calloc(sizeof *t,n))) goto Error2;
 	
 	for(k=0;k<n;k++){
 		if(!(u[k] = runesmprint("%A",a[k]))) goto Error3;

@@ -8,7 +8,7 @@
 static int msize(array *a); 
 static int tsize(enum tag);
 enum { def_rank = 4 };
-enum { def_size = 32};
+enum { def_size = 0 };
 
 /* Make sure if you modify the tag order
  * in apl.h that you also modify this table
@@ -25,13 +25,13 @@ static int type_sizes[] = {
 	sizeof (char),   /* byte      */
 };
 static int msize(array *a) { 
-	return sizeof(int)*a->k + a->n*tsize(a->t); 
+	return sizeof(int)*a->k + a->z*tsize(a->t); 
 }
 static int tsize(enum tag t) {
 	unsigned long s; for(s=0;t>>=1;s++); 
 	return (s>NELEM(type_sizes)?0:type_sizes[s]);
 }
-long asiz(array *a) {
+long asize(array *a) {
 	return ASIZE + msize(a);
 }
 /* Suitable for passing to put() */
@@ -47,18 +47,20 @@ array *atmp(void *p,enum tag t, unsigned r, unsigned n) {
 }
 array *anew(enum tag t, enum flag f, unsigned r, unsigned n) {
 	array *a;
-	int s = max(def_rank,r);
+	int k = max(def_rank,r);
 	int z = max(def_size,n);
-	if(!(a=malloc(ASIZE+sizeof(int)*s+tsize(t)*z)))
+	if(!(a=malloc(ASIZE+sizeof(int)*k+tsize(t)*z)))
 		return enil(Enomem);
 	a->t=t;a->f = f&~tmpmem;
-	a->r=r;a->n=n;a->k=s;a->z=z;
+	a->r=r;a->n=n;a->k=k;a->z=z;
 	if(r == 1) *ashp(a) = n;
 	record(a); return a;
 }
 array *acln(array *a) {
-	array *c = anew(a->t, a->f, a->r, a->n);
-	if(!c) return NULL; else memcpy(c->m, a->m, msize(a));
+	array *c; 
+	if(!(c=anew(a->t, a->f, a->r, a->n))) return NULL; 
+	memcpy(ashp(c), ashp(a), sizeof(int)*a->r);
+	memcpy(aval(c), aval(a), msize(a)-sizeof(int)*a->k);
 	return c;
 }
 int *ashp(array *a) {
@@ -91,27 +93,29 @@ array *astr(char *s) {
 	runesnprint(aval(a),utflen(s)+1, "%s", s);
 	return a;
 }
-array *afun(char *s, unsigned n, array **x) {
-	int i; array *a, *k, **y;
-	if(!(k=astr(s)))             return NULL;
-	if(!(a=anew(boxed,0,1,n+1))) return NULL;
-	y = aval(a); y[0] = k;
-	for(i=0;i<n;i++) {
-		y[i+1] = x[i]->f&tmpmem?acln(x[i]):x[i];
-		if(!y[i+1]) return NULL;
-	}
-	a->t = function;
-	return a;
-}
 void *amem(array *a, long sz) {
-	void *m = a->m + a->n*tsize(a->t);
-	if(a->n+sz > a->z) return NULL;
-	else a->n += sz;   return m;
+	void *m = aget(a,a->n);
+	if(a->n+sz > a->z)     return NULL;
+	*ashp(a)=(a->n += sz); return m;
 }
 
 void aclr(array *a) { a->n = 0; }
 int afull(array *a) { return a->n == a->z; }
-array *agrow(array *a, long n) {
-	if(!(a=realloc(a,msize(a)+n*tsize(a->t)))) return NULL;
-	else a->z += n; return a;
+array *agrow(array **a, long n) {
+	array *r;
+	if(!(r=realloc(*a,asize(*a)+n*tsize((*a)->t))))
+		return NULL;
+	else r->z += n; 
+	return *a=r;
+}
+void *aget(array *a, long i) {
+	if(i >= a->z) return NULL;
+	return aval(a) + tsize(a->t)*i;
+}
+void *apush(array **a, const void *x) {
+	void *p;
+	if(afull(*a) && !agrow(a,4)) return NULL;
+	p = aget(*a,(*a)->n++);
+	*ashp(*a) = (*a)->n;
+	return memcpy(p,x,tsize((*a)->t));
 }

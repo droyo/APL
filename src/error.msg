@@ -25,8 +25,8 @@ finishing your
 [lexline int]
 Maximum line length of %1 exceeded.
 
-[lexmem]
-Scanner memory exhausted.
+[lexmem int]
+Scanner memory exhausted (max %1 bytes).
 
 [lexerr]
 Garbled input.
