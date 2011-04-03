@@ -115,22 +115,18 @@ int apply(array *E, rule *r, stack *s) {
 }
 array* monad(array *E, array **a, int b, int e) {
 	print("(%A %A)", a[b], a[e]);
-	a[e]->f &= ~quiet;
 	return a[e];
 }
 array* dyad(array *E, array **a, int b, int e)  {
 	print("(%A %A,%A)",a[b+1],a[e],a[b]);
-	a[e]->f &= ~quiet;
 	return a[e];
 }
 array* moper(array *E, array **a, int b, int e) {
 	print("(op '%A%A')",a[b],a[e]);
-	a[e]->f &= ~quiet;
 	return a[b];
 }
 array* doper(array *E, array **a, int b, int e) {
 	print("(op %A%A%A)", a[b+1], a[b], a[e]);
-	a[e]->f &= ~quiet;
 	return a[e];
 }
 array* bind(array *E, array **a, int b, int e) {
