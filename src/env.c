@@ -13,7 +13,7 @@ static unsigned long hash(char *s) {
 
 static int addnew(array *e, int x, pair p) {
 	array **v=aval(e),*b=v[x]; pair *n;
-	if(b->n >= b->z/sizeof p && !(b=agrow(b,sizeof p)))
+	if(b->n >= b->z/sizeof p && !agrow(&b,sizeof p))
 		return -1;
 	v[x]=b; n=aval(b); n[b->n++]=p;
 	return 0;

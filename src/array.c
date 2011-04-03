@@ -8,7 +8,7 @@
 static int msize(array *a); 
 static int tsize(enum tag);
 enum { def_rank = 4 };
-enum { def_size = 32};
+enum { def_size = 0 };
 
 /* Make sure if you modify the tag order
  * in apl.h that you also modify this table
@@ -25,13 +25,13 @@ static int type_sizes[] = {
 	sizeof (char),   /* byte      */
 };
 static int msize(array *a) { 
-	return sizeof(int)*a->k + a->n*tsize(a->t); 
+	return sizeof(int)*a->k + a->z*tsize(a->t); 
 }
 static int tsize(enum tag t) {
 	unsigned long s; for(s=0;t>>=1;s++); 
 	return (s>NELEM(type_sizes)?0:type_sizes[s]);
 }
-long asiz(array *a) {
+long asize(array *a) {
 	return ASIZE + msize(a);
 }
 /* Suitable for passing to put() */
@@ -104,22 +104,30 @@ array *afun(char *s, unsigned n, array **x) {
 	return a;
 }
 void *amem(array *a, long sz) {
-	void *m = a->m + a->n*tsize(a->t);
-	if(a->n+sz > a->z) return NULL;
-	else a->n += sz;   return m;
+	void *m = aget(a,a->n);
+	if(a->n+sz > a->z)     return NULL;
+	*ashp(a)=(a->n += sz); return m;
 }
 
 void aclr(array *a) { a->n = 0; }
 int afull(array *a) { return a->n == a->z; }
-array *agrow(array *a, long n) {
-	if(!(a=realloc(a,msize(a)+n*tsize(a->t)))) return NULL;
-	else a->z += n; return a;
-}
-void *apush(array *a, void *x) {
-	void *p;
-	if(afull(a) && !agrow(a,tsize(a->t))*4)
+array *agrow(array **a, long n) {
+	array *r;
+	print("grow %A\n", *a);
+	if(!(r=realloc(*a,asize(*a)+n*tsize((*a)->t))))
 		return NULL;
-	p = aval(a) + tsize(a->t)*a->n;
-	memcpy(p,x,tsize(a->t)); a->n++;
-	return p;
+	else r->z += n; 
+	print("New max: %d\n",r->z);
+	return *a=r;
+}
+void *aget(array *a, long i) {
+	if(i >= a->z) return NULL;
+	return aval(a) + tsize(a->t)*i;
+}
+void *apush(array **a, const void *x) {
+	void *p;
+	if(afull(*a) && !agrow(a,4)) return NULL;
+	p = aget(*a,(*a)->n++);
+	*ashp(*a) = (*a)->n;
+	return memcpy(p,x,tsize((*a)->t));
 }

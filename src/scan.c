@@ -21,40 +21,38 @@ static array* scan_delims   (array*,Biobuf*);
 static array* scan_operator (array*,Biobuf*);
 static array* scan_special  (array*,Biobuf*);
 
-array *scan(void *v, array *tok, array *buf) {
+array *scan(void *v, array **tok, array **buf) {
 	Rune r; 
+	array *a;
 	Biobuf *i = v;
-	array **t = aval(tok), **x;
 
-	t[tok->n++] = marker;
+	if(!apush(tok,&marker)) return enil(Elexmem);
 
 	while((r=Bgetrune(i))>0) {
-		if(afull(tok) || afull(buf)) {
+		if(afull(*buf)) {
 			Brdline(i,'\n');
-			return enil(Elexline,tok->n);
+			return enil(Elexmem);
 		}
 		if(r == Beof || r == '\n') break;
 		if(isspace(r)) continue;
 		Bungetrune(i);
-		x = t+tok->n;
 
 		if(r==ULAMP){Brdline(i,'\n');break;}
-		else if(isapldig(r))*x=scan_numeral (buf,i);
-		else if(r == '\'')  *x=scan_literal (buf,i);
-		else if(isapldel(r))*x=scan_delims  (buf,i);
-		else if(isaplop(r)) *x=scan_operator(buf,i);
-		else if(isaplfun(r))*x=scan_function(buf,i);
-		else if(isaplchr(r))*x=scan_special (buf,i);
-		else                *x=scan_symbol  (buf,i);
+		else if(isapldig(r)) a=scan_numeral (*buf,i);
+		else if(r == '\'')   a=scan_literal (*buf,i);
+		else if(isapldel(r)) a=scan_delims  (*buf,i);
+		else if(isaplop(r))  a=scan_operator(*buf,i);
+		else if(isaplfun(r)) a=scan_function(*buf,i);
+		else if(isaplchr(r)) a=scan_special (*buf,i);
+		else                 a=scan_symbol  (*buf,i);
 		
-		if (!*x) {
+		if (!a) {
 			Brdline(i,'\n');
 			return NULL;
 		}
-		tok->n++;
+		if(!apush(tok,&a)) return enil(Elexmem);
 	}
-	*ashp(tok) = tok->n;
-	return tok;
+	return *tok;
 }
 
 static array* scan_numeral(array *p, Biobuf *i) {
@@ -101,8 +99,8 @@ static array* scan_literal(array *p,Biobuf *i) {
 		push(p,&r,sizeof r);
 		a->n++;
 	}
-	Bungetrune(i);
 	*ashp(a) = a->n;
+	Bungetrune(i);
 
 	return a;
 }
@@ -177,6 +175,7 @@ static array* scan_symbol(array *p, Biobuf *i) {
 		push(p,&r, sizeof r);
 		a->n++;
 	}
+	*ashp(a) = a->n;
 	Bungetrune(i);
 	return a;
 }

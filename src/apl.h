@@ -41,7 +41,6 @@ array* put(array*,char*,array*);
 array* get(array*,char*);
 
 /* Array operations */
-long   asiz(array*);
 array* acln(array*);
 void   aclr(array*);
 array* atmp(void*, enum tag, unsigned, unsigned);
@@ -49,13 +48,15 @@ array* anew(enum tag, enum flag, unsigned, unsigned);
 int*   ashp(array*);
 void*  aval(array*);
 char*  akey(array*,char*,int);
+void*  aget(array*,long);
 array* afun(char*,unsigned,array**);
 array* abox(unsigned,array**);
 array* astr(char*);
 void*  amem(array*,long);
 int    afull(array*);
-array* agrow(array*,long);
-void*  apush(array*,void*);
+array* agrow(array**,long);
+void*  apush(array**,const void*);
+long   asize(array*);
 
 /* Memory management */
 void record(array*);
@@ -63,7 +64,7 @@ void incref(array*);
 void decref(array*);
 
 /* Core interpreter */
-array* scan(void*,array*,array*);
+array* scan(void*,array**,array**);
 array* eval(array*,array*);
 
 /* Init,Teardown */
