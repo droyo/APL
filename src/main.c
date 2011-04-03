@@ -25,8 +25,8 @@ int main(void) {
 		"Can't open input");
 	try(e,e3,!(G=shadow(NULL)),"Can't init env");
 	try(e,e3,!(S=shadow(NULL)),"Can't init sysenv");
-	try(e,e3,!(buf=anew(boxed,0,1,256)),"Tokm");
-	try(e,e3,!(mem=anew(byte,0,1,1024)),"Memm");
+	try(e,e3,!(buf=anew(boxed,0,1,128)),"Tokm");
+	try(e,e3,!(mem=anew(byte,0,1,2048)),"Memm");
 	try(e,e3,fmt_init(),"Can't init formatter:%r");
 	try(e,e3,const_init(),"Can't init constants");
 	try(e,e3,sample_init(G),"Can't init samples");
