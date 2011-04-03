@@ -47,18 +47,20 @@ array *atmp(void *p,enum tag t, unsigned r, unsigned n) {
 }
 array *anew(enum tag t, enum flag f, unsigned r, unsigned n) {
 	array *a;
-	int s = max(def_rank,r);
+	int k = max(def_rank,r);
 	int z = max(def_size,n);
-	if(!(a=malloc(ASIZE+sizeof(int)*s+tsize(t)*z)))
+	if(!(a=malloc(ASIZE+sizeof(int)*k+tsize(t)*z)))
 		return enil(Enomem);
 	a->t=t;a->f = f&~tmpmem;
-	a->r=r;a->n=n;a->k=s;a->z=z;
+	a->r=r;a->n=n;a->k=k;a->z=z;
 	if(r == 1) *ashp(a) = n;
 	record(a); return a;
 }
 array *acln(array *a) {
-	array *c = anew(a->t, a->f, a->r, a->n);
-	if(!c) return NULL; else memcpy(c->m, a->m, msize(a));
+	array *c; 
+	if(!(c=anew(a->t, a->f, a->r, a->n))) return NULL; 
+	memcpy(ashp(c), ashp(a), sizeof(int)*a->r);
+	memcpy(aval(c), aval(a), msize(a)-sizeof(int)*a->k);
 	return c;
 }
 int *ashp(array *a) {
@@ -89,18 +91,6 @@ array *astr(char *s) {
 	if(!(a=anew(string,0,1,utflen(s))))
 		return NULL;
 	runesnprint(aval(a),utflen(s)+1, "%s", s);
-	return a;
-}
-array *afun(char *s, unsigned n, array **x) {
-	int i; array *a, *k, **y;
-	if(!(k=astr(s)))             return NULL;
-	if(!(a=anew(boxed,0,1,n+1))) return NULL;
-	y = aval(a); y[0] = k;
-	for(i=0;i<n;i++) {
-		y[i+1] = x[i]->f&tmpmem?acln(x[i]):x[i];
-		if(!y[i+1]) return NULL;
-	}
-	a->t = function;
 	return a;
 }
 void *amem(array *a, long sz) {

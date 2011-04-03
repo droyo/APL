@@ -49,7 +49,6 @@ int*   ashp(array*);
 void*  aval(array*);
 char*  akey(array*,char*,int);
 void*  aget(array*,long);
-array* afun(char*,unsigned,array**);
 array* abox(unsigned,array**);
 array* astr(char*);
 void*  amem(array*,long);

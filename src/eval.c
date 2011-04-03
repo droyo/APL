@@ -26,7 +26,6 @@ rule cases[] = {
 };
 
 array *eval(array *E, array *tok) {
-	print("%A\n", tok);
 	array **a = aval(tok);
 	stack l = mkstack(a,+1); l.top = a+tok->n-1;
 	stack r = mkstack(a+tok->n-1,-1);
@@ -77,8 +76,9 @@ array *parse(array *E, stack *l, stack *r, int lvl) {
 
 array *mkfun(array *E, stack *s) {
 	array *a;
-	if(!(a=afun("fn:",count(s),s->top)))
+	if(!(a=abox(count(s),s->top)))
 		return enil(Enomem);
+	a->t = function;
 	return a;
 }
 

@@ -70,7 +70,7 @@ static array* scan_numeral(array *p, Biobuf *i) {
 			if(!strcmp(n,"--")) d =-INFINITY;
 			else d = strtod(n, 0);
 			push(p,&d, sizeof d);
-			*ashp(a) = ++a->n;
+			*ashp(a) = a->z = ++a->n;
 		}
 		if (r == '\t' || r == ' ') {
 			j = -1; e = dot = 0;
@@ -86,7 +86,6 @@ static array* scan_literal(array *p,Biobuf *i) {
 	Rune r,q;
 	array *a = parray(p,string, 1, 0);
 	if(!a) return NULL;
-	a->n = 0;
 	q = Bgetrune(i);
 	
 	for(r=Bgetrune(i);r!=q||(r=Bgetrune(i))==q;r=Bgetrune(i)) {
@@ -94,7 +93,7 @@ static array* scan_literal(array *p,Biobuf *i) {
 		push(p,&r,sizeof r);
 		a->n++;
 	}
-	*ashp(a) = a->n;
+	*ashp(a) = a->z = a->n;
 	Bungetrune(i);
 
 	return a;
@@ -127,7 +126,7 @@ static array* scan_special(array *p,Biobuf *i) {
 	default:
 		push(p,&r, sizeof r);
 		a->t = symbol;
-		a->n=1;
+		a->z=a->n=1;
 	}
 	return a;
 }
@@ -136,7 +135,7 @@ static array* scan_symbol(array *p, Biobuf *i) {
 	Rune r;
 	array *a = parray(p,symbol,0,0);
 	if(!a) return NULL;
-	a->n = 0;
+	a->r = 1;
 	
 	while((r = Bgetrune(i))>0) {
 		if(isaplch(r)&&r!='.') break;
@@ -146,7 +145,7 @@ static array* scan_symbol(array *p, Biobuf *i) {
 		push(p,&r, sizeof r);
 		a->n++;
 	}
-	*ashp(a) = a->n;
+	*ashp(a) = a->z = a->n;
 	Bungetrune(i);
 	return a;
 }
@@ -155,7 +154,7 @@ static array *parray(array *p,enum tag t, unsigned r, unsigned n){
 	void *m = amem(p,ASIZE);
 	if(!m) return enil(Elexmem);
 	array *a = atmp(m,t,r,n);
-	int i = a->k;
+	int i = a->k; a->z = a->n;
 	while(i--) {
 		if(!push(p,&zero, sizeof (int)))
 			return enil(Elexmem);
