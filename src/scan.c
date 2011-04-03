@@ -23,12 +23,13 @@ array *scan(void *v, array **tok, array **buf) {
 	array *a;
 	Biobuf *i = v;
 
-	if(!apush(tok,&marker)) return enil(Elexmem);
+	if(!apush(tok,&marker))
+		return enil(Elexline,(*tok)->z);
 
 	while((r=Bgetrune(i))>0) {
 		if(afull(*buf)) {
 			Brdline(i,'\n');
-			return enil(Elexmem);
+			return enil(Elexmem,(*buf)->z);
 		}
 		if(r == Beof || r == '\n') break;
 		if(isspace(r)) continue;
@@ -43,9 +44,13 @@ array *scan(void *v, array **tok, array **buf) {
 		
 		if (!a) {
 			Brdline(i,'\n');
-			return NULL;
+			if(afull(*buf))
+				return enil(Elexmem,(*buf)->z);
+			else
+				return enil(Elexline,(*tok)->z);
 		}
-		if(!apush(tok,&a)) return enil(Elexmem);
+		if(!apush(tok,&a)) 
+			return enil(Elexline,(*tok)->z);
 	}
 	return *tok;
 }
@@ -152,12 +157,12 @@ static array* scan_symbol(array *p, Biobuf *i) {
 
 static array *parray(array *p,enum tag t, unsigned r, unsigned n){
 	void *m = amem(p,ASIZE);
-	if(!m) return enil(Elexmem);
+	if(!m) return NULL;
 	array *a = atmp(m,t,r,n);
 	int i = a->k; a->z = a->n;
 	while(i--) {
 		if(!push(p,&zero, sizeof (int)))
-			return enil(Elexmem);
+			return NULL;
 	}
 	return a;
 }

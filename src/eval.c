@@ -76,6 +76,7 @@ array *parse(array *E, stack *l, stack *r, int lvl) {
 
 array *mkfun(array *E, stack *s) {
 	array *a;
+	if(!count(s)) return zilde;
 	if(!(a=abox(count(s),s->top)))
 		return enil(Enomem);
 	a->t = function;
