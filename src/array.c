@@ -113,11 +113,9 @@ void aclr(array *a) { a->n = 0; }
 int afull(array *a) { return a->n == a->z; }
 array *agrow(array **a, long n) {
 	array *r;
-	print("grow %A\n", *a);
 	if(!(r=realloc(*a,asize(*a)+n*tsize((*a)->t))))
 		return NULL;
 	else r->z += n; 
-	print("New max: %d\n",r->z);
 	return *a=r;
 }
 void *aget(array *a, long i) {
