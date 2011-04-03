@@ -116,7 +116,6 @@ static int B(Fmt *f,int ind,array **a) {
 	if(!(s = runesmprint("%A",*a)))
 		return -1;
 	else { t = s;  w = llen(s);}
-	if(pad(f,ind))       goto Error;
 	if(frame(f,w,UL,UR)) goto Error;
 
 	while(*t) {
@@ -129,8 +128,8 @@ static int B(Fmt *f,int ind,array **a) {
 			goto Error;
 		t = n;
 	}
-	if(pad(f,ind))       goto Error;
 	if(fmtrune(f,'\n'))  goto Error;
+	if(pad(f,ind))       goto Error;
 	if(frame(f,w,DL,DR)) goto Error;
 	e = 0;
 Error:
@@ -250,13 +249,12 @@ static int getw(array *a) {
 	return m;
 }
 static int geti(Fmt *f) {
-	int i = 0;
-	char *c = f->to;
+	int i = 0; char *c = f->to;
 	while(c --> (char*)f->start) {
-		if(*c == '\n') break;
 		i++;
+		if(*c == '\n') break;
 	}
-	return i;
+	return utfnlen(c+1,i);
 }
 static Rune* rfind(Rune *s, Rune r) {
 	int i; for(i=0;s[i];i++)
