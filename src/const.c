@@ -21,7 +21,8 @@ static const Rune utfspecial[] = {
 	UTAKE,   UTILDE,   UWITHE,  UASSIGN, UBRANCH,
 	UQQUAD,  USLASHB,  UMERGE,  USWAP,   UHOLLER, 
 	UEACH,   UDOT,     UHOOT,   UBSLASH, UBSLASHB,
-	USLASH,  UUNION,   UISECT,  UDFNS,   ULAMP
+	USLASH,  UUNION,   UISECT,  UDFNS,   ULAMP,
+	UALPHA,  UOMEGA
 };
 	
 static int checksym(char *s, Rune r) {
