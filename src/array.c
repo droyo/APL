@@ -115,3 +115,11 @@ array *agrow(array *a, long n) {
 	if(!(a=realloc(a,msize(a)+n*tsize(a->t)))) return NULL;
 	else a->z += n; return a;
 }
+void *apush(array *a, void *x) {
+	void *p;
+	if(afull(a) && !agrow(a,tsize(a->t))*4)
+		return NULL;
+	p = aval(a) + tsize(a->t)*a->n;
+	memcpy(p,x,tsize(a->t)); a->n++;
+	return p;
+}

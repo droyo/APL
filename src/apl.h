@@ -55,6 +55,7 @@ array* astr(char*);
 void*  amem(array*,long);
 int    afull(array*);
 array* agrow(array*,long);
+void*  apush(array*,void*);
 
 /* Memory management */
 void record(array*);
