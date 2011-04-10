@@ -39,7 +39,7 @@ static int add(array *e, long x, pair p) {
 	return addnew(e,x,p);
 }
 
-array *shadow(array *up) {
+array *env(array *up) {
 	array *e,**b; pair *p;
 	if(!(e=abox(768,NULL))) return NULL;
 	b=aval(e); b[0] = up;

@@ -23,8 +23,8 @@ int main(void) {
 	try(e,e1,mem_init(),"Can't init memory");
 	try(e,e2,!(in=Bfdopen(0,O_RDONLY)),
 		"Can't open input");
-	try(e,e3,!(G=shadow(NULL)),"Can't init env");
-	try(e,e3,!(S=shadow(NULL)),"Can't init sysenv");
+	try(e,e3,!(G=env(NULL)),"Can't init env");
+	try(e,e3,!(S=env(NULL)),"Can't init sysenv");
 	try(e,e3,!(buf=anew(TBOX,0,1,128)),"Tokm");
 	try(e,e3,!(mem=anew(TRAW,0,1,2048)),"Memm");
 	try(e,e3,fmt_init(),"Can't init formatter:%r");
