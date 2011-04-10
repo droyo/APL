@@ -1,7 +1,8 @@
 CC := gcc
 LD := gcc
-BIN := apl
 AWK := awk
+BIN := apl
+
 SRC := \
 	main.c eval.c scan.c \
 	array.c format.c env.c \
@@ -12,7 +13,6 @@ INC := apl.h eval.h error.h \
        error-enm.h const.h codepoints.h
 
 AUTO:= error-enm.h codepoints.h error-msg.c
-
 OBJ := $(SRC:.c=.o)
 
 CFLAGS = -Wall -I/usr/local/include -g
