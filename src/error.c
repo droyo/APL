@@ -4,8 +4,6 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
-extern const struct err_msg *error_messages;
-
 int errfmt(char *fmt, ...) {
 	int r; va_list ap;
 	fprint(2, "!");
