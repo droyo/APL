@@ -45,7 +45,6 @@ $(OBJ) : apl.h error.h const.h
 	$(CC) $(CFLAGS) -c $<
 
 eval.o  : eval.h
-error-msg.o error.o : error.h error-enm.h
 
 clean:
 	rm -f $(OBJ) $(BIN) $(AUTO)
