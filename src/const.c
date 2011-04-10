@@ -36,7 +36,7 @@ static int checksym(char *s, Rune r) {
 };
 int isapldig(Rune x){return (x>='0' && x<='9')||x==UMACRON;}
 int isapldel(Rune x){return checksym("⎕dl", x);}
-int isaplch (Rune x){return checksym("⎕pc", x);}
+int isaplchr(Rune x){return checksym("⎕pc", x);}
 
 int const_init(void) {
 	array *Aplch, *Delim;

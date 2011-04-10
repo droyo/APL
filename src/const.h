@@ -1,6 +1,6 @@
 int isapldig(Rune);
 int isapldel(Rune);
-int isaplch(Rune);
+int isaplchr(Rune);
 enum codepoint {
 	UASSIGN		= 0x2190, UBAR		= 0x007C,
 	UBRANCH		= 0x2192, UBSLASH	= 0x005C,
