@@ -50,6 +50,7 @@ error-msg.c: error.msg ../aux/efmake.awk
 	@$(AWK) -f ../aux/efmake.awk $< > $@
 
 clean:
-	rm -f $(OBJ) $(BIN) $(AUTO)
+	@echo Cleaning...
+	@rm -f $(OBJ) $(BIN) $(AUTO)
 
 .PHONY: clean all
