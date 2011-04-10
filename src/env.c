@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "apl.h"
-#define dirty(a) (a->f&(tmpmem|rdonly))
+#define dirty(a) (a->f&(FTMP|FRDO))
 
 typedef struct {char k[64];array *a;} pair;
 
@@ -45,7 +45,7 @@ array *shadow(array *up) {
 	if(!(e=abox(768,NULL))) return NULL;
 	b=aval(e); b[0] = up;
 	for(e->n=1;e->n<e->z;e->n++) {
-		if(!(b[e->n]=anew(byte,0,1,sizeof(pair))))
+		if(!(b[e->n]=anew(TRAW,0,1,sizeof(pair))))
 			return NULL;
 		b[e->n]->n = 0;
 		p=aval(b[e->n]);p->k[0] = '\0';
@@ -64,7 +64,7 @@ array *put(array *e, char *k, array *a) {
 
 	strncpy(p.k, k, sizeof p.k-1);
 	if(old) {
-		if(old->a->f&rdonly) return NULL;
+		if(old->a->f&FRDO) return NULL;
 		else if(old->a == a) return a;
 		else decref(old->a);
 	} 

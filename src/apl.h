@@ -1,23 +1,22 @@
 #define NELEM(x)(sizeof(x)/sizeof(*x))
-#define max(a,b) ((a)>(b))?(a):(b)
-#define min(a,b) ((a)<(b))?(a):(b)
+#define MAX(a,b) ((a)>(b))?(a):(b)
+#define MIN(a,b) ((a)<(b))?(a):(b)
 
 enum tag {
-	number  = 0x00001, string   = 0x00002,
-	symbol  = 0x00004, function = 0x00008,
-	dydop   = 0x00010, monop    = 0x00020, 
-	niladic = 0x00040, boxed    = 0x00080, 
-	byte    = 0x00100, lparen   = 0x00200, 
-	rparen  = 0x00400, colon    = 0x00800, 
-	empty   = 0x01000, null     = 0x02000,
-	ldfns   = 0x04000, rdfns    = 0x08000,
-	assign  = 0x10000
+	TNUM = 0x00001, TSTR = 0x00002,
+	TSYM = 0x00004, TFUN = 0x00008,
+	TDYA = 0x00010, TMON = 0x00020, 
+	TCLK = 0x00040, TBOX = 0x00080, 
+	TRAW = 0x00100, TLPR = 0x00200, 
+	TRPR = 0x00400, TCOL = 0x00800, 
+	TEND = 0x01000, TNIL = 0x02000,
+	TLDF = 0x04000, TRDF = 0x08000,
+	TSET = 0x10000
 };
 
 enum flag {
-	tmpmem    = 0x01, rdonly = 0x02,
-	managed   = 0x04, active = 0x08,
-	primitive = 0x10, quiet  = 0x20
+	FTMP = 0x1,  FRDO = 0x02,
+	FMAN = 0x04, FSIL = 0x08
 };
 
 #define ASIZE (sizeof(array))

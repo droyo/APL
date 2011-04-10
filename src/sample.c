@@ -10,15 +10,15 @@ int sample_init(void *E) {
 	array *SS, *SSS, *SSSS;
 	array *B, *BB, *BBB;
 
-	if (!(NN=anew(number,0,2,12))) return -1;
-	if (!(NNN=anew(number,0,3,32))) return -1;
-	if (!(NNNN=anew(number,0,4,16))) return -1;
-	if (!(SS=anew(string,0,2,12))) return -1;
-	if (!(SSS=anew(string,0,3,32))) return -1;
-	if (!(SSSS=anew(string,0,4,16))) return -1;
-	if (!(B=anew(boxed,0,0,1))) return -1;
-	if (!(BB=anew(boxed,0,0,1))) return -1;
-	if (!(BBB=anew(boxed,0,2,4))) return -1;
+	if (!(NN=anew(TNUM,0,2,12))) return -1;
+	if (!(NNN=anew(TNUM,0,3,32))) return -1;
+	if (!(NNNN=anew(TNUM,0,4,16))) return -1;
+	if (!(SS=anew(TSTR,0,2,12))) return -1;
+	if (!(SSS=anew(TSTR,0,3,32))) return -1;
+	if (!(SSSS=anew(TSTR,0,4,16))) return -1;
+	if (!(B=anew(TBOX,0,0,1))) return -1;
+	if (!(BB=anew(TBOX,0,0,1))) return -1;
+	if (!(BBB=anew(TBOX,0,2,4))) return -1;
 
 	s = ashp(NN); d = aval(NN);
 	s[0] = 2; s[1] = 6;

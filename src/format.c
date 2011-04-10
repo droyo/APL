@@ -56,23 +56,20 @@ static int Rfmt(Fmt *f) {
 static int Afmt(Fmt *f) {
 	array *a = va_arg(f->args, array*);
 	switch(a->t) {
-	case number: return Afmtn(f,a);
-	case boxed:  return Afmtb(f,a);
-	case string: return Afmts(f,a);
-	case symbol: return Sx1(f,aval(a),a->n);
-	case null:   return fmtprint(f,"∘");
-	case empty:  return fmtprint(f,"⍝");
-	case assign: return fmtprint(f,"←");
-	case colon:  return fmtprint(f,":");
-	case lparen: return fmtprint(f,"(");
-	case rparen: return fmtprint(f,")");
-	case ldfns:  return fmtprint(f,"[");
-	case rdfns:  return fmtprint(f,"]");
-	case function:
-		if(a->f&primitive) 
-			return fmtrune(f,*(Rune*)aval(a));
-		else return Afmtb(f,a);
-	default:     return fmtprint(f,"%*R",a->n,aval(a));
+	case TNUM: return Afmtn(f,a);
+	case TBOX: return Afmtb(f,a);
+	case TFUN: return Afmtb(f,a);
+	case TSTR: return Afmts(f,a);
+	case TSYM: return Sx1(f,aval(a),a->n);
+	case TNIL: return fmtprint(f,"∘");
+	case TEND: return fmtprint(f,"⍝");
+	case TSET: return fmtprint(f,"←");
+	case TCOL: return fmtprint(f,":");
+	case TLPR: return fmtprint(f,"(");
+	case TRPR: return fmtprint(f,")");
+	case TLDF: return fmtprint(f,"[");
+	case TRDF: return fmtprint(f,"]");
+	default:   return fmtprint(f,"%*R",a->n,aval(a));
 	}
 	return 0;
 }

@@ -17,8 +17,8 @@ static void bubbledn(array*);
 static void bubbleup(array*);
 
 int mem_init(void) { 
-	if(!(toofar = anew(empty,rdonly,0,0))) return -1;
-	if(!(toocls = anew(empty,rdonly,0,0))) return -1;
+	if(!(toofar = anew(TNIL,FRDO,0,0))) return -1;
+	if(!(toocls = anew(TNIL,FRDO,0,0))) return -1;
 	toocls->c = 0;
 	toofar->c = UCHAR_MAX;
 	memset(refs, 0, sizeof refs); 
@@ -38,17 +38,17 @@ void mem_coll(void) {
 	}
 }
 void record(array *a) {
-	if(a->f&(tmpmem|rdonly)) return;
+	if(a->f&(FTMP|FRDO)) return;
 	int i;for(i=bot?bot->gc:0;refs[i];i++);
 	a->gc = i; refs[i] = a;
 	bot=a; bubbleup(a);
-	a->f |= managed;
+	a->f |= FMAN;
 }
 void incref(array *a) { 
 	int i; array **x;
-	if(!(a->f&managed)) return;
+	if(!(a->f&FMAN)) return;
 	if(a->c+1>a->c) a->c++; bubbledn(a);
-	if(a->t == boxed || a->t == function) {
+	if(a->t == TBOX || a->t == TFUN) {
 		x = aval(a);
 		for(i=0;i<a->n;i++) if(x[i])
 			incref(x[i]);
@@ -56,9 +56,9 @@ void incref(array *a) {
 }
 void decref(array *a) {
 	int i; array **x;
-	if(a->f&(tmpmem|rdonly)) return;
+	if(a->f&(FTMP|FRDO)) return;
 	if(a->c) a->c--; bubbleup(a); 
-	if(a->t == boxed || a->t == function) {
+	if(a->t == TBOX || a->t == TFUN) {
 		x = aval(a);
 		for(i=0;i<a->n;i++) if(x[i])
 			incref(x[i]);

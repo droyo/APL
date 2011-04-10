@@ -41,9 +41,9 @@ int isaplchr(Rune x){return checksym("⎕pc", x);}
 int const_init(void) {
 	array *Aplch, *Delim;
 	
-	if (!(zilde=anew(null,rdonly,0,0))) return -1;
-	if (!(marker=anew(empty,rdonly,0,0))) return -1;
-	if (!(Aplch=anew(string,rdonly,1,NELEM(utfspecial)))) return -1;
+	if (!(zilde=anew(TNIL,FRDO,0,0))) return -1;
+	if (!(marker=anew(TEND,FRDO,0,0))) return -1;
+	if (!(Aplch=anew(TSTR,FRDO,1,NELEM(utfspecial)))) return -1;
 	if (!(Delim=astr(utfdelim))) return -1;
 	
 	runesprint(aval(Aplch),"%*R",NELEM(utfspecial), utfspecial);
