@@ -38,7 +38,7 @@ static int llen(Rune*);
 static int pad(Fmt*,int);
 static int frame(Fmt*,int,Rune,Rune);
 static int any(Rune**,int);
-static int fmt_boxrow(Fmt*,int,Rune**,int*,int);
+static int row(Fmt*,int,Rune**,int*,int);
 static Rune* rfind(Rune*, Rune);
 
 int fmt_init(void) {
@@ -153,7 +153,7 @@ static int Bx1(Fmt *f, int ind, array **a, int n) {
 	}
 	for(i=0;i<n;i++)if (frame(f,w[i],UL,UR)) goto Error3;
 	while(any(t,n)) 
-		if (fmt_boxrow(f,ind,t,w,n))         goto Error3;
+		if (row(f,ind,t,w,n))         goto Error3;
 	if(fmtrune(f,'\n'))                      goto Error3;
 	if(pad(f,ind))                           goto Error3;
 	for(i=0;i<n;i++)if (frame(f,w[i],DL,DR)) goto Error3;
@@ -277,7 +277,7 @@ static int any(Rune **r, int n) {
 	int i; for(i=0;i<n;i++) if(*r[i]) return 1;
 	return 0;
 }
-static int fmt_boxrow(Fmt *f,int ind,Rune **blocks,int *w,int n) {
+static int row(Fmt *f,int ind,Rune **blocks,int *w,int n) {
 	int i; Rune *s, *e;
 	for(i=0;i<n;i++) {
 		s = blocks[i];

@@ -29,7 +29,6 @@ int main(void) {
 	try(e,e3,!(mem=anew(TRAW,0,1,2048)),"Memm");
 	try(e,e3,fmt_init(),"Can't init formatter:%r");
 	try(e,e3,const_init(),"Can't init constants");
-	try(e,e3,sample_init(G),"Can't init samples");
 
 	aclr(mem); aclr(buf);
 	try(e,e3,!put(S,"⎕tokbuf",buf),"Can't bind token buffer");
