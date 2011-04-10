@@ -1,7 +1,8 @@
 CC := gcc
 LD := gcc
-BIN := apl
 AWK := awk
+BIN := apl
+
 SRC := \
 	main.c eval.c scan.c \
 	array.c format.c env.c \
@@ -9,8 +10,9 @@ SRC := \
 	error.c error-msg.c
 
 INC := apl.h eval.h error.h \
-       error-enm.h const.h
+       error-enm.h const.h codepoints.h
 
+AUTO:= error-enm.h codepoints.h error-msg.c
 OBJ := $(SRC:.c=.o)
 
 CFLAGS = -Wall -I/usr/local/include -g
@@ -19,24 +21,36 @@ LDFLAGS = -lbio -lfmt -lutf -L/usr/local/lib
 all: $(BIN)
 
 $(BIN): $(OBJ)
-	$(LD) -o $@ $^ $(LDFLAGS)
+	@echo LD $@
+	@$(LD) -o $@ $^ $(LDFLAGS)
 
+$(OBJ) : apl.h error.h const.h
+const.h: codepoints.h
 error.h: error-enm.h
-
-error-enm.h: error.msg ../aux/enmake.awk
-	$(AWK) -f ../aux/enmake.awk $< > $@
-
-error-msg.c: error.msg ../aux/efmake.awk
-	$(AWK) -f ../aux/efmake.awk $< > $@
-
-$(OBJ) : apl.h error.h
+eval.o : eval.h
 
 .c.o:
-	$(CC) $(CFLAGS) -c $<
+	@echo CC $@
+	@$(CC) $(CFLAGS) -c $<
 
-eval.o  : eval.h
-const.o : const.h
-error-msg.o error.o : error.h error-enm.h
+../aux/utf: ../aux/utf.c
+	@echo MK $@
+	@$(CC) -o $@ $^ $(LDFLAGS)
+
+codepoints.h: ../aux/utf symbols.utf
+	@echo MK $@
+	@../aux/utf < symbols.utf > $@
+
+error-enm.h: error.msg ../aux/enmake.awk
+	@echo MK $@
+	@$(AWK) -f ../aux/enmake.awk $< > $@
+
+error-msg.c: error.msg ../aux/efmake.awk
+	@echo MK $@
+	@$(AWK) -f ../aux/efmake.awk $< > $@
 
 clean:
-	rm -f $(OBJ) $(BIN) error-msg.c error-enm.h
+	@echo Cleaning...
+	@rm -f $(OBJ) $(BIN) $(AUTO)
+
+.PHONY: clean all

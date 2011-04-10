@@ -14,21 +14,21 @@ enum { def_size = 0 };
  * in apl.h that you also modify this table
  * accordingly */
 static int type_sizes[] = {
-	sizeof (double), /* number    */
-	sizeof (Rune),   /* string    */
-	sizeof (Rune),   /* symbol    */
-	sizeof (array*), /* function  */
-	sizeof (array*), /* dydop     */
-	sizeof (array*), /* monop     */
-	sizeof (array*), /* niladic   */
-	sizeof (array*), /* boxed     */
-	sizeof (char),   /* byte      */
+	sizeof (double), /* TNUM */
+	sizeof (Rune),   /* TSTR */
+	sizeof (Rune),   /* TSYM */
+	sizeof (array*), /* TFUN */
+	sizeof (array*), /* TDYA */
+	sizeof (array*), /* TMON */
+	sizeof (array*), /* TCLK */
+	sizeof (array*), /* TBOX */
+	sizeof (char),   /* TRAW */
 };
 static int msize(array *a) { 
 	return sizeof(int)*a->k + a->z*tsize(a->t); 
 }
 static int tsize(enum tag t) {
-	unsigned long s; for(s=0;t>>=1;s++); 
+	unsigned s; for(s=0;t>>=1;s++); 
 	return (s>NELEM(type_sizes)?0:type_sizes[s]);
 }
 long asize(array *a) {
@@ -40,18 +40,18 @@ char *akey(array *a, char *buf, int n) {
 	return buf;
 }
 array *atmp(void *p,enum tag t, unsigned r, unsigned n) {
-	array *a = p; a->k = max(def_rank,r);
-	a->t = t; a->f=tmpmem; 
+	array *a = p; a->k = MAX(def_rank,r);
+	a->t = t; a->f=FTMP; 
 	a->r = r; a->n = n; a->c = 0;
 	return a;
 }
 array *anew(enum tag t, enum flag f, unsigned r, unsigned n) {
 	array *a;
-	int k = max(def_rank,r);
-	int z = max(def_size,n);
+	int k = MAX(def_rank,r);
+	int z = MAX(def_size,n);
 	if(!(a=malloc(ASIZE+sizeof(int)*k+tsize(t)*z)))
 		return enil(Enomem);
-	a->t=t;a->f = f&~tmpmem;
+	a->t=t;a->f = f&~FTMP;
 	a->r=r;a->n=n;a->k=k;a->z=z;
 	if(r == 1) *ashp(a) = n;
 	record(a); return a;
@@ -71,14 +71,14 @@ void *aval(array *a) {
 }
 array *abox(unsigned n, array **x) {
 	int i, *s; array *a, **y;
-	if(!(a=anew(boxed,0,n>1?1:0,n)))
+	if(!(a=anew(TBOX,0,n>1?1:0,n)))
 		return NULL;
 	if(!x) {
 		a->n = 0;
 		return a;
 	}
 	for(i=0,y=aval(a);i<n;i++) {
-		if(x[i]->f & tmpmem) {
+		if(x[i]->f & FTMP) {
 			if(!(y[i]=acln(x[i]))) return NULL;
 		}else
 			y[i] = x[i];
@@ -88,7 +88,7 @@ array *abox(unsigned n, array **x) {
 }
 array *astr(char *s) {
 	array *a;
-	if(!(a=anew(string,0,1,utflen(s))))
+	if(!(a=anew(TSTR,0,1,utflen(s))))
 		return NULL;
 	runesnprint(aval(a),utflen(s)+1, "%s", s);
 	return a;

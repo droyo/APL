@@ -39,7 +39,7 @@ array *scan(void *v, array **tok, array **buf) {
 		else if(isapldig(r)) a=scan_numeral (*buf,i);
 		else if(r == '\'')   a=scan_literal (*buf,i);
 		else if(isapldel(r)) a=scan_delims  (*buf,i);
-		else if(isaplch(r))  a=scan_special (*buf,i);
+		else if(isaplchr(r)) a=scan_special (*buf,i);
 		else                 a=scan_symbol  (*buf,i);
 		
 		if (!a) {
@@ -57,7 +57,7 @@ array *scan(void *v, array **tok, array **buf) {
 
 static array* scan_numeral(array *p, Biobuf *i) {
 	Rune r; double d; char n[64];
-	array *a = parray(p,number, 1, 0);
+	array *a = parray(p,TNUM, 1, 0);
 	if(!a) return NULL;
 	int j, e=0, dot=0;
 
@@ -89,7 +89,7 @@ static array* scan_numeral(array *p, Biobuf *i) {
 
 static array* scan_literal(array *p,Biobuf *i) {
 	Rune r,q;
-	array *a = parray(p,string, 1, 0);
+	array *a = parray(p,TSTR,1,0);
 	if(!a) return NULL;
 	q = Bgetrune(i);
 	
@@ -107,21 +107,21 @@ static array* scan_literal(array *p,Biobuf *i) {
 static array* scan_delims(array *p,Biobuf *i) {
 	int c = Bgetc(i); enum tag t;
 	switch(c) {
-		case ':': t = colon;  break;
-		case '[': t = ldfns;  break;
-		case ']': t = rdfns;  break;
-		case '(': t = lparen; break;
-		case ')': t = rparen; break;
+		case ':': t = TCOL; break;
+		case '[': t = TLDF; break;
+		case ']': t = TRDF; break;
+		case '(': t = TLPR; break;
+		case ')': t = TRPR; break;
 	}
 	return parray(p,t,0,0);
 }
 
 static array* scan_special(array *p,Biobuf *i) {
 	Rune r = Bgetrune(i);
-	array *a = parray(p,empty, 0, 0);
+	array *a = parray(p,TSYM, 0, 0);
 	if (!a) return NULL;
 	switch(r) {
-	case UASSIGN: a->t = assign; break;
+	case UASSIGN: a->t = TSET; break;
 	case '.':
 	Bungetrune(i);Bgetc(i);
 	if(isdigit(Bgetc(i))) {
@@ -130,7 +130,6 @@ static array* scan_special(array *p,Biobuf *i) {
 	}
 	default:
 		push(p,&r, sizeof r);
-		a->t = symbol;
 		a->z=a->n=1;
 	}
 	return a;
@@ -138,15 +137,15 @@ static array* scan_special(array *p,Biobuf *i) {
 
 static array* scan_symbol(array *p, Biobuf *i) {
 	Rune r;
-	array *a = parray(p,symbol,0,0);
+	array *a = parray(p,TSYM,0,0);
 	if(!a) return NULL;
 	a->r = 1;
 	
 	while((r = Bgetrune(i))>0) {
-		if(isaplch(r)&&r!='.') break;
-		else if(isspace(r))    break;
-		else if(r == '\'')     break;
-		else if(isapldel(r))   break;
+		if(isaplchr(r)&&r!='.') break;
+		else if(isspace(r))     break;
+		else if(r == '\'')      break;
+		else if(isapldel(r))    break;
 		push(p,&r, sizeof r);
 		a->n++;
 	}

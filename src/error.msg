@@ -4,7 +4,7 @@
 # 'make error-msg.c'
 
 [unbound array*] 
-Unbound variable `%1'
+Unbound variable "%1"
 
 [rdonly array*]
 "%1" is read-only. You can look, but you can't
