@@ -1,5 +1,4 @@
 #include "apl.h"
-#include "func.h"
 
 /* Acess the nth k-cell of a */
 void *kcell(array *a, int k, int n) {
