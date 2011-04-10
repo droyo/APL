@@ -21,27 +21,33 @@ LDFLAGS = -lbio -lfmt -lutf -L/usr/local/lib
 all: $(BIN)
 
 $(BIN): $(OBJ)
-	$(LD) -o $@ $^ $(LDFLAGS)
+	@echo LD $@
+	@$(LD) -o $@ $^ $(LDFLAGS)
 
 $(OBJ) : apl.h error.h const.h
 const.h: codepoints.h
 error.h: error-enm.h
 eval.o : eval.h
 
+.c.o:
+	@echo CC $@
+	@$(CC) $(CFLAGS) -c $<
+
 ../aux/utf: ../aux/utf.c
-	$(CC) -o $@ $^ $(LDFLAGS)
+	@echo MK $@
+	@$(CC) -o $@ $^ $(LDFLAGS)
 
 codepoints.h: ../aux/utf symbols.utf
-	../aux/utf < symbols.utf > $@
+	@echo MK $@
+	@../aux/utf < symbols.utf > $@
 
 error-enm.h: error.msg ../aux/enmake.awk
-	$(AWK) -f ../aux/enmake.awk $< > $@
+	@echo MK $@
+	@$(AWK) -f ../aux/enmake.awk $< > $@
 
 error-msg.c: error.msg ../aux/efmake.awk
-	$(AWK) -f ../aux/efmake.awk $< > $@
-
-.c.o:
-	$(CC) $(CFLAGS) -c $<
+	@echo MK $@
+	@$(AWK) -f ../aux/efmake.awk $< > $@
 
 clean:
 	rm -f $(OBJ) $(BIN) $(AUTO)
