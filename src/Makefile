@@ -21,6 +21,14 @@ all: $(BIN)
 $(BIN): $(OBJ)
 	$(LD) -o $@ $^ $(LDFLAGS)
 
+../aux/utf: ../aux/utf.c
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+const.h: codepoints.h
+
+codepoints.h: ../aux/utf symbols.utf
+	../aux/utf < symbols.utf > $@
+
 error.h: error-enm.h
 
 error-enm.h: error.msg ../aux/enmake.awk
@@ -40,3 +48,5 @@ error-msg.o error.o : error.h error-enm.h
 
 clean:
 	rm -f $(OBJ) $(BIN) error-msg.c error-enm.h
+
+.PHONY: clean all
