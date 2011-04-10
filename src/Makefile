@@ -23,15 +23,16 @@ all: $(BIN)
 $(BIN): $(OBJ)
 	$(LD) -o $@ $^ $(LDFLAGS)
 
+$(OBJ) : apl.h error.h const.h
+const.h: codepoints.h
+error.h: error-enm.h
+eval.o : eval.h
+
 ../aux/utf: ../aux/utf.c
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-const.h: codepoints.h
-
 codepoints.h: ../aux/utf symbols.utf
 	../aux/utf < symbols.utf > $@
-
-error.h: error-enm.h
 
 error-enm.h: error.msg ../aux/enmake.awk
 	$(AWK) -f ../aux/enmake.awk $< > $@
@@ -39,12 +40,8 @@ error-enm.h: error.msg ../aux/enmake.awk
 error-msg.c: error.msg ../aux/efmake.awk
 	$(AWK) -f ../aux/efmake.awk $< > $@
 
-$(OBJ) : apl.h error.h const.h
-
 .c.o:
 	$(CC) $(CFLAGS) -c $<
-
-eval.o  : eval.h
 
 clean:
 	rm -f $(OBJ) $(BIN) $(AUTO)
