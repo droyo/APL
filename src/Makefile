@@ -9,7 +9,9 @@ SRC := \
 	error.c error-msg.c
 
 INC := apl.h eval.h error.h \
-       error-enm.h const.h
+       error-enm.h const.h codepoints.h
+
+AUTO:= error-enm.h codepoints.h error-msg.c
 
 OBJ := $(SRC:.c=.o)
 
@@ -37,16 +39,15 @@ error-enm.h: error.msg ../aux/enmake.awk
 error-msg.c: error.msg ../aux/efmake.awk
 	$(AWK) -f ../aux/efmake.awk $< > $@
 
-$(OBJ) : apl.h error.h
+$(OBJ) : apl.h error.h const.h
 
 .c.o:
 	$(CC) $(CFLAGS) -c $<
 
 eval.o  : eval.h
-const.o : const.h
 error-msg.o error.o : error.h error-enm.h
 
 clean:
-	rm -f $(OBJ) $(BIN) error-msg.c error-enm.h
+	rm -f $(OBJ) $(BIN) $(AUTO)
 
 .PHONY: clean all
