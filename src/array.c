@@ -28,7 +28,7 @@ static int msize(array *a) {
 	return sizeof(int)*a->k + a->z*tsize(a->t); 
 }
 static int tsize(enum tag t) {
-	unsigned long s; for(s=0;t>>=1;s++); 
+	unsigned s; for(s=0;t>>=1;s++); 
 	return (s>NELEM(type_sizes)?0:type_sizes[s]);
 }
 long asize(array *a) {

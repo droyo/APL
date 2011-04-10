@@ -39,7 +39,7 @@ array *scan(void *v, array **tok, array **buf) {
 		else if(isapldig(r)) a=scan_numeral (*buf,i);
 		else if(r == '\'')   a=scan_literal (*buf,i);
 		else if(isapldel(r)) a=scan_delims  (*buf,i);
-		else if(isaplch(r))  a=scan_special (*buf,i);
+		else if(isaplchr(r)) a=scan_special (*buf,i);
 		else                 a=scan_symbol  (*buf,i);
 		
 		if (!a) {
@@ -143,10 +143,10 @@ static array* scan_symbol(array *p, Biobuf *i) {
 	a->r = 1;
 	
 	while((r = Bgetrune(i))>0) {
-		if(isaplch(r)&&r!='.') break;
-		else if(isspace(r))    break;
-		else if(r == '\'')     break;
-		else if(isapldel(r))   break;
+		if(isaplchr(r)&&r!='.') break;
+		else if(isspace(r))     break;
+		else if(r == '\'')      break;
+		else if(isapldel(r))    break;
 		push(p,&r, sizeof r);
 		a->n++;
 	}

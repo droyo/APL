@@ -3,5 +3,7 @@ doc/*
 apl
 core
 .*.swp
-error-enm.h
-error-msg.c
+src/error-enm.h
+src/error-msg.c
+src/codepoints.h
+aux/utf
