@@ -3,20 +3,21 @@
 #define MIN(a,b) ((a)<(b))?(a):(b)
 
 enum tag {
-	TNUM = 0x00001, TSTR = 0x00002,
-	TSYM = 0x00004, TFUN = 0x00008,
-	TDYA = 0x00010, TMON = 0x00020, 
-	TCLK = 0x00040, TBOX = 0x00080, 
-	TRAW = 0x00100, TLPR = 0x00200, 
-	TRPR = 0x00400, TCOL = 0x00800, 
-	TEND = 0x01000, TNIL = 0x02000,
-	TLDF = 0x04000, TRDF = 0x08000,
-	TSET = 0x10000
+	TNUM = 1,       TSTR = TNUM<<1,
+	TSYM = TSTR<<1, TFUN = TSYM<<1,
+	TDYA = TFUN<<1, TMON = TDYA<<1,
+	TCLK = TMON<<1, TBOX = TCLK<<1,
+	TREL = TBOX<<1, TRAW = TREL<<1,
+	TRPR = TRAW<<1, TLPR = TRPR<<1,
+	TEND = TLPR<<1, TNIL = TEND<<1,
+	TLDF = TNIL<<1, TRDF = TLDF<<1,
+	TSET = TRDF<<1, TCOL = TSET<<1
 };
 
 enum flag {
-	FTMP = 0x1,  FRDO = 0x02,
-	FMAN = 0x04, FSIL = 0x08
+	FTMP = 0x01, FRDO = 0x02,
+	FMAN = 0x04, FSIL = 0x08,
+	FSYS = 0x10
 };
 
 #define ASIZE (sizeof(array))
@@ -27,12 +28,11 @@ typedef struct {
 	unsigned long n,z;
 	char m[];
 } array;
+typedef struct {char k[64];array *a;} pair;
 
 extern array *zilde;
 extern array *marker;
 extern char quit;
-extern void *S;
-extern void *G;
 
 /* Hash table for var bindings */
 array* env(array*);
@@ -40,35 +40,37 @@ array* put(array*,char*,array*);
 array* get(array*,char*);
 
 /* Array operations */
-array* acln(array*);
-void   aclr(array*);
 array* atmp(void*, enum tag, unsigned, unsigned);
-array* anew(enum tag, enum flag, unsigned, unsigned);
+array* anew(array*,enum tag, enum flag,unsigned, unsigned);
+array* abox(array*,unsigned,enum flag,array**);
+array* astr(array*,char*);
+array* acln(array*,array*);
 int*   ashp(array*);
+void   aclr(array*);
 void*  aval(array*);
 char*  akey(array*,char*,int);
 void*  aget(array*,long);
-array* abox(unsigned,array**);
-array* astr(char*);
 void*  amem(array*,long);
 int    afull(array*);
 array* agrow(array**,long);
-void*  apush(array**,const void*);
+void*  apush(array*,const void*);
 long   asize(array*);
+void*  afind(array*,void*);
+int    aeach(array*,int(*)(void*,void*),void*);
 
 /* Memory management */
-void record(array*);
-void incref(array*);
-void decref(array*);
+void record(array*,array*);
+void incref(array*,array*);
+void decref(array*,array*);
 
 /* Core interpreter */
-array* scan(void*,array**,array**);
+array* scan(array*,void*);
 array* eval(array*,array*);
 
 /* Init,Teardown */
-int   fmt_init(void);
-int   const_init(void);
-int   sample_init(void*);
-int   mem_init(void);
-void  mem_coll(void);
-void  mem_free(void);
+int   fmt_init(array*);
+int   cst_init(array*);
+int   mem_init(array*);
+void  mem_coll(array*);
+void  mem_free(array*);
+void  env_free(array*);

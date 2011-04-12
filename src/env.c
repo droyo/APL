@@ -3,19 +3,15 @@
 #include <stdlib.h>
 #include "apl.h"
 
-typedef struct {char k[64];array *a;} pair;
-static int dirty(array *a) { return a->f&(FTMP|FRDO); }
 static unsigned long hash(char *s) {
 	unsigned long c,h=3581;
 	while((c=*s++))h=((h<<5)+h)^c; return h;
 }
 
-static int addnew(array *e, int x, pair p) {
-	array **v=aval(e),*b=v[x]; pair *n;
-	if(b->n >= b->z/sizeof p && !agrow(&b,sizeof p))
+static int addnew(array **b, pair p) {
+	if((*b)->n >= (*b)->z && !agrow(b,1))
 		return -1;
-	v[x]=b; n=aval(b); n[b->n++]=p;
-	return 0;
+	return apush(*b, &p) ? 0: -1;
 }
 
 static pair *find(array *b, char *k) {
@@ -25,60 +21,66 @@ static pair *find(array *b, char *k) {
 	return NULL;
 }
 
-static int add(array *e, long x, pair p) {
+static int add(array **b, pair p) {
 	int i; 
-	array **v=aval(e),*b=v[x];
-	pair *n = aval(b);
+	pair *n = aval(*b);
 
-	for(i=0;i<b->n;i++) {
+	for(i=0;i<(*b)->n;i++) {
 		if(!strncmp(n[i].k,p.k, sizeof p.k)) {
 			n[i] = p;
 			return 0;
 		}
 	}
-	return addnew(e,x,p);
+	return addnew(b,p);
 }
 
 array *env(array *up) {
-	array *e,**b; pair *p;
-	if(!(e=abox(768,NULL))) return NULL;
+	array *e,**b;
+	if(!(e=abox(NULL,768,FSYS,NULL)))
+		return NULL;
 	b=aval(e); b[0] = up;
 	for(e->n=1;e->n<e->z;e->n++) {
-		if(!(b[e->n]=anew(TRAW,0,1,sizeof(pair))))
+		if(!(b[e->n]=anew(NULL,TREL,FSYS,1,1)))
 			return NULL;
 		b[e->n]->n = 0;
-		p=aval(b[e->n]);p->k[0] = '\0';
+		((pair*)aval(b[e->n]))->k[0]=0;
 	}
 	return e;
 }
-
-static array *slot(array *e, char *k) {
-	array **b = aval(e);
-	return b[hash(k)%e->n];
+int free_bucket(void *item, void *args) {
+	free(*(array**)item);
+	return 0;
+}
+void env_free(array *e) {
+	aeach(e,free_bucket,NULL);
+	free(e);
+}
+static array **slot(array *e, char *k) {
+	return aget(e,1+(hash(k)%(e->n-1)));
 }
 
 array *put(array *e, char *k, array *a) {
-	array *b = slot(e,k);
-	pair p,*old = find(b,k);
+	array   **b = slot(e,k);
+	pair p,*old = find(*b,k);
 
 	strncpy(p.k, k, sizeof p.k-1);
 	if(old) {
-		if(old->a->f&FRDO) return NULL;
+		if(old->a->f&(FRDO|FSYS)) return NULL;
 		else if(old->a == a) return a;
-		else decref(old->a);
+		else decref(e,old->a);
 	} 
-	if (dirty(a) && !(a = acln(a))) 
+	if (a->f&FTMP && !(a = acln(e,a))) 
 		return NULL;
 	else p.a = a;
-	if(add(e,hash(k)%e->n,p))
+	if(add(b,p))
 		return NULL;
-	incref(p.a);
+	if(!(a->f&FSYS)) incref(e,p.a);
 	return p.a;
 }
 
 array *get(array *e,char *k) {
 	pair *p; array **a;
-	do{ p = find(slot(e,k),k); a=aval(e);
+	do{ p = find(*slot(e,k),k); a=aval(e);
 		if(!p && *a) e=*a;
 		else if(p) return p->a;
 	} while(*a); return NULL;

@@ -8,7 +8,7 @@
 static int msize(array *a); 
 static int tsize(enum tag);
 enum { def_rank = 4 };
-enum { def_size = 0 };
+enum { def_size = 4 };
 
 /* Make sure if you modify the tag order
  * in apl.h that you also modify this table
@@ -22,6 +22,7 @@ static int type_sizes[] = {
 	sizeof (array*), /* TMON */
 	sizeof (array*), /* TCLK */
 	sizeof (array*), /* TBOX */
+	sizeof (pair),   /* TREL */
 	sizeof (char),   /* TRAW */
 };
 static int msize(array *a) { 
@@ -45,7 +46,7 @@ array *atmp(void *p,enum tag t, unsigned r, unsigned n) {
 	a->r = r; a->n = n; a->c = 0;
 	return a;
 }
-array *anew(enum tag t, enum flag f, unsigned r, unsigned n) {
+array *anew(array *E,enum tag t, enum flag f, unsigned r, unsigned n) {
 	array *a;
 	int k = MAX(def_rank,r);
 	int z = MAX(def_size,n);
@@ -54,13 +55,14 @@ array *anew(enum tag t, enum flag f, unsigned r, unsigned n) {
 	a->t=t;a->f = f&~FTMP;
 	a->r=r;a->n=n;a->k=k;a->z=z;
 	if(r == 1) *ashp(a) = n;
-	record(a); return a;
+	if(!(f&FSYS)) record(E,a);
+	return a;
 }
-array *acln(array *a) {
-	array *c; 
-	if(!(c=anew(a->t, a->f, a->r, a->n))) return NULL; 
-	memcpy(ashp(c), ashp(a), sizeof(int)*a->r);
-	memcpy(aval(c), aval(a), msize(a)-sizeof(int)*a->k);
+array *acln(array *E, array *a) {
+	array *c = anew(E,a->t, a->f, a->r, a->n); 
+	if(!c) return NULL; 
+	memcpy(ashp(c),ashp(a),sizeof(int)*a->r);
+	memcpy(aval(c),aval(a),msize(a)-sizeof(int)*a->k);
 	return c;
 }
 int *ashp(array *a) {
@@ -69,9 +71,9 @@ int *ashp(array *a) {
 void *aval(array *a) {
 	return a->m+(sizeof(int)*a->k);
 }
-array *abox(unsigned n, array **x) {
+array *abox(array *E,unsigned n,enum flag f,array **x) {
 	int i, *s; array *a, **y;
-	if(!(a=anew(TBOX,0,n>1?1:0,n)))
+	if(!(a=anew(E,TBOX,f,n>1?1:0,n)))
 		return NULL;
 	if(!x) {
 		a->n = 0;
@@ -79,18 +81,18 @@ array *abox(unsigned n, array **x) {
 	}
 	for(i=0,y=aval(a);i<n;i++) {
 		if(x[i]->f & FTMP) {
-			if(!(y[i]=acln(x[i]))) return NULL;
+			if(!(y[i]=acln(E,x[i]))) return NULL;
 		}else
 			y[i] = x[i];
 	}
 	s=ashp(a); s[0] = n;
 	return a;
 }
-array *astr(char *s) {
+array *astr(array *E, char *s) {
 	array *a;
-	if(!(a=anew(TSTR,0,1,utflen(s))))
+	if(!(a=anew(E,TSTR,0,1,utflen(s)+1)))
 		return NULL;
-	runesnprint(aval(a),utflen(s)+1, "%s", s);
+	runesnprint(aval(a),a->n,"%s",s);
 	return a;
 }
 void *amem(array *a, long sz) {
@@ -110,12 +112,36 @@ array *agrow(array **a, long n) {
 }
 void *aget(array *a, long i) {
 	if(i >= a->z) return NULL;
-	return aval(a) + tsize(a->t)*i;
+	switch(a->t) {
+	case TNUM: return ((double*)aval(a))+i;
+	case TSTR: 
+	case TSYM: return ((Rune*)aval(a))+i;
+	case TFUN: 
+	case TBOX: return ((array**)aval(a))+i;
+	case TCLK: return ((void*)aval(a))+i;
+	case TRAW: return ((char*)aval(a))+i;
+	case TREL: return ((pair*)aval(a))+i;
+	default:   return NULL;
+	}
 }
-void *apush(array **a, const void *x) {
+
+void *apush(array *a, const void *x) {
 	void *p;
-	if(afull(*a) && !agrow(a,4)) return NULL;
-	p = aget(*a,(*a)->n++);
-	*ashp(*a) = (*a)->n;
-	return memcpy(p,x,tsize((*a)->t));
+	if(afull(a)) return NULL;
+	p = aget(a,a->n++);
+	*ashp(a) = a->n;
+	return memcpy(p,x,tsize(a->t));
+}
+
+void *afind(array *a, void *x) {
+	int i,s = tsize(a->t); array *y;
+	for(i=0,y=aget(a,0);i<a->n;i++,y+=s)
+		if(!memcmp(x,y,s)) return y;
+	return NULL;
+}
+
+int aeach(array *a, int(*f)(void*,void*),void *p) {
+	int i; for(i=0;i<a->n;i++)
+		if(f(p,aget(a,i))) return -1;
+	return 0;
 }

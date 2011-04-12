@@ -5,5 +5,5 @@ core
 .*.swp
 src/error-enm.h
 src/error-msg.c
-src/codepoints.h
+src/const.h
 aux/utf

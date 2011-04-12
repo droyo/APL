@@ -5,84 +5,91 @@
 #include <string.h>
 #include "apl.h"
 
-static array *refs[2048];
-static array *bot = NULL;
 static array *toofar;
 static array *toocls;
 
-static array *c(array*,int);
-static array *p(array*);
-static void swap(array*,array*);
-static void bubbledn(array*);
-static void bubbleup(array*);
+static array *c(array*,array*,int);
+static array *p(array*,array*);
+static void swap(array**,array*,array*);
+static void bubbledn(array*,array*);
+static void bubbleup(array*,array*);
 
-int mem_init(void) { 
-	if(!(toofar = anew(TNIL,FRDO,0,0))) return -1;
-	if(!(toocls = anew(TNIL,FRDO,0,0))) return -1;
-	toocls->c = 0;
+int mem_init(array *E) { 
+	array *ref=NULL;
+	if(!(ref=anew(E,TBOX,FSYS,0,1024))) return -1;
+	if(!(toofar=anew(E,TNIL,FSYS,0,0))) return -1;
+	if(!(toocls=anew(E,TNIL,FSYS,0,0))) return -1;
 	toofar->c = UCHAR_MAX;
-	memset(refs, 0, sizeof refs); 
-	return 0;
+	toocls->c = 0;
+	if(!put(E,"⎕REF",ref)) return -1;
+	return ref->n = 0;
 }
-void mem_free(void) {
-	int i; for(i=0;refs[i];i++)
-		free(refs[i]);
+
+void mem_free(array *E) {
+	array *ref = get(E,"⎕REF");
+	int i; for(i=0;i<ref->n;i++)
+		free(*(array**)aget(ref,i));
+	free(toofar);
+	free(toocls);
 }
-void mem_coll(void) {
-	array *t;
-	while((t=refs[0]) && !t->c) {
+
+void mem_coll(array *E) {
+	array *t=NULL, *ref = get(E,"⎕REF");
+	while(ref->n && !(t=*(array**)aget(ref,0))->c){
 		t->c = UCHAR_MAX;
-		bubbledn(t);
-		refs[t->gc] = NULL;
-		free(t);
+		bubbledn(ref,t);
+		ref->n--; free(t);
 	}
 }
-void record(array *a) {
-	if(a->f&(FTMP|FRDO)) return;
-	int i;for(i=bot?bot->gc:0;refs[i];i++);
-	a->gc = i; refs[i] = a;
-	bot=a; bubbleup(a);
+
+void record(array *E, array *a) {
+	array *ref = get(E,"⎕REF");
+	a->gc = ref->n;
+	if(!apush(ref, &a)) return;
+	bubbleup(ref,a);
 	a->f |= FMAN;
 }
-void incref(array *a) { 
-	int i; array **x;
-	if(!(a->f&FMAN)) return;
-	if(a->c+1>a->c) a->c++; bubbledn(a);
-	if(a->t == TBOX || a->t == TFUN) {
-		x = aval(a);
-		for(i=0;i<a->n;i++) if(x[i])
-			incref(x[i]);
+
+void incref(array *E, array *a) { 
+	int i;
+	array *ref = get(E,"⎕REF");
+	if(a->c+1>a->c)a->c++;
+	bubbledn(ref,a);
+	if(a->t==TBOX||a->t==TFUN) {
+		for(i=0;i<a->n;i++)
+			incref(E,*(array**)aget(a,i));
 	}
 }
-void decref(array *a) {
-	int i; array **x;
-	if(a->f&(FTMP|FRDO)) return;
-	if(a->c) a->c--; bubbleup(a); 
-	if(a->t == TBOX || a->t == TFUN) {
-		x = aval(a);
-		for(i=0;i<a->n;i++) if(x[i])
-			incref(x[i]);
+
+void decref(array *E, array *a) {
+	int i;
+	array *ref = get(E,"⎕REF");
+	if(a->c) a->c--;
+	bubbleup(ref,a);
+	if(a->t==TBOX||a->t==TFUN) {
+		for(i=0;i<a->n;i++)
+			decref(E,*(array**)aget(a,i));
 	}
 }
-static void bubbledn(array *a) {
-	array *u; int n = a->c;
-	while(n>(u=c(a,n>c(a,1)->c?1:2))->c)
-		swap(a,u);
+static void bubbledn(array *r, array *a) {
+	array *u=NULL; int n = a->c;
+	while(n>(u=c(r,a,n>c(r,a,1)->c?1:2))->c)
+		swap(aval(r),a,u);
 }
-static void bubbleup(array *a) {
-	while(a->c<p(a)->c) swap(a,p(a));
+static void bubbleup(array *r, array *a) {
+	while(a->c<p(r,a)->c) swap(aval(r),a,p(r,a));
 }
-static array *p(array *a) {
-	return a->gc?refs[(a->gc-1)/2]:toocls;
+static array *p(array *r, array *a) {
+	array **x = aval(r);
+	return a->gc?x[(a->gc-1)/2]:toocls;
 }
-static array *c(array *a,int x) {
+static array *c(array *r,array *a,int x) {
 	int i = a->gc * 2+x;
-	if(i > NELEM(refs) || !refs[i])
-		return toofar;
-	return refs[i];
+	if(i>r->n) return toofar;
+	else       return aget(r,i);
 }
-static void swap(array *x, array *y) {
-	long tmp;
-	refs[x->gc]=y;refs[y->gc]=x;
+static void swap(array **r, array *x, array *y) {
+	long tmp; 
+	r[x->gc]=y;r[y->gc]=x;
 	tmp=x->gc; x->gc=y->gc; y->gc=tmp;
 }

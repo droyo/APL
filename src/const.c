@@ -7,8 +7,7 @@
 array *zilde;
 array *marker;
 
-static char utfdelim[] = "()[]";
-static const Rune utfspecial[] = {
+static const Rune prim[] = {
 	UBAR,    UCAT,     UCATBAR, UCIRC,   UDECODE,
 	UDIV,    UDOMINO,  UDROP,   UENCODE, UEQUAL,
 	UEVAL,   UFACT,    UFIND,   UFMT,    UFROM,
@@ -24,32 +23,22 @@ static const Rune utfspecial[] = {
 	USLASH,  UUNION,   UISECT,  UDFNS,   ULAMP,
 	UALPHA,  UOMEGA,   UJOT
 };
-	
-static int checksym(char *s, Rune r) {
-	int i; Rune *c;
-	array *a = get(S,s);
-	if(!a) return 0;
-	c = aval(a);
-	for(i=0;i<a->n;i++)
-		if(c[i] == r) return 1;
-	return 0;
-};
-int isapldig(Rune x){return (x>='0' && x<='9')||x==UMACRON;}
-int isapldel(Rune x){return checksym("⎕dl", x);}
-int isaplchr(Rune x){return checksym("⎕pc", x);}
 
-int const_init(void) {
-	array *Aplch, *Delim;
+int cst_init(array *E) {
+	array *aplch, *delim, *digit;
 	
-	if (!(zilde=anew(TNIL,FRDO,0,0))) return -1;
-	if (!(marker=anew(TEND,FRDO,0,0))) return -1;
-	if (!(Aplch=anew(TSTR,FRDO,1,NELEM(utfspecial)))) return -1;
-	if (!(Delim=astr(utfdelim))) return -1;
-	
-	runesprint(aval(Aplch),"%*R",NELEM(utfspecial), utfspecial);
-	if(!put(S,"⎕pc",Aplch)) return -1;
-	if(!put(S,"⎕dl",Delim)) return -1;
-	if(!put(G,"⍬",zilde))   return -1;
+	if (!(zilde=anew(E,TNIL,FRDO,0,0)))  return -1;
+	if (!(marker=anew(E,TEND,FRDO,0,0))) return -1;
+	if (!(delim=astr(E,"()[]:")))        return -1;
+	if (!(digit=astr(E,"¯0123456789")))  return -1;
+	if (!(aplch=anew(E,TSTR,FRDO,1,NELEM(prim))))
+		return -1;
+	else runesprint(aval(aplch),"%*R",NELEM(prim), prim);
+
+	if(!put(E,"⎕PRICH",aplch)) return -1;
+	if(!put(E,"⎕DELIM",delim)) return -1;
+	if(!put(E,"⎕DIGIT",digit)) return -1;
+	if(!put(E,"⍬",zilde))      return -1;
 
 	return 0;
 }

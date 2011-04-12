@@ -14,45 +14,51 @@ static array* parray(array*,enum tag,unsigned,unsigned);
 static void*  push(array*,const void*,long);
 static array* scan_numeral (array*,Biobuf*);
 static array* scan_literal (array*,Biobuf*);
-static array* scan_symbol  (array*,Biobuf*);
+static array* scan_symbol  (array*,array*,array*,Biobuf*);
 static array* scan_delims  (array*,Biobuf*);
 static array* scan_special (array*,Biobuf*);
 
-array *scan(void *v, array **tok, array **buf) {
+array *scan(array *E, void *v) {
 	Rune r; 
 	array *a;
 	Biobuf *i = v;
+	array *del = get(E, "⎕DELIM");
+	array *dig = get(E, "⎕DIGIT");
+	array *pri = get(E, "⎕PRICH");
+	array *tok = get(E, "⎕SCTOK");
+	array *buf = get(E, "⎕SCBUF");
 
 	if(!apush(tok,&marker))
-		return enil(Elexline,(*tok)->z);
+		return enil(Elexline,tok->z);
 
 	while((r=Bgetrune(i))>0) {
-		if(afull(*buf)) {
+		if(afull(buf)) {
 			Brdline(i,'\n');
-			return enil(Elexmem,(*buf)->z);
+			return enil(Elexmem,buf->z);
 		}
 		if(r == Beof || r == '\n') break;
 		if(isspace(r)) continue;
 		Bungetrune(i);
 
 		if(r==ULAMP){Brdline(i,'\n');break;}
-		else if(isapldig(r)) a=scan_numeral (*buf,i);
-		else if(r == '\'')   a=scan_literal (*buf,i);
-		else if(isapldel(r)) a=scan_delims  (*buf,i);
-		else if(isaplchr(r)) a=scan_special (*buf,i);
-		else                 a=scan_symbol  (*buf,i);
+		else if(afind(dig,&r))a=scan_numeral(buf,i);
+		else if(r == '\'')    a=scan_literal(buf,i);
+		else if(afind(del,&r))a=scan_delims (buf,i);
+		else if(afind(pri,&r))a=scan_special(buf,i);
+		else          a=scan_symbol (del,pri,buf,i);
 		
 		if (!a) {
 			Brdline(i,'\n');
-			if(afull(*buf))
-				return enil(Elexmem,(*buf)->z);
+			if(afull(buf))
+				return enil(Elexmem,buf->z);
 			else
-				return enil(Elexline,(*tok)->z);
+				return enil(Elexline,tok->z);
 		}
 		if(!apush(tok,&a)) 
-			return enil(Elexline,(*tok)->z);
+			return enil(Elexline,tok->z);
+		else put(E,"⎕SCTOK", tok);
 	}
-	return *tok;
+	return tok;
 }
 
 static array* scan_numeral(array *p, Biobuf *i) {
@@ -135,17 +141,17 @@ static array* scan_special(array *p,Biobuf *i) {
 	return a;
 }
 
-static array* scan_symbol(array *p, Biobuf *i) {
+static array* scan_symbol(array *d,array *c,array *p,Biobuf *i) {
 	Rune r;
 	array *a = parray(p,TSYM,0,0);
 	if(!a) return NULL;
 	a->r = 1;
 	
 	while((r = Bgetrune(i))>0) {
-		if(isaplchr(r)&&r!='.') break;
+		if(afind(c,&r)&&r!='.') break;
 		else if(isspace(r))     break;
 		else if(r == '\'')      break;
-		else if(isapldel(r))    break;
+		else if(afind(d,&r))    break;
 		push(p,&r, sizeof r);
 		a->n++;
 	}

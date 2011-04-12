@@ -10,9 +10,9 @@ SRC := \
 	error-msg.c
 
 INC := apl.h eval.h error.h \
-       error-enm.h const.h codepoints.h
+       error-enm.h const.h 
 
-AUTO:= error-enm.h codepoints.h error-msg.c
+AUTO:= error-enm.h const.h error-msg.c
 OBJ := $(SRC:.c=.o)
 
 CFLAGS = -Wall -I/usr/local/include -g
@@ -25,7 +25,6 @@ $(BIN): $(OBJ)
 	@$(LD) -o $@ $^ $(LDFLAGS)
 
 $(OBJ) : apl.h error.h const.h
-const.h: codepoints.h
 error.h: error-enm.h
 eval.o : eval.h
 
@@ -37,7 +36,7 @@ eval.o : eval.h
 	@echo MK $@
 	@$(CC) -o $@ $^ $(LDFLAGS)
 
-codepoints.h: ../aux/utf symbols.utf
+const.h: ../aux/utf symbols.utf
 	@echo MK $@
 	@../aux/utf < symbols.utf > $@
 
