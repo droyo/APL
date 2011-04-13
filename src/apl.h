@@ -14,11 +14,11 @@ enum tag {
 	TSYM = TSTR<<1, TFUN = TSYM<<1,
 	TDYA = TFUN<<1, TMON = TDYA<<1,
 	TCLK = TMON<<1, TBOX = TCLK<<1,
-	TREL = TBOX<<1, TRAW = TREL<<1,
-	TRPR = TRAW<<1, TLPR = TRPR<<1,
-	TEND = TLPR<<1, TNIL = TEND<<1,
-	TLDF = TNIL<<1, TRDF = TLDF<<1,
-	TSET = TRDF<<1, TCOL = TSET<<1
+	TRAW = TBOX<<1, TRPR = TRAW<<1,
+	TLPR = TRPR<<1, TEND = TLPR<<1,
+	TNIL = TEND<<1, TLDF = TNIL<<1,
+	TRDF = TLDF<<1, TSET = TRDF<<1,
+	TCOL = TSET<<1
 };
 
 enum flag {
@@ -34,22 +34,21 @@ typedef struct {
 	ulong n,z;
 	char m[];
 } array;
-typedef struct {char k[64];array *a;} pair;
 
 extern array *zilde;
 extern array *marker;
 
 /* Hash table for var bindings */
-array* env(array*);
-array* put(array*,char*,array*);
-array* get(array*,char*);
+void* env(void*);
+array* put(void*,char*,array*);
+array* get(void*,char*);
 
 /* Array operations */
-array* anew(array*,enum tag, enum flag,uint,uint);
+array* anew(void*,enum tag, enum flag,uint,uint);
 array* atmp(void*, enum tag, uint,uint);
-array* abox(array*,uint,enum flag,array**);
-array* astr(array*,char*);
-array* acln(array*,enum flag,array*);
+array* abox(void*,uint,enum flag,array**);
+array* astr(void*,char*);
+array* acln(void*,enum flag,array*);
 int*   ashp(array*);
 void   aclr(array*);
 void*  aval(array*);
@@ -64,18 +63,18 @@ void*  afind(array*,void*);
 int    aeach(array*,int(*)(void*,void*),void*);
 
 /* Memory management */
-void record(array*,array*);
-void incref(array*,array*);
-void decref(array*,array*);
+void record(void*,array*);
+void incref(void*,array*);
+void decref(void*,array*);
 
 /* Core interpreter */
-array* scan(array*,array*,array*,void*);
-array* eval(array*,array*);
+array* scan(void*,array*,array*,void*);
+array* eval(void*,array*);
 
 /* Init,Teardown */
-int   fmt_init(array*);
-int   cst_init(array*);
-int   mem_init(array*);
-void  mem_coll(array*);
-void  mem_free(array*);
-void  env_free(array*);
+int   fmt_init(void*);
+int   cst_init(void*);
+int   mem_init(void*);
+void  mem_coll(void*);
+void  mem_free(void*);
+void  env_free(void*);

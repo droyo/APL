@@ -11,9 +11,10 @@
 	r=1; goto e;}}while(0)
 
 int main(void) {
+	void *E;
 	Biobuf *in;
 	int e = 0, quit = 0;
-	array *ans, *mem, *buf, *E;
+	array *ans, *mem, *buf;
 	
 	try(e,e1,!(in=Bfdopen(0,O_RDONLY)),
 		"Can't open input");

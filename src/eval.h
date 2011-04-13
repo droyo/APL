@@ -6,22 +6,22 @@ typedef struct {
 
 typedef struct {
 	long c[4];
-	array* (*f)(array*,array**,int,int);
+	array* (*f)(void*,array**,int,int);
 	long b, e;
 } rule;
 
-array* monad(array*,array**, int,int);
-array* dyad (array*, array**, int,int);
-array* moper(array*, array**, int,int);
-array* doper(array*, array**, int,int);
-array* bind (array*, array**, int,int);
-array* punc (array*, array**, int,int);
+array* monad(void*,array**, int,int);
+array* dyad (void*, array**, int,int);
+array* moper(void*, array**, int,int);
+array* doper(void*, array**, int,int);
+array* bind (void*, array**, int,int);
+array* punc (void*, array**, int,int);
 
-array *lookup(array*,array *);
-array *parse (array*,stack*,stack*,int);
-array *mkfun (array*,stack*);
-int exec(array*,stack*);
-int apply(array*,rule*,stack*);
+array *lookup(void*,array *);
+array *parse (void*,stack*,stack*,int);
+array *mkfun (void*,stack*);
+int exec(void*,stack*);
+int apply(void*,rule*,stack*);
 
 static array *pop(stack*);
 static array *top(stack*);

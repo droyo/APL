@@ -14,9 +14,9 @@ static void   swap(array**,array**);
 static array**c(array*,array**,char);
 static array**p(array*,array**);
 
-static array* mr(array *E) { return get(E,"⎕OBJECTS"); }
+static array* mr(void *E) { return get(E,"⎕OBJECTS"); }
 
-int  mem_init(array *E) {
+int  mem_init(void *E) {
 	array *ref = abox(E,1024,FSYS,NULL);
 	if(!toocls) toocls=anew(E,TNIL,FSYS,0,0);
 	if(!toofar) toofar=anew(E,TNIL,FSYS,0,0);
@@ -29,14 +29,14 @@ int  mem_init(array *E) {
 	return 0;
 }
 
-void mem_free(array *E) {
+void mem_free(void *E) {
 	array *ref = mr(E);
 	int i; for(i=0;i<ref->n;i++)
 		free(*(array**)aget(ref,i));
 	free(ref);
 }
 
-void mem_coll(array *E) {
+void mem_coll(void *E) {
 	array *ref = mr(E);
 	array **top = aval(ref);
 	array **bot = aget(ref,ref->n-1);
@@ -47,14 +47,14 @@ void mem_coll(array *E) {
 	}
 }
 
-void record(array *E, array *a) {
+void record(void *E, array *a) {
 	array *ref = mr(E);
 	array **x = apush(ref,&a);
 	bubbleup(ref,x);
 	a->f |= FMAN;
 }
 
-void incref(array *E, array *a) {
+void incref(void *E, array *a) {
 	int i; array *ref = mr(E);
 	if(!(a->f&FMAN))   return;
 	if(a->c+1>a->c) a->c++;
@@ -65,7 +65,7 @@ void incref(array *E, array *a) {
 	bubbledn(ref,afind(ref,&a));
 }
 
-void decref(array *E, array *a) {
+void decref(void *E, array *a) {
 	array *ref = mr(E); int i;
 	if(!(a->f&FMAN)) return;
 	a->c-=a->c?1:0;

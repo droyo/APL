@@ -3,86 +3,93 @@
 #include <stdlib.h>
 #include "apl.h"
 
-static ulong hash(char *s,ulong max) {
-	ulong c,h=3581;
-	while((c=*s++))h=(((h<<5)+h)^c)%max;
-	return h;
+typedef struct   {char k[64]; array *a;}         pair;
+typedef struct   {long n,max; pair *p;}          bucket;
+typedef struct _e{struct _e *up; bucket b[768];} tbl;
+
+static unsigned long hash(char *s) {
+	unsigned long c,h=3581;
+	while((c=*s++))h=((h<<5)+h)^c; return h;
 }
 
-static int addnew(array **b, pair p) {
-	if((*b)->n >= (*b)->z && !agrow(b,1))
-		return -1;
-	return apush(*b, &p) ? 0: -1;
+static int addnew(bucket *b, pair p) {
+	pair *r;
+	if(b->n >= b->max) {
+		if(!(r=realloc(b->p, b->max+sizeof p)))
+			return -1;
+		else b->max++;
+	}
+	b->p[b->n++] = p;
+	return 0;
 }
 
-static pair *find(array *b, char *k) {
-	pair *v = aval(b);
+static pair *find(bucket *b, char *k) {
 	int i; for(i=0;i<b->n;i++)
-		if(!strncmp(v[i].k,k,sizeof v[i].k)) return v+i;
+		if(!strncmp(b->p[i].k,k,sizeof b->p[i].k))
+			return b->p+i;
 	return NULL;
 }
 
-static int add(array **b, pair p) {
-	int i; 
-	pair *n = aval(*b);
-
-	for(i=0;i<(*b)->n;i++) {
-		if(!strncmp(n[i].k,p.k, sizeof p.k)) {
-			n[i] = p;
+static int add(bucket *b, pair p) {
+	int i;
+	for(i=0;i<b->n;i++) {
+		if(!strncmp(b->p[i].k,p.k, sizeof p.k)) {
+			b->p[i] = p;
 			return 0;
 		}
 	}
 	return addnew(b,p);
 }
 
-array *env(array *up) {
-	array *e,**b;
-	if(!(e=abox(NULL,768,FSYS,NULL)))
-		return NULL;
-	b=aval(e); b[0] = up;
-	for(e->n=1;e->n<e->z;e->n++) {
-		if(!(b[e->n]=anew(NULL,TREL,FSYS,1,1)))
-			return NULL;
-		b[e->n]->n = 0;
-		((pair*)aval(b[e->n]))->k[0]=0;
+void *env(void *up) {
+	int i; tbl *e;
+	if(!(e=malloc(sizeof *e))) return NULL;
+	e->up = (tbl*)up; 
+	for(i=0;i<NELEM(e->b);i++) {
+		if(!(e->b[i].p = malloc(sizeof (pair))))
+			goto spill;
+		e->b[i].p->k[0] = 0;
+		e->b[i].max = 1;
+		e->b[i].n = 0;
 	}
 	return e;
-}
-int free_bucket(void *args, void *item) {
-	free(*(array**)item);
-	return 0;
-}
-void env_free(array *e) {
-	aeach(e,free_bucket,NULL);
-	free(e);
-}
-static array **slot(array *e, char *k) {
-	return aget(e,1+hash(k,e->n-1));
+	spill: while(--i>=0) free(e->b[i].p); free(e);
+	return NULL;
 }
 
-array *put(array *e, char *k, array *a) {
-	array   **b = slot(e,k);
-	pair p,*old = find(*b,k);
+void env_free(void *p) {
+	int i; tbl *e = p;
+	for(i=0;i<NELEM(e->b);i++)
+		free(e->b[i].p);
+	free(e);
+}
+
+static bucket *slot(tbl *e, char *k) {
+	return e->b+hash(k)%NELEM(e->b);
+}
+
+array *put(void *v, char *k, array *a) {
+	bucket *b = slot((tbl*)v, k);
+	pair p,*old = find(b,k);
 
 	strncpy(p.k, k, sizeof p.k-1);
 	if(old) {
 		if(old->a->f&(FRDO|FSYS)) return NULL;
-		else if(old->a == a) return a;
-		else decref(e,old->a);
+		else if(old->a == a)      return a;
+		else decref(v,old->a);
 	} 
-	if (a->f&FTMP && !(a=acln(e,~0,a))) 
+	if (a->f&FTMP && !(a=acln(v,0,a))) 
 		return NULL;
 	else p.a = a;
-	if(add(b,p))
-		return NULL;
-	if(!(a->f&FSYS)) incref(e,p.a);
+	if(add(b,p)) return NULL;
+	if(!(a->f&FSYS))incref(v,p.a);
 	return p.a;
 }
 
-array *get(array *e,char *k) {
-	pair *p; array **a;
-	do{ p = find(*slot(e,k),k); a=aval(e);
-		if(!p && *a) e=*a;
+array *get(void *v,char *k) {
+	tbl *e = v; pair *p;
+	do{ p = find(slot(e,k),k);
+		if(!p && e->up) e=e->up;
 		else if(p) return p->a;
-	} while(*a); return NULL;
+	} while(e->up); return NULL;
 }

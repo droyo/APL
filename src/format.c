@@ -41,7 +41,7 @@ static int any(Rune**,int);
 static int row(Fmt*,int,Rune**,int*,int);
 static Rune* rfind(Rune*, Rune);
 
-int fmt_init(array *E) {
+int fmt_init(void *E) {
 	if(fmtinstall('R', Rfmt)) return -1;
 	return fmtinstall('A', Afmt);
 }

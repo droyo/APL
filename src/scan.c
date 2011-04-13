@@ -18,13 +18,14 @@ static array* scan_symbol  (array*,array*,array*,Biobuf*);
 static array* scan_delims  (array*,Biobuf*);
 static array* scan_special (array*,Biobuf*);
 
-array *scan(array *E,array *tok,array *buf,void *v) {
+array *
+scan(void *E,array *tok,array *buf,void *v) {
 	Rune r; 
 	array *a;
 	Biobuf *i = v;
 	array *del = get(E, "⎕DELIM");
 	array *dig = get(E, "⎕DIGIT");
-	array *pri = get(E, "⎕PRICH");
+	array *pri = get(E, "⎕PRIM");
 
 	if(!apush(tok,&marker))
 		return enil(Elexline,tok->z);

@@ -22,7 +22,6 @@ static int type_sizes[] = {
 	sizeof (array*), /* TMON */
 	sizeof (array*), /* TCLK */
 	sizeof (array*), /* TBOX */
-	sizeof (pair),   /* TREL */
 	sizeof (char),   /* TRAW */
 };
 static int msize(array *a) { 
@@ -48,7 +47,7 @@ array *atmp(void *p,enum tag t, uint r, uint n) {
 }
 
 array *
-anew(array *E,enum tag t, enum flag f, uint r, uint n) {
+anew(void *E,enum tag t, enum flag f, uint r, uint n) {
 	array *a = NULL;
 	int k = MAX(def_rank,r);
 	int z = MAX(def_size,n);
@@ -60,7 +59,7 @@ anew(array *E,enum tag t, enum flag f, uint r, uint n) {
 	if(!(f&FSYS)) record(E,a);
 	return a;
 }
-array *acln(array *E,enum flag mask,array *a) {
+array *acln(void *E,enum flag mask,array *a) {
 	array *c = anew(E,a->t, a->f&mask, a->r, a->n); 
 	if(!c) return NULL; 
 	memcpy(ashp(c),ashp(a),sizeof(int)*a->r);
@@ -73,7 +72,7 @@ int *ashp(array *a) {
 void *aval(array *a) {
 	return a->m+(sizeof(int)*a->k);
 }
-array *abox(array *E,uint n,enum flag f,array **x) {
+array *abox(void *E,uint n,enum flag f,array **x) {
 	int i, *s; array *a, **y;
 	if(!(a=anew(E,TBOX,f,n>1?1:0,n)))
 		return NULL;
@@ -90,7 +89,7 @@ array *abox(array *E,uint n,enum flag f,array **x) {
 	s=ashp(a); s[0] = n;
 	return a;
 }
-array *astr(array *E, char *s) {
+array *astr(void *E, char *s) {
 	array *a;
 	if(!(a=anew(E,TSTR,0,1,utflen(s)+1)))
 		return NULL;
@@ -122,7 +121,6 @@ void *aget(array *a, long i) {
 	case TBOX: return ((array**)aval(a))+i;
 	case TCLK: return ((void*)aval(a))+i;
 	case TRAW: return ((char*)aval(a))+i;
-	case TREL: return ((pair*)aval(a))+i;
 	default:   return NULL;
 	}
 }
