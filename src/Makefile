@@ -29,7 +29,7 @@ error.h: error-enm.h
 eval.o : eval.h
 
 .c.o:
-	@echo CC $@
+	@echo CC $<
 	@$(CC) $(CFLAGS) -c $<
 
 ../aux/utf: ../aux/utf.c

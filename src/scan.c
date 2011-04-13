@@ -10,7 +10,7 @@
 #include "error.h"
 
 const int zero = 0;
-static array* parray(array*,enum tag,unsigned,unsigned);
+static array* parray(array*,enum tag,uint,uint);
 static void*  push(array*,const void*,long);
 static array* scan_numeral (array*,Biobuf*);
 static array* scan_literal (array*,Biobuf*);
@@ -158,7 +158,7 @@ static array* scan_symbol(array *d,array *c,array *p,Biobuf *i) {
 	return a;
 }
 
-static array *parray(array *p,enum tag t, unsigned r, unsigned n){
+static array *parray(array *p,enum tag t, uint r, uint n){
 	void *m = amem(p,ASIZE);
 	if(!m) return NULL;
 	array *a = atmp(m,t,r,n);

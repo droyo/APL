@@ -2,6 +2,13 @@
 #define MAX(a,b) ((a)>(b))?(a):(b)
 #define MIN(a,b) ((a)<(b))?(a):(b)
 
+typedef unsigned int uint;
+typedef unsigned long ulong;
+typedef unsigned short ushort;
+typedef unsigned char uchar;
+typedef unsigned long long uvlong;
+typedef long long vlong;
+
 enum tag {
 	TNUM = 1,       TSTR = TNUM<<1,
 	TSYM = TSTR<<1, TFUN = TSYM<<1,
@@ -23,15 +30,14 @@ enum flag {
 #define ASIZE (sizeof(array))
 typedef struct {
 	enum tag t; enum flag f;
-	unsigned char r, k, c;
-	unsigned long n,z;
+	uchar r, k, c;
+	ulong n,z;
 	char m[];
 } array;
 typedef struct {char k[64];array *a;} pair;
 
 extern array *zilde;
 extern array *marker;
-extern char quit;
 
 /* Hash table for var bindings */
 array* env(array*);
@@ -39,11 +45,11 @@ array* put(array*,char*,array*);
 array* get(array*,char*);
 
 /* Array operations */
-array* atmp(void*, enum tag, unsigned, unsigned);
-array* anew(array*,enum tag, enum flag,unsigned, unsigned);
-array* abox(array*,unsigned,enum flag,array**);
+array* anew(array*,enum tag, enum flag,uint,uint);
+array* atmp(void*, enum tag, uint,uint);
+array* abox(array*,uint,enum flag,array**);
 array* astr(array*,char*);
-array* acln(array*,array*);
+array* acln(array*,enum flag,array*);
 int*   ashp(array*);
 void   aclr(array*);
 void*  aval(array*);

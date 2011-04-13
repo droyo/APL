@@ -85,10 +85,10 @@ array *mkfun(array *E, stack *s) {
 
 array *lookup(array *E,array *a) {
 	char k[64];
-	if(a->t == TSYM) {
-		return get(E,akey(a,k,sizeof k));
-	}
-	return a;
+	if(a->t==TSYM && !(a=get(E,akey(a,k,64))))
+		return NULL;
+	else
+		return a;
 }
 int exec(array *E, stack *s) {
 	int i, j, a, p;

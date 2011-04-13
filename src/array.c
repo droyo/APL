@@ -29,7 +29,7 @@ static int msize(array *a) {
 	return sizeof(int)*a->k + a->z*tsize(a->t); 
 }
 static int tsize(enum tag t) {
-	unsigned s; for(s=0;t>>=1;s++); 
+	uint s; for(s=0;t>>=1;s++); 
 	return (s>NELEM(type_sizes)?0:type_sizes[s]);
 }
 long asize(array *a) {
@@ -40,13 +40,15 @@ char *akey(array *a, char *buf, int n) {
 	snprint(buf, n, "%*R", a->n, aval(a));
 	return buf;
 }
-array *atmp(void *p,enum tag t, unsigned r, unsigned n) {
+array *atmp(void *p,enum tag t, uint r, uint n) {
 	array *a = p; a->k = MAX(def_rank,r);
 	a->t = t; a->f=FTMP; 
 	a->r = r; a->n = n; a->c = 0;
 	return a;
 }
-array *anew(array *E,enum tag t, enum flag f, unsigned r, unsigned n) {
+
+array *
+anew(array *E,enum tag t, enum flag f, uint r, uint n) {
 	array *a = NULL;
 	int k = MAX(def_rank,r);
 	int z = MAX(def_size,n);
@@ -58,8 +60,8 @@ array *anew(array *E,enum tag t, enum flag f, unsigned r, unsigned n) {
 	if(!(f&FSYS)) record(E,a);
 	return a;
 }
-array *acln(array *E, array *a) {
-	array *c = anew(E,a->t, a->f, a->r, a->n); 
+array *acln(array *E,enum flag mask,array *a) {
+	array *c = anew(E,a->t, a->f&mask, a->r, a->n); 
 	if(!c) return NULL; 
 	memcpy(ashp(c),ashp(a),sizeof(int)*a->r);
 	memcpy(aval(c),aval(a),msize(a)-sizeof(int)*a->k);
@@ -71,7 +73,7 @@ int *ashp(array *a) {
 void *aval(array *a) {
 	return a->m+(sizeof(int)*a->k);
 }
-array *abox(array *E,unsigned n,enum flag f,array **x) {
+array *abox(array *E,uint n,enum flag f,array **x) {
 	int i, *s; array *a, **y;
 	if(!(a=anew(E,TBOX,f,n>1?1:0,n)))
 		return NULL;
@@ -81,7 +83,7 @@ array *abox(array *E,unsigned n,enum flag f,array **x) {
 	}
 	for(i=0,y=aval(a);i<n;i++) {
 		if(x[i]->f & FTMP) {
-			if(!(y[i]=acln(E,x[i]))) return NULL;
+			if(!(y[i]=acln(E,~0,x[i]))) return NULL;
 		}else
 			y[i] = x[i];
 	}

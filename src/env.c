@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include "apl.h"
 
-static unsigned long hash(char *s) {
-	unsigned long c,h=3581;
+static ulong hash(char *s) {
+	ulong c,h=3581;
 	while((c=*s++))h=((h<<5)+h)^c; return h;
 }
 
@@ -69,7 +69,7 @@ array *put(array *e, char *k, array *a) {
 		else if(old->a == a) return a;
 		else decref(e,old->a);
 	} 
-	if (a->f&FTMP && !(a = acln(e,a))) 
+	if (a->f&FTMP && !(a=acln(e,~0,a))) 
 		return NULL;
 	else p.a = a;
 	if(add(b,p))
