@@ -57,7 +57,7 @@ void*  amem(array*,long);
 int    afull(array*);
 array* agrow(array**,long);
 void*  apush(array*,const void*);
-long   asize(array*);
+ulong  asize(array*);
 void*  afind(array*,void*);
 int    aeach(array*,int(*)(void*,void*),void*);
 

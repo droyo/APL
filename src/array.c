@@ -1,40 +1,31 @@
 #include <utf.h>
 #include <fmt.h>
 #include <string.h>
-#include <stdlib.h>
 #include <gc.h>
 #include "apl.h"
 #include "error.h"
 
-static int msize(array *a); 
-static int tsize(enum tag);
-enum { def_rank = 4 };
-enum { def_size = 4 };
+enum { def_rank = 4, def_size = 4 };
 
-/* Make sure if you modify the tag order
- * in apl.h that you also modify this table
- * accordingly */
-static int type_sizes[] = {
-	sizeof (double), /* TNUM */
-	sizeof (Rune),   /* TSTR */
-	sizeof (Rune),   /* TSYM */
-	sizeof (array*), /* TFUN */
-	sizeof (array*), /* TDYA */
-	sizeof (array*), /* TMON */
-	sizeof (array*), /* TCLK */
-	sizeof (array*), /* TBOX */
-	sizeof (char),   /* TRAW */
+static uint type_sizes[] = {
+	sizeof (double),sizeof (Rune),   /* TNUM, TSTR */
+	sizeof (Rune),  sizeof (array*), /* TSYM, TFUN */
+	sizeof (array*),sizeof (array*), /* TDYA, TMON */
+	sizeof (array*),sizeof (array*), /* TCLK, TBOX */
+	sizeof (char)                    /* TRAW       */
 };
-static int msize(array *a) { 
-	return sizeof(int)*a->k + a->z*tsize(a->t); 
-}
-static int tsize(enum tag t) {
-	uint s; for(s=0;t>>=1;s++); 
+
+uint tsize(enum tag t) {
+	uchar s; for(s=0;t>>=1;s++); 
 	return (s>NELEM(type_sizes)?0:type_sizes[s]);
 }
-long asize(array *a) {
-	return ASIZE + msize(a);
-}
+int*  ashp  (array *a){return (int*)a->m;}
+void* aval  (array *a){return a->m+(sizeof(int)*a->k);}
+uint  msize (array *a){return sizeof(int)*a->k+a->z*tsize(a->t);}
+ulong asize (array *a){return ASIZE + msize(a);}
+void  aclr  (array *a){a->n = 0; }
+int   afull (array *a){return a->n == a->z; }
+
 /* Suitable for passing to put() */
 char *akey(array *a, char *buf, int n) {
 	snprint(buf, n, "%*R", a->n, aval(a));
@@ -49,18 +40,16 @@ array *atmp(void *p,enum tag t, uint r, uint n) {
 
 array *
 anew(void *E,enum tag t, enum flag f, uint r, uint n) {
-	array *a = NULL;
-	ulong k = MAX(def_rank,r);
-	ulong z = MAX(def_size,n);
-	ulong s = ASIZE + sizeof(int)*k+tsize(t)*z;
-	
-	if(!(a=GC_MALLOC(s))) return enil(Enomem);
-	memset(a,0,s);
+	array *a;
+	ulong k = MAX(def_rank,r), z = MAX(def_size,n);
+	if(!(a=GC_MALLOC(ASIZE + sizeof(int)*k+tsize(t)*z)))
+		return enil(Enomem);
 	a->t=t;a->f = f&~FTMP;
 	a->r=r;a->n=n;a->k=k;a->z=z;
 	if(r == 1) *ashp(a) = n;
 	return a;
 }
+
 array *acln(void *E,enum flag mask,array *a) {
 	array *c = anew(E,a->t, a->f&mask, a->r, a->n); 
 	if(!c) return NULL; 
@@ -68,25 +57,15 @@ array *acln(void *E,enum flag mask,array *a) {
 	memcpy(aval(c),aval(a),msize(a)-sizeof(int)*a->k);
 	return c;
 }
-int *ashp(array *a) {
-	return (int*)a->m;
-}
-void *aval(array *a) {
-	return a->m+(sizeof(int)*a->k);
-}
 array *abox(void *E,uint n,enum flag f,array **x) {
 	int i, *s; array *a, **y;
-	if(!(a=anew(E,TBOX,f,n>1?1:0,n)))
-		return NULL;
-	if(!x) {
-		a->n = 0;
-		return a;
-	}
+	if(!(a=anew(E,TBOX,f,n>1?1:0,n))) return NULL;
+	if(!x) { a->n = 0; return a; }
+	
 	for(i=0,y=aval(a);i<n;i++) {
-		if(x[i]->f & FTMP) {
-			if(!(y[i]=acln(E,~0,x[i]))) return NULL;
-		}else
-			y[i] = x[i];
+		if(x[i]->f & FTMP&& !(y[i]=acln(E,~0,x[i]))) 
+			return NULL;
+		else y[i] = x[i];
 	}
 	s=ashp(a); s[0] = n;
 	return a;
@@ -104,8 +83,6 @@ void *amem(array *a, long sz) {
 	*ashp(a)=(a->n += sz); return m;
 }
 
-void aclr(array *a) { a->n = 0; }
-int afull(array *a) { return a->n == a->z; }
 array *agrow(array **a, long n) {
 	array *r;
 	if(!(r=GC_REALLOC(*a,asize(*a)+n*tsize((*a)->t))))
@@ -136,8 +113,8 @@ void *apush(array *a, const void *x) {
 }
 
 void *afind(array *a, void *x) {
-	int i,s = tsize(a->t); 
 	void *y;
+	int i,s = tsize(a->t); 
 	for(i=0;i<a->n;i++) {
 		if(!memcmp(x,y=aget(a,i),s))
 			return y;

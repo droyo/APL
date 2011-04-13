@@ -36,21 +36,7 @@ array *parse(void *E, stack *l, stack *r, int lvl) {
 	array *a, *e, *v;
 	do {
 		a = pop(l);
-		if(lvl < 0) {
-			if(a->t == TRDF) {
-				n=mkstack(r->top-1,-1);
-				if(!(e=parse(E,l,&n,lvl-1)))
-					return NULL;
-				else push(r,e);
-			}else if(a->t == TLDF) return mkfun(E,r);
-			else push(r,a);
-			continue;
-		}else if(a->t == TRDF) {
-			n=mkstack(r->top-1,-1);
-			if(!(e = parse(E,l,&n,-1)))
-				return NULL;
-			else push(r,e);
-		}else if(a->t == TRPR) {
+		if(a->t == TRPR) {
 			n=mkstack(r->top-1,-1);
 			push(&n,a);
 			if(!(e = parse(E,l,&n,lvl+1)))
@@ -69,18 +55,8 @@ array *parse(void *E, stack *l, stack *r, int lvl) {
 		while(exec(E,r));
 	} while(a->t != TEND);
 	while(exec(E,r));
-	if (lvl < 0)    return enil(Esyntax);
 	if (count(r)>2) return enil(Esyntax);
 	return nth(r,lvl?0:1);
-}
-
-array *mkfun(void *E, stack *s) {
-	array *a;
-	if(!count(s)) return zilde;
-	if(!(a=abox(E,count(s),0,s->top)))
-		return enil(Enomem);
-	a->t = TFUN;
-	return a;
 }
 
 array *lookup(void *E,array *a) {
@@ -115,24 +91,19 @@ int apply(void *E, rule *r, stack *s) {
 	return 0;
 }
 array* monad(void *E, array **a, int b, int e) {
-	print("(%A %A)", a[b], a[e]);
 	return a[e];
 }
 array* dyad(void *E, array **a, int b, int e)  {
-	print("(%A %A,%A)",a[b+1],a[e],a[b]);
 	return a[e];
 }
 array* moper(void *E, array **a, int b, int e) {
-	print("(op '%A%A')",a[b],a[e]);
 	return a[b];
 }
 array* doper(void *E, array **a, int b, int e) {
-	print("(op %A%A%A)", a[b+1], a[b], a[e]);
 	return a[e];
 }
 array* bind(void *E, array **a, int b, int e) {
 	char k[64];
-	print("(set %A %A)",a[b], a[e]);
 	array *s = put(E, akey(a[b],k,sizeof k), a[e]);
 	if(!s) return NULL;
 	s->f |= FSIL;

@@ -19,7 +19,7 @@ things at once (don't laugh, I bet you can't
 remember more than 7!).
 
 [paren]
-Not balancing your parenthesis is like not
+Not balancing parenthesis is like not
 finishing your
 
 [lexline int]
