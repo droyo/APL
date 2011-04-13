@@ -1,9 +1,7 @@
 #include <utf.h>
 #include <fmt.h>
 #include <bio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
+#include <gc.h>
 #include "apl.h"
 
 #define try(f,s) do{if(f){fprint(2,"!"s"\n");return 1; }}while(0)
@@ -13,7 +11,7 @@ int main(void) {
 	Biobuf *in;
 	int quit = 0;
 	array *ans, *mem, *buf;
-	
+	GC_INIT();
 	try(!(in=Bfdopen(0,O_RDONLY)),"Can't open input");
 	try(!(E=env(NULL)),"init env");
 	try(!(buf=anew(E,TBOX,FSYS,1,128)),"Tokm");
