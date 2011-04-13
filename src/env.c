@@ -7,19 +7,20 @@ typedef struct   {char k[64]; array *a;}         pair;
 typedef struct   {long n,max; pair *p;}          bucket;
 typedef struct _e{struct _e *up; bucket b[768];} tbl;
 
-static unsigned long hash(char *s) {
+static ulong hash(char *s,ulong max) {
 	unsigned long c,h=3581;
-	while((c=*s++))h=((h<<5)+h)^c; return h;
+	while((c=*s++))h=(((h<<5)+h)^c)%max; 
+	return h;
 }
 
-static int addnew(bucket *b, pair p) {
+static int addnew(bucket *b, pair *p) {
 	pair *r;
 	if(b->n >= b->max) {
-		if(!(r=realloc(b->p, b->max+sizeof p)))
+		if(!(r=realloc(b->p, b->max+sizeof *p)))
 			return -1;
 		else b->max++;
 	}
-	b->p[b->n++] = p;
+	b->p[b->n++] = *p;
 	return 0;
 }
 
@@ -30,11 +31,11 @@ static pair *find(bucket *b, char *k) {
 	return NULL;
 }
 
-static int add(bucket *b, pair p) {
+static int add(bucket *b, pair *p) {
 	int i;
 	for(i=0;i<b->n;i++) {
-		if(!strncmp(b->p[i].k,p.k, sizeof p.k)) {
-			b->p[i] = p;
+		if(!strncmp(b->p[i].k,p->k, sizeof p->k)) {
+			b->p[i] = *p;
 			return 0;
 		}
 	}
@@ -65,7 +66,7 @@ void env_free(void *p) {
 }
 
 static bucket *slot(tbl *e, char *k) {
-	return e->b+hash(k)%NELEM(e->b);
+	return e->b+1+hash(k,NELEM(e->b)-1);
 }
 
 array *put(void *v, char *k, array *a) {
@@ -81,7 +82,7 @@ array *put(void *v, char *k, array *a) {
 	if (a->f&FTMP && !(a=acln(v,0,a))) 
 		return NULL;
 	else p.a = a;
-	if(add(b,p)) return NULL;
+	if(add(b,&p)) return NULL;
 	if(!(a->f&FSYS))incref(v,p.a);
 	return p.a;
 }
