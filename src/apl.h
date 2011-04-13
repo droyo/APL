@@ -35,7 +35,7 @@ extern void *S;
 extern void *G;
 
 /* Hash table for var bindings */
-array* shadow(array*);
+array* env(array*);
 array* put(array*,char*,array*);
 array* get(array*,char*);
 

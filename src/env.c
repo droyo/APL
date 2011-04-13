@@ -2,10 +2,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include "apl.h"
-#define dirty(a) (a->f&(FTMP|FRDO))
 
 typedef struct {char k[64];array *a;} pair;
-
+static int dirty(array *a) { return a->f&(FTMP|FRDO); }
 static unsigned long hash(char *s) {
 	unsigned long c,h=3581;
 	while((c=*s++))h=((h<<5)+h)^c; return h;
@@ -40,7 +39,7 @@ static int add(array *e, long x, pair p) {
 	return addnew(e,x,p);
 }
 
-array *shadow(array *up) {
+array *env(array *up) {
 	array *e,**b; pair *p;
 	if(!(e=abox(768,NULL))) return NULL;
 	b=aval(e); b[0] = up;
