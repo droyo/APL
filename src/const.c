@@ -22,6 +22,10 @@ int cst_init(void *E) {
 	if (!(digit=astr(E,digits)))         return -1;
 	if (!(aplch=astr(E,primitives)))     return -1;
 
+	delim->f |= FRDO;
+	digit->f |= FRDO;
+	aplch->f |= FRDO;
+	
 	if(!put(E,"⎕DELIM",delim)) return -1;
 	if(!put(E,"⎕PRIM",aplch))  return -1;
 	if(!put(E,"⎕DIGIT",digit)) return -1;

@@ -134,7 +134,7 @@ array* bind(void *E, array **a, int b, int e) {
 	char k[64];
 	print("(set %A %A)",a[b], a[e]);
 	array *s = put(E, akey(a[b],k,sizeof k), a[e]);
-	if(!s) return ezil(Ebind, a[b]);
+	if(!s) return NULL;
 	s->f |= FSIL;
 	return s;
 }

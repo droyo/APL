@@ -6,7 +6,7 @@
 [unbound array*] 
 Unbound variable "%1"
 
-[rdonly array*]
+[rdonly char*]
 "%1" is read-only. You can look, but you can't
 touch~
 

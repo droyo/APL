@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <gc.h>
 #include "apl.h"
+#include "error.h"
 
 typedef struct   {char k[32]; array *a;}         pair;
 typedef struct   {long n,max; pair *p;}          bucket;
@@ -67,13 +68,13 @@ array *put(void *e, char *k, array *a) {
 
 	strncpy(p.k, k, sizeof p.k-1);
 	if(old) {
-		if(old->a->f&(FRDO|FSYS)) return NULL;
+		if(old->a->f&(FRDO|FSYS)) return enil(Erdonly,k);
 		else if(old->a == a)      return a;
 	} 
 	if (a->f&FTMP && !(a=acln(e,0,a))) 
 		return NULL;
 	else p.a = a;
-	if(add(b,&p)) return NULL;
+	if(add(b,&p)) return enil(Ebind);
 	return p.a;
 }
 

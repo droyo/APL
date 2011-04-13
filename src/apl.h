@@ -23,8 +23,7 @@ enum tag {
 
 enum flag {
 	FTMP = 0x01, FRDO = 0x02,
-	FMAN = 0x04, FSIL = 0x08,
-	FSYS = 0x10
+	FSIL = 0x08, FSYS = 0x10
 };
 
 #define ASIZE (sizeof(array))
