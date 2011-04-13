@@ -63,7 +63,7 @@ void incref(array*,array*);
 void decref(array*,array*);
 
 /* Core interpreter */
-array* scan(array*,void*);
+array* scan(array*,array*,array*,void*);
 array* eval(array*,array*);
 
 /* Init,Teardown */
