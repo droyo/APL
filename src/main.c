@@ -11,7 +11,7 @@
 	r=1; goto e;}}while(0)
 
 int main(void) {
-	void *E;
+	void *E = NULL;
 	Biobuf *in;
 	int e = 0, quit = 0;
 	array *ans, *mem, *buf;

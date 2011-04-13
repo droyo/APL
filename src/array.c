@@ -49,10 +49,12 @@ array *atmp(void *p,enum tag t, uint r, uint n) {
 array *
 anew(void *E,enum tag t, enum flag f, uint r, uint n) {
 	array *a = NULL;
-	int k = MAX(def_rank,r);
-	int z = MAX(def_size,n);
-	if(!(a=malloc(ASIZE+sizeof(int)*k+tsize(t)*z)))
-		return enil(Enomem);
+	ulong k = MAX(def_rank,r);
+	ulong z = MAX(def_size,n);
+	ulong s = ASIZE + sizeof(int)*k+tsize(t)*z;
+	
+	if(!(a=malloc(s))) return enil(Enomem);
+	memset(a,0,s);
 	a->t=t;a->f = f&~FTMP;
 	a->r=r;a->n=n;a->k=k;a->z=z;
 	if(r == 1) *ashp(a) = n;

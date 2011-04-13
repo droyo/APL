@@ -38,12 +38,11 @@ void mem_free(void *E) {
 
 void mem_coll(void *E) {
 	array *ref = mr(E);
-	array **top = aval(ref);
-	array **bot = aget(ref,ref->n-1);
-	while(ref->n && !(*top)->c) {
-		swap(top, bot);
-		free(*top); ref->n--;
-		if(ref->n) bubbledn(ref, bot);
+	array **top,**bot;
+	while(ref->n && !(*(top=aval(ref)))->c) {
+		swap(top,bot=aget(ref,ref->n-1));
+		free(*bot); ref->n--;
+		if(ref->n) bubbledn(ref,top);
 	}
 }
 

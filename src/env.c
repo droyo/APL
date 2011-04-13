@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include "apl.h"
 
-typedef struct   {char k[64]; array *a;}         pair;
+typedef struct   {char k[32]; array *a;}         pair;
 typedef struct   {long n,max; pair *p;}          bucket;
-typedef struct _e{struct _e *up; bucket b[768];} tbl;
+typedef struct _e{struct _e *up; bucket b[768];} table;
 
 static ulong hash(char *s,ulong max) {
 	unsigned long c,h=3581;
@@ -43,13 +43,13 @@ static int add(bucket *b, pair *p) {
 }
 
 void *env(void *up) {
-	int i; tbl *e;
+	int i; table *e;
 	if(!(e=malloc(sizeof *e))) return NULL;
-	e->up = (tbl*)up; 
+	e->up = (table*)up; 
 	for(i=0;i<NELEM(e->b);i++) {
 		if(!(e->b[i].p = malloc(sizeof (pair))))
 			goto spill;
-		e->b[i].p->k[0] = 0;
+		memset(e->b[i].p->k, 0, sizeof e->b[i].p->k);
 		e->b[i].max = 1;
 		e->b[i].n = 0;
 	}
@@ -59,36 +59,36 @@ void *env(void *up) {
 }
 
 void env_free(void *p) {
-	int i; tbl *e = p;
+	int i; table *e = p;
 	for(i=0;i<NELEM(e->b);i++)
 		free(e->b[i].p);
 	free(e);
 }
 
-static bucket *slot(tbl *e, char *k) {
+static bucket *slot(table *e, char *k) {
 	return e->b+1+hash(k,NELEM(e->b)-1);
 }
 
-array *put(void *v, char *k, array *a) {
-	bucket *b = slot((tbl*)v, k);
+array *put(void *e, char *k, array *a) {
+	bucket *b = slot(e,k);
 	pair p,*old = find(b,k);
 
 	strncpy(p.k, k, sizeof p.k-1);
 	if(old) {
 		if(old->a->f&(FRDO|FSYS)) return NULL;
 		else if(old->a == a)      return a;
-		else decref(v,old->a);
+		else decref(e,old->a);
 	} 
-	if (a->f&FTMP && !(a=acln(v,0,a))) 
+	if (a->f&FTMP && !(a=acln(e,0,a))) 
 		return NULL;
 	else p.a = a;
 	if(add(b,&p)) return NULL;
-	if(!(a->f&FSYS))incref(v,p.a);
+	if(!(a->f&FSYS))incref(e,p.a);
 	return p.a;
 }
 
 array *get(void *v,char *k) {
-	tbl *e = v; pair *p;
+	table *e = v; pair *p;
 	do{ p = find(slot(e,k),k);
 		if(!p && e->up) e=e->up;
 		else if(p) return p->a;

@@ -84,8 +84,8 @@ array *mkfun(void *E, stack *s) {
 }
 
 array *lookup(void *E,array *a) {
-	char k[64];
-	if(a->t==TSYM && !(a=get(E,akey(a,k,64))))
+	char k[32];
+	if(a->t==TSYM && !(a=get(E,akey(a,k,sizeof k))))
 		return NULL;
 	else
 		return a;

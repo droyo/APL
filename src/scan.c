@@ -55,7 +55,6 @@ scan(void *E,array *tok,array *buf,void *v) {
 		}
 		if(!apush(tok,&a)) 
 			return enil(Elexline,tok->z);
-		else put(E,"⎕SCTOK", tok);
 	}
 	return tok;
 }
