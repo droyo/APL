@@ -4,8 +4,8 @@
 #include "apl.h"
 #include "const.h"
 
-array *zilde;
-array *marker;
+array *zilde  = NULL;
+array *marker = NULL;
 
 static const Rune prim[] = {
 	UBAR,    UCAT,     UCATBAR, UCIRC,   UDECODE,
@@ -21,7 +21,7 @@ static const Rune prim[] = {
 	UQQUAD,  USLASHB,  UMERGE,  USWAP,   UHOLLER, 
 	UEACH,   UDOT,     UHOOT,   UBSLASH, UBSLASHB,
 	USLASH,  UUNION,   UISECT,  UDFNS,   ULAMP,
-	UALPHA,  UOMEGA,   UJOT
+	UALPHA,  UOMEGA,   UJOT,0
 };
 
 int cst_init(array *E) {

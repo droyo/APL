@@ -47,7 +47,7 @@ array *atmp(void *p,enum tag t, unsigned r, unsigned n) {
 	return a;
 }
 array *anew(array *E,enum tag t, enum flag f, unsigned r, unsigned n) {
-	array *a;
+	array *a = NULL;
 	int k = MAX(def_rank,r);
 	int z = MAX(def_size,n);
 	if(!(a=malloc(ASIZE+sizeof(int)*k+tsize(t)*z)))
@@ -134,9 +134,12 @@ void *apush(array *a, const void *x) {
 }
 
 void *afind(array *a, void *x) {
-	int i,s = tsize(a->t); array *y;
-	for(i=0,y=aget(a,0);i<a->n;i++,y+=s)
-		if(!memcmp(x,y,s)) return y;
+	int i,s = tsize(a->t); 
+	void *y;
+	for(i=0;i<a->n;i++) {
+		if(!memcmp(x,y=aget(a,i),s))
+			return y;
+	}
 	return NULL;
 }
 

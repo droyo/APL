@@ -47,7 +47,7 @@ array *env(array *up) {
 	}
 	return e;
 }
-int free_bucket(void *item, void *args) {
+int free_bucket(void *args, void *item) {
 	free(*(array**)item);
 	return 0;
 }

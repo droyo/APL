@@ -50,7 +50,7 @@ static int Rfmt(Fmt *f) {
 	Rune *s = va_arg(f->args, Rune*);
 	for(i=0;s[i]&&i<f->width;i++)
 		if(fmtrune(f,s[i])) return -1;
-	return fmtrune(f,0);
+	return 0;
 }
 
 static int Afmt(Fmt *f) {

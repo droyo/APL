@@ -1,95 +1,115 @@
 #include <utf.h>
 #include <fmt.h>
 #include <stdlib.h>
-#include <limits.h>
 #include <string.h>
 #include "apl.h"
 
-static array *toofar;
-static array *toocls;
+array *toocls = NULL;
+array *toofar = NULL;
 
-static array *c(array*,array*,int);
-static array *p(array*,array*);
-static void swap(array**,array*,array*);
-static void bubbledn(array*,array*);
-static void bubbleup(array*,array*);
+/* Heap operations */
+static void   bubbleup(array*,array**);
+static void   bubbledn(array*,array**);
+static void   swap(array**,array**);
+static array**c(array*,array**,char);
+static array**p(array*,array**);
 
-int mem_init(array *E) { 
-	array *ref=NULL;
-	if(!(ref=anew(E,TBOX,FSYS,0,1024))) return -1;
-	if(!(toofar=anew(E,TNIL,FSYS,0,0))) return -1;
-	if(!(toocls=anew(E,TNIL,FSYS,0,0))) return -1;
-	toofar->c = UCHAR_MAX;
-	toocls->c = 0;
-	if(!put(E,"⎕REF",ref)) return -1;
-	return ref->n = 0;
+static array* mr(array *E) { return get(E,"⎕OBJECTS"); }
+
+int  mem_init(array *E) {
+	array *ref = abox(E,1024,FSYS,NULL);
+	if(!toocls) toocls=anew(E,TNIL,FSYS,0,0);
+	if(!toofar) toofar=anew(E,TNIL,FSYS,0,0);
+	if(!(ref&&toocls&&toofar)) return -1;
+	if(!put(E,"⎕OBJECTS",ref)) return -1;
+	if(!put(E,"⎕TOOFAR",ref))  return -1;
+	if(!put(E,"⎕TOOCLS",ref))  return -1;
+	toofar->c = ~0;
+	toocls->c =  0;
+	return 0;
 }
 
 void mem_free(array *E) {
-	array *ref = get(E,"⎕REF");
+	array *ref = mr(E);
 	int i; for(i=0;i<ref->n;i++)
 		free(*(array**)aget(ref,i));
-	free(toofar);
-	free(toocls);
+	free(ref);
 }
 
 void mem_coll(array *E) {
-	array *t=NULL, *ref = get(E,"⎕REF");
-	while(ref->n && !(t=*(array**)aget(ref,0))->c){
-		t->c = UCHAR_MAX;
-		bubbledn(ref,t);
-		ref->n--; free(t);
+	array *ref = mr(E);
+	array **top = aval(ref);
+	array **bot = aget(ref,ref->n-1);
+	while(ref->n && !(*top)->c) {
+		swap(top, bot);
+		free(*top); ref->n--;
+		if(ref->n) bubbledn(ref, bot);
 	}
 }
 
 void record(array *E, array *a) {
-	array *ref = get(E,"⎕REF");
-	a->gc = ref->n;
-	if(!apush(ref, &a)) return;
-	bubbleup(ref,a);
+	array *ref = mr(E);
+	array **x = apush(ref,&a);
+	bubbleup(ref,x);
 	a->f |= FMAN;
 }
 
-void incref(array *E, array *a) { 
-	int i;
-	array *ref = get(E,"⎕REF");
-	if(a->c+1>a->c)a->c++;
-	bubbledn(ref,a);
-	if(a->t==TBOX||a->t==TFUN) {
-		for(i=0;i<a->n;i++)
-			incref(E,*(array**)aget(a,i));
+void incref(array *E, array *a) {
+	int i; array *ref = mr(E);
+	if(!(a->f&FMAN))   return;
+	if(a->c+1>a->c) a->c++;
+	if(a->t&(TFUN|TBOX)) {
+		for(i=0;i<ref->n;i++) 
+			incref(E,*(array**)aget(ref,i));
 	}
+	bubbledn(ref,afind(ref,&a));
 }
 
 void decref(array *E, array *a) {
-	int i;
-	array *ref = get(E,"⎕REF");
-	if(a->c) a->c--;
-	bubbleup(ref,a);
-	if(a->t==TBOX||a->t==TFUN) {
-		for(i=0;i<a->n;i++)
-			decref(E,*(array**)aget(a,i));
+	array *ref = mr(E); int i;
+	if(!(a->f&FMAN)) return;
+	a->c-=a->c?1:0;
+	if(a->t&(TFUN|TBOX)) {
+		for(i=0;i<ref->n;i++) 
+			decref(E,*(array**)aget(ref,i));
+	}
+	bubbleup(ref,afind(ref,&a));
+}
+
+static void bubbleup(array *ref, array **a) {
+	array **u;
+	while((*(u=p(ref,a)))->c > (*a)->c) {
+		swap(u,a);
+		a = u;
 	}
 }
-static void bubbledn(array *r, array *a) {
-	array *u=NULL; int n = a->c;
-	while(n>(u=c(r,a,n>c(r,a,1)->c?1:2))->c)
-		swap(aval(r),a,u);
+
+static void bubbledn(array *ref, array **a) {
+	array **l = c(ref,a,1);
+	array **r = c(ref,a,2);
+	while((*l)->c+(*r)->c < (*a)->c * 2) {
+		if((*l)->c < (*a)->c) {
+			swap(l,a); a=l;
+		} else {
+			swap(r,a); r=l;
+		}
+		l = c(ref,a,1);
+		r = c(ref,a,2);
+	}
 }
-static void bubbleup(array *r, array *a) {
-	while(a->c<p(r,a)->c) swap(aval(r),a,p(r,a));
+
+static void swap(array **x, array **y) {
+	array *tmp = *x; *x = *y; *y = tmp;
 }
-static array *p(array *r, array *a) {
-	array **x = aval(r);
-	return a->gc?x[(a->gc-1)/2]:toocls;
+
+static array** p(array *ref, array **a) {
+	array **r = aval(ref);
+	long k = (((long)(a-r))-1)/2;
+	return k<0?&toocls:r+k;
 }
-static array *c(array *r,array *a,int x) {
-	int i = a->gc * 2+x;
-	if(i>r->n) return toofar;
-	else       return aget(r,i);
-}
-static void swap(array **r, array *x, array *y) {
-	long tmp; 
-	r[x->gc]=y;r[y->gc]=x;
-	tmp=x->gc; x->gc=y->gc; y->gc=tmp;
+
+static array** c(array *ref, array **a, char w) {
+	array **r = aval(ref);
+	long k = ((long)(a-r))*2+w;
+	return k >= ref->n ? &toofar : r+k;
 }
