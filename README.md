@@ -77,7 +77,7 @@ into the core of the language or loaded as libraries, like:
 
 ### Compliance with 'A Dictionary of APL'
 
-'A dictionary of APL[1]' was written by the creator of APL
+['A dictionary of APL'][1] was written by the creator of APL
 himself and is a good formal standard to follow.  This
 interpreter will conform to this standard where possible.
 Notably, bracketed array indexing/assignment(a[n;]) will *not*
@@ -110,4 +110,4 @@ a fork useful.  The lexer, while trivial, may be of interest as
 it accepts utf-8 input. An earlier version of the lexer also
 output tokens in a fairly portable streaming format.
 
-[1](http://www.jsoftware.com/papers/APLDictionary.htm)
+[1]:(http://www.jsoftware.com/papers/APLDictionary.htm)
