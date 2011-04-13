@@ -1,3 +1,23 @@
+# Build dependencies
+- awk
+- make (GNU or BSD)
+- C compiler (tcc and gcc are used for development)
+- [libbio,libfmt,libutf](http://swtch.com/plan9port/unix/)
+
+# Build instructions
+
+	cd src
+	make
+
+You may need to tweak the CC,LD,CFLAGS and LDFLAGS
+variables in the Makefile. Also, if your C compiler
+does not support flexible array members like the example
+
+	struct foo { int x; char m[] };
+
+You'll need to tweak the declaration for array and ASIZE
+in apl.h
+
 # An open-source, unicode APL interpreter
 
 This project is my endeavour to create an open-source APL
