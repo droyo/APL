@@ -39,7 +39,7 @@ extern array *zilde;
 extern array *marker;
 
 /* Hash table for var bindings */
-void* env(void*);
+void*  env(void*);
 array* put(void*,char*,array*);
 array* get(void*,char*);
 
@@ -62,11 +62,6 @@ long   asize(array*);
 void*  afind(array*,void*);
 int    aeach(array*,int(*)(void*,void*),void*);
 
-/* Memory management */
-void record(void*,array*);
-void incref(void*,array*);
-void decref(void*,array*);
-
 /* Core interpreter */
 array* scan(void*,array*,array*,void*);
 array* eval(void*,array*);
@@ -74,7 +69,3 @@ array* eval(void*,array*);
 /* Init,Teardown */
 int   fmt_init(void*);
 int   cst_init(void*);
-int   mem_init(void*);
-void  mem_coll(void*);
-void  mem_free(void*);
-void  env_free(void*);

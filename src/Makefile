@@ -6,8 +6,7 @@ BIN := apl
 SRC := \
 	main.c eval.c scan.c \
 	array.c format.c env.c \
-	memory.c const.c error.c \
-	error-msg.c
+	const.c error.c error-msg.c
 
 INC := apl.h eval.h error.h \
        error-enm.h const.h 
@@ -16,7 +15,7 @@ AUTO:= error-enm.h const.h error-msg.c
 OBJ := $(SRC:.c=.o)
 
 CFLAGS = -Wall -I/usr/local/include -g
-LDFLAGS = -lbio -lfmt -lutf -L/usr/local/lib 
+LDFLAGS = -lbio -lfmt -lutf -L/usr/local/lib -lgc
 
 all: $(BIN)
 

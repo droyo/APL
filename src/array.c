@@ -2,6 +2,7 @@
 #include <fmt.h>
 #include <string.h>
 #include <stdlib.h>
+#include <gc.h>
 #include "apl.h"
 #include "error.h"
 
@@ -53,12 +54,11 @@ anew(void *E,enum tag t, enum flag f, uint r, uint n) {
 	ulong z = MAX(def_size,n);
 	ulong s = ASIZE + sizeof(int)*k+tsize(t)*z;
 	
-	if(!(a=malloc(s))) return enil(Enomem);
+	if(!(a=GC_MALLOC(s))) return enil(Enomem);
 	memset(a,0,s);
 	a->t=t;a->f = f&~FTMP;
 	a->r=r;a->n=n;a->k=k;a->z=z;
 	if(r == 1) *ashp(a) = n;
-	if(!(f&FSYS)) record(E,a);
 	return a;
 }
 array *acln(void *E,enum flag mask,array *a) {
@@ -108,7 +108,7 @@ void aclr(array *a) { a->n = 0; }
 int afull(array *a) { return a->n == a->z; }
 array *agrow(array **a, long n) {
 	array *r;
-	if(!(r=realloc(*a,asize(*a)+n*tsize((*a)->t))))
+	if(!(r=GC_REALLOC(*a,asize(*a)+n*tsize((*a)->t))))
 		return NULL;
 	else r->z += n; 
 	return *a=r;
