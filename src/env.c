@@ -3,9 +3,10 @@
 #include <stdlib.h>
 #include "apl.h"
 
-static ulong hash(char *s) {
+static ulong hash(char *s,ulong max) {
 	ulong c,h=3581;
-	while((c=*s++))h=((h<<5)+h)^c; return h;
+	while((c=*s++))h=(((h<<5)+h)^c)%max;
+	return h;
 }
 
 static int addnew(array **b, pair p) {
@@ -56,7 +57,7 @@ void env_free(array *e) {
 	free(e);
 }
 static array **slot(array *e, char *k) {
-	return aget(e,1+(hash(k)%(e->n-1)));
+	return aget(e,1+hash(k,e->n-1));
 }
 
 array *put(array *e, char *k, array *a) {
