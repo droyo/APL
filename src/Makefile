@@ -12,7 +12,7 @@ SRC := \
 INC := apl.h eval.h error.h \
        error-enm.h const.h codepoints.h
 
-AUTO:= error-enm.h codepoints.h error-msg.c
+AUTO:= error-enm.h codepoints.h error-msg.c ../aux/utf
 OBJ := $(SRC:.c=.o)
 
 CFLAGS = -Wall -I/usr/local/include -g
