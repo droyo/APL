@@ -16,7 +16,8 @@ does not support flexible array members like the example
 	struct foo { int x; char m[] };
 
 You'll need to tweak the declaration for array and ASIZE
-in apl.h
+in apl.h. The source is developed using gcc and tcc, on
+both x86 and x86_64 platforms.
 
 # An open-source, unicode APL interpreter
 
