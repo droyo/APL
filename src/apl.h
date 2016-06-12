@@ -1,74 +1,28 @@
-#define NELEM(x)(sizeof(x)/sizeof(*x))
-#define MAX(a,b) ((a)>(b))?(a):(b)
-#define MIN(a,b) ((a)<(b))?(a):(b)
+typedef struct apl_machine apl_machine;
+typedef struct apl_array apl_array;
 
-enum tag {
-	TNUM = 0x00001, TSTR = 0x00002,
-	TSYM = 0x00004, TFUN = 0x00008,
-	TDYA = 0x00010, TMON = 0x00020, 
-	TCLK = 0x00040, TBOX = 0x00080, 
-	TRAW = 0x00100, TLPR = 0x00200, 
-	TRPR = 0x00400, TCOL = 0x00800, 
-	TEND = 0x01000, TNIL = 0x02000,
-	TLDF = 0x04000, TRDF = 0x08000,
-	TSET = 0x10000
-};
-
-enum flag {
-	FTMP = 0x1,  FRDO = 0x02,
-	FMAN = 0x04, FSIL = 0x08
-};
-
-#define ASIZE (sizeof(array))
 typedef struct {
-	enum tag t; enum flag f;
-	unsigned char r, k, c;
-	unsigned short gc;
-	unsigned long n,z;
-	char m[];
-} array;
+	void (*op)(apl_machine*, apl_array*);
+	apl_array *operand; /* For literals */
+} apl_instruction;
 
-extern array *zilde;
-extern array *marker;
-extern char quit;
-extern void *S;
-extern void *G;
+typedef enum apl_array_type {
+	APL_TYPE_INT = 0,
+	APL_TYPE_STR = 1,
+	APL_TYPE_REAL = 2,
+	APL_TYPE_BOOL = 3,
+	APL_FUNCTION = 4
+} apl_array_type;
 
-/* Hash table for var bindings */
-array* env(array*);
-array* put(array*,char*,array*);
-array* get(array*,char*);
+/* Utility functions */
+void *apl_emalloc(size_t size);
 
-/* Array operations */
-array* acln(array*);
-void   aclr(array*);
-array* atmp(void*, enum tag, unsigned, unsigned);
-array* anew(enum tag, enum flag, unsigned, unsigned);
-int*   ashp(array*);
-void*  aval(array*);
-char*  akey(array*,char*,int);
-void*  aget(array*,long);
-array* abox(unsigned,array**);
-array* astr(char*);
-void*  amem(array*,long);
-int    afull(array*);
-array* agrow(array**,long);
-void*  apush(array**,const void*);
-long   asize(array*);
+apl_machine *apl_alloc_machine(void);
+void apl_machine_run(apl_machine*, apl_instruction*);
+void apl_machine_next(apl_machine *m);
 
-/* Memory management */
-void record(array*);
-void incref(array*);
-void decref(array*);
-
-/* Core interpreter */
-array* scan(void*,array**,array**);
-array* eval(array*,array*);
-
-/* Init,Teardown */
-int   fmt_init(void);
-int   const_init(void);
-int   sample_init(void*);
-int   mem_init(void);
-void  mem_coll(void);
-void  mem_free(void);
+/* builtin VM operations */
+void apl_fn_exit(apl_machine *, apl_array *);
+void apl_fn_push(apl_machine *, apl_array *);
+void apl_fn_add(apl_machine *, apl_array *);
+void apl_fn_print(apl_machine *, apl_array *);
