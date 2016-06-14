@@ -1,6 +1,6 @@
 include config.mk
 
-SRC := apl.c lex.c array.c machine.c util.c
+SRC := main.c array.c machine.c util.c
 OBJ := ${SRC:.c=.o}
 
 all: options apl

@@ -13,3 +13,8 @@ void *apl_emalloc(size_t size) {
 	}
 	return memset(m, 0, size);
 }
+
+void *apl_strdup(void *buf, size_t size) {
+	void *cp = apl_emalloc(size);
+	return memcpy(cp, buf, size);
+}
