@@ -1,4 +1,9 @@
-typedef void *apl_instruction;
+typedef unsigned char apl_instruction;
+typedef struct {
+	apl_instruction *code;
+	size_t size;
+	size_t op_count;
+} apl_program;
 
 typedef enum apl_array_type {
 	APL_TYPE_REAL,
@@ -22,11 +27,13 @@ apl_array *apl_array_reshape(apl_array*, int, int*);
 
 
 /* VM & bytecode */
+#define APL_STACK_SIZE 300
 typedef struct apl_machine apl_machine;
 apl_machine *apl_alloc_machine(void);
-void apl_machine_run(apl_machine*, apl_instruction*, size_t);
+void apl_machine_run(apl_machine*, apl_program*);
 
 enum apl_bytecodes {
+	APL_OP_UNKNOWN,
 	APL_OP_END,
 	APL_OP_ADD,
 	APL_OP_SUB,

@@ -5,24 +5,20 @@
 #include <stddef.h>
 #include "apl.h"
 
-#define STACK_SIZE 300
-
 struct apl_machine {
-	apl_instruction *ip;
 	apl_array *sp;
-	apl_array *stack;
+	apl_array stack[APL_STACK_SIZE];
 };
 
 typedef struct {
 	void *addr;
 	unsigned char next;
-} jump_table;
+} apl_jump_table;
 
-apl_instruction *apl_translate_prog(jump_table*, apl_instruction*, size_t);
+void **apl_translate_prog(apl_jump_table*, apl_program*);
 
 apl_machine *apl_alloc_machine(void) {
 	apl_machine *m = apl_emalloc(sizeof *m);
-	m->stack = apl_emalloc(sizeof m->stack[0] * STACK_SIZE);
 	m->sp = m->stack;
 	return m;
 }
@@ -36,60 +32,67 @@ See "The Structure and Performance of Efficient Interpreters"
 for more on direct threading:
 	https://www.jilp.org/vol5/v5paper12.pdf
 */
-#define NEXT(m) goto **(m->ip++);
-void apl_machine_run(apl_machine *m, apl_instruction *prog, size_t size) {
+#define NEXT(ip) goto **ip++
+void apl_machine_run(apl_machine *m, apl_program *prog) {
+	void **ip;
+	m->sp = m->stack;
 	apl_array *arg;
-	/*
-	Most examples of direct threading that you will find on the
-	internet use a lot of global variables. To avoid global state,
-	we to transform the symbolic opcodes in *prog to
-	the addresses contained in this code block.
-	*/
-	jump_table tbl[] = {
+		apl_jump_table tbl[] = {
+		[APL_OP_UNKNOWN]   = {.addr = &&apl_op_unknown, .next = 1},
 		[APL_OP_END]   = {.addr = &&apl_op_end, .next = 1},
 		[APL_OP_ADD]   = {.addr = &&apl_op_add, .next = 1},
 		[APL_OP_SUB]   = {.addr = &&apl_op_sub, .next = 1},
 		[APL_OP_MUL]   = {.addr = &&apl_op_mul, .next = 1},
 		[APL_OP_DIV]   = {.addr = &&apl_op_div, .next = 1},
-		[APL_OP_CONST] = {.addr = &&apl_op_const, .next = 2},
+		[APL_OP_CONST] = {.addr = &&apl_op_const, .next = sizeof arg},
 	};
-
-	apl_instruction *native = apl_translate_prog(tbl, prog, size);
-	m->ip = native;
-	NEXT(m);
+	void **native = apl_translate_prog(tbl, prog);
+	ip = native;
+	NEXT(ip);
 
 apl_op_add:
 	puts("call add");
-	NEXT(m);
+	NEXT(ip);
 
 apl_op_sub:
 	puts("call sub");
-	NEXT(m);
+	NEXT(ip);
 
 apl_op_mul:
 	puts("call mul");
-	NEXT(m);
+	NEXT(ip);
 
 apl_op_div:
 	puts("call div");
-	NEXT(m);
+	NEXT(ip);
 
 apl_op_const:
-	arg = *m->ip++;
+	arg = *ip;
+	ip += sizeof(apl_array*);
 	printf("call const %p\n", arg);
-	NEXT(m);
+	NEXT(ip);
 
+apl_op_unknown:
+	puts("illegal bytecode");
 apl_op_end:
+	puts("done");
 	free(native);
 }
 
-apl_instruction *
-apl_translate_prog(jump_table *tbl, apl_instruction *prog, size_t size) {
-	int i;
-	int count = (int)(size / sizeof *prog);
-	apl_instruction *native = memcpy(apl_emalloc(size), prog, size);
-	for(i = 0; i < count; i += tbl[(intptr_t)prog[i]].next) {
-		native[i] = tbl[(intptr_t)prog[i]].addr;
+void **apl_translate_prog(apl_jump_table *tbl, apl_program *prog) {
+	size_t i;
+	size_t size;
+	void **buf;
+	apl_instruction *code;
+	
+	size = prog->op_count * sizeof(*buf);
+	size += (prog->size - prog->op_count);
+
+	buf = apl_emalloc(size);
+	code = prog->code;
+	for(i = 0; i < prog->size; i += tbl[code[i]].next) {
+		buf[i] = tbl[code[i]].addr;
+		printf("%x -> %p\n", code[i], buf[i]);
 	}
-	return native;
+	return buf;
 }
