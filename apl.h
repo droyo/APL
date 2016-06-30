@@ -1,10 +1,3 @@
-typedef unsigned char apl_instruction;
-typedef struct {
-	apl_instruction *code;
-	size_t size;
-	size_t op_count;
-} apl_program;
-
 typedef enum apl_array_type {
 	APL_TYPE_REAL,
 	APL_TYPE_CHAR,
@@ -19,18 +12,23 @@ typedef struct apl_array {
 		void *data;
 		char *string;
 		double *real;
+		int num;
 	};
 } apl_array;
 
 apl_array *apl_alloc_array(apl_array_type, int);
 apl_array *apl_array_reshape(apl_array*, int, int*);
 
-
 /* VM & bytecode */
-#define APL_STACK_SIZE 300
-typedef struct apl_machine apl_machine;
-apl_machine *apl_alloc_machine(void);
-void apl_machine_run(apl_machine*, apl_program*);
+typedef uint32_t apl_instruction;
+typedef struct {
+	apl_instruction *code;
+	apl_array *data;
+	size_t code_size;
+	size_t data_size;
+} apl_program;
+
+void apl_exec(apl_program*);
 
 enum apl_bytecodes {
 	APL_OP_UNKNOWN,
@@ -39,8 +37,15 @@ enum apl_bytecodes {
 	APL_OP_SUB,
 	APL_OP_MUL,
 	APL_OP_DIV,
-	APL_OP_CONST
+	APL_OP_CONST,
+	APL_OP_LOAD,
+	APL_OP_STORE,
+	
+	APL_OP_COUNT
 };
+
+/* Parsing functions */
+apl_program *apl_compile(char*);
 
 /* Utility functions */
 void *apl_emalloc(size_t size);

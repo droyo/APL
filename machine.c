@@ -1,98 +1,86 @@
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
+#include <limits.h>
 #include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include "apl.h"
 
-struct apl_machine {
-	apl_array *sp;
-	apl_array stack[APL_STACK_SIZE];
-};
+#define STACK_SIZE 300
 
 typedef struct {
-	void *addr;
-	unsigned char next;
-} apl_jump_table;
-
-void **apl_translate_prog(apl_jump_table*, apl_program*);
-
-apl_machine *apl_alloc_machine(void) {
-	apl_machine *m = apl_emalloc(sizeof *m);
-	m->sp = m->stack;
-	return m;
-}
+	apl_instruction *pc; /* The current instruction */
+	apl_array *r[256]; /* 256 general-purpose registers */
+} machine;
 
 /*
-This interpreter implements Direct Threading using the
-GNU C "Labels as values" extension: 
-	https://gcc.gnu.org/onlinedocs/gcc/Labels-as-Values.html
+Bytecode layout:
 
-See "The Structure and Performance of Efficient Interpreters"
-for more on direct threading:
-	https://www.jilp.org/vol5/v5paper12.pdf
+32-bit fixed-width instruction.
+
+Standard form: 8/8/8/8 OP/DST/X/Y
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+|----opcode-----|-----dst-----|-------x-------|--------y--------|
+
+LOAD/STORE/CONST form: 8/8/16 OP/REG/ADDR
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+|----opcode-----|-----reg-----|-------------addr----------------|
 */
-#define NEXT(ip) goto **ip++
-void apl_machine_run(apl_machine *m, apl_program *prog) {
-	void **ip;
-	m->sp = m->stack;
-	apl_array *arg;
-		apl_jump_table tbl[] = {
-		[APL_OP_UNKNOWN]   = {.addr = &&apl_op_unknown, .next = 1},
-		[APL_OP_END]   = {.addr = &&apl_op_end, .next = 1},
-		[APL_OP_ADD]   = {.addr = &&apl_op_add, .next = 1},
-		[APL_OP_SUB]   = {.addr = &&apl_op_sub, .next = 1},
-		[APL_OP_MUL]   = {.addr = &&apl_op_mul, .next = 1},
-		[APL_OP_DIV]   = {.addr = &&apl_op_div, .next = 1},
-		[APL_OP_CONST] = {.addr = &&apl_op_const, .next = sizeof arg},
-	};
-	void **native = apl_translate_prog(tbl, prog);
-	ip = native;
-	NEXT(ip);
+uint32_t op  (apl_instruction x) { return (x & 0xff000000) >> 24; }
+uint32_t dst (apl_instruction x) { return (x & 0x00ff0000) >> 16; }
+uint32_t reg (apl_instruction x) { return (x & 0x00ff0000) >> 16; }
+uint32_t arg1(apl_instruction x) { return (x & 0x0000ff00) >> 8; }
+uint32_t arg2(apl_instruction x) { return (x & 0x000000ff) >> 0; }
+uint32_t addr(apl_instruction x) { return (x & 0x0000ffff) >> 0; }
 
-apl_op_add:
-	puts("call add");
-	NEXT(ip);
-
-apl_op_sub:
-	puts("call sub");
-	NEXT(ip);
-
-apl_op_mul:
-	puts("call mul");
-	NEXT(ip);
-
-apl_op_div:
-	puts("call div");
-	NEXT(ip);
-
-apl_op_const:
-	arg = *ip;
-	ip += sizeof(apl_array*);
-	printf("call const %p\n", arg);
-	NEXT(ip);
-
-apl_op_unknown:
-	puts("illegal bytecode");
-apl_op_end:
-	puts("done");
-	free(native);
-}
-
-void **apl_translate_prog(apl_jump_table *tbl, apl_program *prog) {
-	size_t i;
-	size_t size;
-	void **buf;
-	apl_instruction *code;
-	
-	size = prog->op_count * sizeof(*buf);
-	size += (prog->size - prog->op_count);
-
-	buf = apl_emalloc(size);
-	code = prog->code;
-	for(i = 0; i < prog->size; i += tbl[code[i]].next) {
-		buf[i] = tbl[code[i]].addr;
-		printf("%x -> %p\n", code[i], buf[i]);
+void apl_exec(apl_program *prog) {
+	apl_instruction inst;
+	machine m;
+	memset(&m, 0, sizeof m);
+	m.pc = prog->code;
+	for(;;) {
+		inst = *m.pc;
+		switch(op(inst)) {
+		case APL_OP_ADD:
+			printf("ADD r%u r%u → r%u\n",
+				arg1(inst), arg2(inst), dst(inst));
+			break;
+		case APL_OP_SUB:
+			printf("SUB r%u r%u → r%u\n",
+				arg1(inst), arg2(inst), dst(inst));
+			break;
+		case APL_OP_MUL:
+			printf("MUL r%u r%u → r%u\n",
+				arg1(inst), arg2(inst), dst(inst));
+			break;
+		case APL_OP_DIV:
+			printf("DIV r%u r%u → r%u\n",
+				arg1(inst), arg2(inst), dst(inst));
+			break;
+		case APL_OP_CONST:
+			printf("CONST 0x%x → r%u\n",
+				addr(inst), reg(inst));
+			break;
+		case APL_OP_LOAD:
+			printf("LOAD 0x%x → r%u\n",
+				addr(inst), reg(inst));
+			break;
+		case APL_OP_STORE:
+			printf("STORE r%u → 0x%x\n",
+				reg(inst), addr(inst));
+			break;
+		case APL_OP_END:
+			puts("END");
+			return;
+		default:
+			printf("unknown code 0x%x\n", op(inst));
+			printf("known codes are:\n");
+			apl_instruction i;
+			for(i = 0; i < APL_OP_COUNT; i++) {
+				printf("\t0x%x\n", i);
+			}
+			return;
+		}
+		m.pc++;
 	}
-	return buf;
 }
