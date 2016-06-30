@@ -37,6 +37,11 @@ apl_array *apl_array_reshape(apl_array *a, int rank, int *dim) {
 	size_t copied = 0;
 	size_t upto = old_size;
 	
+	/*
+	The APL Dictionary states that when shrinking
+	an array, it is truncated, and when growing an array,
+	it is repeated over the new space.
+	*/
 	while(old_size > 0 && copied < new_size) {
 		if(copied + upto > new_size){
 			upto = new_size - copied;
