@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
+#include <stdint.h>
 #include "apl.h"
 
 /* apl_emalloc never returns an error. zeroes returned memory */
