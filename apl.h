@@ -1,7 +1,8 @@
 typedef enum apl_array_type {
 	APL_TYPE_REAL,
-	APL_TYPE_CHAR,
-	APL_TYPE_COUNT
+	APL_TYPE_TEXT,
+
+	APL_COUNT_TYPE
 } apl_array_type;
 
 typedef struct apl_array {

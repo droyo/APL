@@ -3,15 +3,16 @@
 #include <string.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <utf.h>
 #include "apl.h"
 
 int apl_item_count(int rank, int dim[]);
 size_t apl_buffer_size(apl_array_type t, int rank, int dim[]);
-size_t apl_type_size_lut[APL_TYPE_COUNT];
+size_t apl_type_size_lut[APL_COUNT_TYPE];
 
-size_t apl_type_size_lut[APL_TYPE_COUNT] = {
-	sizeof(double), /* APL_TYPE_REAL */
-	sizeof(char) /* APL_TYPE_CHAR */
+size_t apl_type_size_lut[APL_COUNT_TYPE] = {
+	[APL_TYPE_REAL] = sizeof(double),
+	[APL_TYPE_TEXT] = sizeof(Rune)
 };
 
 /* Creates a 0-size array of given rank */
