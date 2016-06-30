@@ -1,7 +1,11 @@
 include config.mk
+CFLAGS += -Ilibutf
 
-SRC := main.c array.c machine.c util.c
-OBJ := ${SRC:.c=.o}
+OBJ := main.o array.o machine.o util.o compile.o
+
+dir := libutf
+include $(dir)/Makefile 
+dir := $(CURDIR)
 
 all: options apl
 
@@ -13,15 +17,15 @@ options:
 
 .c.o:
 	@echo CC $<
-	@${CC} -c ${CFLAGS} $<
+	@${CC} -c ${CFLAGS} $< -o $@
 
-${OBJ}: apl.h
+$(CURDIR)/%.c: apl.h
 
 apl: ${OBJ}
-	@echo CC -o $@
-	@${CC} -o $@ ${OBJ} ${LDFLAGS}
+	@echo LD $@
+	${CC} ${LDFLAGS} -o $@ ${OBJ}
 
 clean:
-	rm -f apl ${OBJ}
+	rm -f apl ${OBJ} 
 
 .PHONY: clean all

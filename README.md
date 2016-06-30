@@ -13,7 +13,8 @@ prod at data.
 If you want to tweak compiler/linker flags, they are in
 the file `config.mk`. This project has no dependencies
 other than the C standard library. The source is developed
-using the GNU C compiler on Linux.
+using gcc and tcc on Linux, but should compile on other
+platforms.
 
 # Install
 
