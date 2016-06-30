@@ -76,7 +76,7 @@ void apl_exec(apl_program *prog) {
 			printf("unknown code 0x%x\n", op(inst));
 			printf("known codes are:\n");
 			apl_instruction i;
-			for(i = 0; i < APL_OP_COUNT; i++) {
+			for(i = 0; i < APL_COUNT_OP; i++) {
 				printf("\t0x%x\n", i);
 			}
 			return;

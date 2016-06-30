@@ -42,7 +42,7 @@ enum apl_bytecodes {
 	APL_OP_LOAD,
 	APL_OP_STORE,
 	
-	APL_OP_COUNT
+	APL_COUNT_OP
 };
 
 /* Parsing functions */
